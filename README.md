@@ -1,6 +1,8 @@
 # Dödsbacken
 
-Ett 3D-mobilspel där en bil ska ta sig nerför en backe full av hinder. Det finns inga liv: bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra, men den rullar alltid vidare. Frågan är hur mycket bil som är kvar i mål.
+Ett 3D-mobilspel där en bil ska ta sig nerför en kuperad backe full av hinder till en stor rund teleportportal som tar en vidare till nästa bana. Det finns inga liv: bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra, men den rullar alltid vidare – sista biten drar portalen in bilen, så även en helt kvaddad bil glider in.
+
+Backen går i krön och svackor (mer kuperat på svårare banor) och bilen kan lätta över skarpa krön. Kameran byter vinkel under resan – bakifrån, uppifrån, lågt, från sidorna, snett ovanifrån och långt bakom – vilket gör det svårare att styra.
 
 Inspirerat av BeamNG-klippen på YouTube-kanalen Monster Chases.
 
@@ -14,15 +16,15 @@ Plåten bucklas där bilen träffas. Stötfångare, speglar, dörrar, huv, vinge
 
 ## Banor och stjärnor
 
-| Bana            | Längd  | Kräver | Speciellt                                  |
-|-----------------|--------|--------|--------------------------------------------|
-| Sommarbacken    | 800 m  | –      | De första hindren                          |
-| Vinterbacken    | 1000 m | 2 ★    | Isfläckar, pendelklingor                   |
-| Ökenkanjonen    | 1100 m | 5 ★    | Mycket stenblock, alla hinder              |
-| Vulkanberget    | 1200 m | 8 ★    | Lavapölar som bränner bilen                |
-| Midnattsbacken  | 1300 m | 11 ★   | Mörker och strålkastare, snabbast          |
+| Bana            | Längd  | Speciellt                                  |
+|-----------------|--------|--------------------------------------------|
+| Sommarbacken    | 800 m  | De första hindren                          |
+| Vinterbacken    | 1000 m | Isfläckar, pendelklingor                   |
+| Ökenkanjonen    | 1100 m | Mycket stenblock, alla hinder              |
+| Vulkanberget    | 1200 m | Lavapölar som bränner bilen                |
+| Midnattsbacken  | 1300 m | Mörker och strålkastare, mest kuperad      |
 
-1 ★ för att komma i mål, 2 ★ med minst 40 % av bilen kvar, 3 ★ med minst 75 %.
+Nästa bana låses upp när man når portalen. 1 ★ för att nå portalen, 2 ★ med minst 40 % av bilen kvar, 3 ★ med minst 75 %.
 
 ## Nivåer och upplåsningar
 

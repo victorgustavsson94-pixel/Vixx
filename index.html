@@ -76,6 +76,11 @@
   .screen h2 { font-family: var(--display); font-weight: 400; font-size: 26px; margin: 0; color: var(--hazard); }
   .screen h3 { margin: 6px 0 0; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .btn.sm { font-size: 15px; padding: 12px 6px; }
+  #flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle, #ffffff 0%, #8ff7ff 45%, #6a3cff 100%); transition: opacity 0.5s; }
+  #flash.on { opacity: 1; transition: opacity 0.25s; }
+  #camTag { position: absolute; left: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); pointer-events: none; font-size: 13px; }
   .btn.alt { background: transparent; border-color: var(--hazard); color: var(--hazard); box-shadow: 0 6px 0 rgba(255,194,26,0.3); font-size: 20px; }
   .btn.alt:active { box-shadow: 0 2px 0 rgba(255,194,26,0.3); }
   .lvl { background: rgba(255,247,230,0.07); border-left: 4px solid var(--hazard); padding: 10px 12px; display: grid; gap: 6px; }
@@ -175,7 +180,7 @@
 
   <div class="hud" id="hud" hidden>
     <div class="chip">
-      <span class="label">Kvar till mål</span>
+      <span class="label">Kvar till portalen</span>
       <span class="big" id="hudDist">1000 m</span>
     </div>
     <div class="right">
@@ -187,6 +192,8 @@
     </div>
   </div>
   <div id="pop"></div>
+  <div id="flash"></div>
+  <div id="camTag" class="chip" hidden></div>
   <button id="pauseBtn" hidden aria-label="Pausa">II</button>
 
   <div class="screen" id="menu">
@@ -197,7 +204,7 @@
       <div class="bar"><i id="lvlBar"></i></div>
       <span class="hint" id="lvlNext"></span>
     </div>
-    <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Kör banor för att tjäna XP, gå upp i nivå och låsa upp nya banor, lacker och tillbehör.</p>
+    <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Ta dig till den stora portalen längst ner, så teleporteras du till nästa bana. Kameran byter vinkel under resan, så håll koll. Tjäna XP, gå upp i nivå och lås upp lacker och tillbehör.</p>
     <div class="row2"><button class="btn" id="playBtn">Kör</button><button class="btn alt" id="garageBtn">Garage</button></div>
     <span class="hint">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span>
   </div>
@@ -206,7 +213,7 @@
     <div class="head"><button class="back" id="tracksBack">‹ Meny</button><span class="starsTot" id="starsTot">★ 0 / 15</span></div>
     <h2>Välj bana</h2>
     <div class="list" id="trackList"></div>
-    <span class="hint">1 ★ för att komma i mål, 2 ★ med minst 40 % kvar av bilen, 3 ★ med minst 75 %.</span>
+    <span class="hint">Nå portalen för att låsa upp nästa bana. 1 ★ för att ta dig dit, 2 ★ med minst 40 % kvar av bilen, 3 ★ med minst 75 %.</span>
   </div>
 
   <div class="screen bottom" id="garage" hidden>
@@ -226,7 +233,7 @@
   </div>
 
   <div class="screen" id="over" hidden>
-    <span class="sign" id="ovSign">🏁 I mål</span>
+    <span class="sign" id="ovSign">🌀 Teleporterad</span>
     <h1 id="ovTitle">Knappt i mål</h1>
     <div class="starsBig" id="ovStars" aria-label="Stjärnor"></div>
     <div class="stats">
@@ -241,8 +248,8 @@
     </div>
     <div class="unlocks" id="ovUnlocks" hidden></div>
     <span class="newbest" id="ovNew" hidden>Nytt rekord på banan!</span>
-    <button class="btn" id="againBtn">Kör igen</button>
-    <div class="row2"><button class="btn alt" id="ovTracks">Banor</button><button class="btn alt" id="ovGarage">Garage</button></div>
+    <button class="btn" id="nextBtn">Nästa bana</button>
+    <div class="row3"><button class="btn alt sm" id="againBtn">Kör igen</button><button class="btn alt sm" id="ovTracks">Banor</button><button class="btn alt sm" id="ovGarage">Garage</button></div>
   </div>
 
   <div class="screen" id="paused" hidden>
@@ -280,10 +287,10 @@
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(SKY);
   scene.fog = new THREE.Fog(SKY, 70, 210);
-  const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 600);
+  const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 700);
 
   // Hela banan ligger i en grupp som lutar, så "framåt" (-z) går nedför.
-  const SLOPE = 0.11;
+  const SLOPE = 0.24;
   const track = new THREE.Group();
   track.rotation.x = -SLOPE;
   scene.add(track);
@@ -406,22 +413,38 @@
   };
 
   // ---------- Miljö ----------
-  const ROAD_LEN = 320;
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(ROAD_HALF * 2, ROAD_LEN), new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.85 }));
+  const ROAD_LEN = 520;
+  // Kuperad backe: utöver grundlutningen går vägen i krön och svackor. HILL ökar på svårare banor.
+  let HILL = 1;
+  const hillY = z => { const u = -z; if (u <= 0) return 0; return HILL * (5 * Math.sin(u / 40) + 3 * Math.sin(u / 12 + 1) - 3 * Math.sin(1)) * Math.min(1, u / 60); };
+  const hillPitch = z => -Math.atan(hillY(z + 0.5) - hillY(z - 0.5));
+  // Remsor (väg, gräs, kantsten) vars hörn läggs om efter profilen när de flyttas fram.
+  const strips = [];
+  function strip(w, mat, x, yOff) {
+    const geo = new THREE.PlaneGeometry(w, ROAD_LEN, 1, ROAD_LEN / 2); geo.rotateX(-Math.PI / 2);
+    const m = new THREE.Mesh(geo, mat); m.position.x = x; m.receiveShadow = true; m.userData.yOff = yOff; m.userData.at = NaN;
+    track.add(m); strips.push(m); return m;
+  }
+  function fitStrip(m, z) {
+    if (m.userData.at === z) return;
+    m.userData.at = z; m.position.z = z;
+    const a = m.geometry.attributes.position;
+    for (let i = 0; i < a.count; i++) a.setY(i, hillY(z + a.getZ(i)) + m.userData.yOff);
+    a.needsUpdate = true; m.geometry.computeVertexNormals(); m.geometry.computeBoundingSphere();
+  }
+  const road = strip(ROAD_HALF * 2, new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.85 }), 0, 0);
   road.material.map.repeat.set(1, ROAD_LEN / ROAD_TILE);
-  road.rotation.x = -Math.PI / 2; road.receiveShadow = true; track.add(road);
-  const grass = new THREE.Mesh(new THREE.PlaneGeometry(240, ROAD_LEN), new THREE.MeshStandardMaterial({ map: grassTex, roughness: 1 }));
+  const grass = strip(240, new THREE.MeshStandardMaterial({ map: grassTex, roughness: 1 }), 0, -0.04);
   grass.material.map.repeat.set(10, ROAD_LEN / 24);
-  grass.rotation.x = -Math.PI / 2; grass.position.y = -0.03; grass.receiveShadow = true; track.add(grass);
   const curbs = [-1, 1].map(s => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, ROAD_LEN), new THREE.MeshStandardMaterial({ map: curbTex.clone(), roughness: 0.7 }));
+    const m = strip(0.7, new THREE.MeshStandardMaterial({ map: curbTex.clone(), roughness: 0.7 }), s * (ROAD_HALF + 0.35), 0.05);
     m.material.map.needsUpdate = true; m.material.map.repeat.set(1, ROAD_LEN / 3);
-    m.position.x = s * (ROAD_HALF + 0.35); m.position.y = 0.09; m.receiveShadow = true; track.add(m); return m;
+    return m;
   });
 
   const treeGeo = { cactus: new THREE.CylinderGeometry(0.34, 0.4, 3.2, 8), leaf: new THREE.ConeGeometry(1.7, 4.2, 7), trunk: new THREE.CylinderGeometry(0.25, 0.3, 1.2, 6), rock: new THREE.DodecahedronGeometry(0.9, 0) };
   const scenery = [];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 90; i++) {
     const g = new THREE.Group();
     if (i % 5 === 4) { const r = new THREE.Mesh(treeGeo.rock, M.stone); r.scale.set(1.2, 0.7, 1); r.position.y = 0.3; g.add(r); }
     else {
@@ -431,9 +454,13 @@
       g.scale.setScalar(0.8 + Math.random() * 0.7);
     }
     const side = i % 2 ? 1 : -1;
+    g.rotation.x = SLOPE; // träden står lodrätt fast vägen lutar
     g.position.set(side * (9.5 + Math.random() * 28), 0, -i * 4.2 + 20);
     track.add(g); scenery.push(g);
   }
+  // Platt dal långt nedanför: vägen stupar ner mot den, så backen syns.
+  const valley = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x4a8436, roughness: 1 }));
+  valley.rotation.x = -Math.PI / 2; scene.add(valley);
   // Berg långt bort (följer kameran, ingen dimma)
   const mountains = new THREE.Group(); scene.add(mountains);
   for (let i = 0; i < 9; i++) {
@@ -587,21 +614,21 @@
   // ---------- Banor, fordon, lacker, tillbehör ----------
   const ALL_KINDS = ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum', 'crusher'];
   const TRACKS = [
-    { id: 'sommar', name: 'Sommarbacken', len: 800, stars: 0, desc: 'Sol, grönt gräs och de första hindren.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
+    { id: 'sommar', name: 'Sommarbacken', len: 800, hills: 1, desc: 'Sol, grönt gräs och de första hindren.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
       kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil',
-      theme: { sky: 0xa9d4f0, fog: [70, 210], ground: ['#4f8f3a', '#58993f'], leaf: 0x2d6a2b, tree: 'cone', stone: 0x8b8577, mount: 0x7d95ad, cap: 0xf2f6fa, hemi: [0xe6f2ff, 0x4f7f3a, 0.8], sun: [0xfff2dd, 1.0] } },
-    { id: 'vinter', name: 'Vinterbacken', len: 1000, stars: 2, desc: 'Snö, isfläckar som får bilen att sladda och pendelklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
+      theme: { sky: 0xa9d4f0, fog: [70, 283], ground: ['#4f8f3a', '#58993f'], leaf: 0x2d6a2b, tree: 'cone', stone: 0x8b8577, mount: 0x7d95ad, cap: 0xf2f6fa, hemi: [0xe6f2ff, 0x4f7f3a, 0.8], sun: [0xfff2dd, 1.0] } },
+    { id: 'vinter', name: 'Vinterbacken', len: 1000, hills: 1.2, desc: 'Snö, isfläckar som får bilen att sladda och pendelklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
       kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum'], intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice',
-      theme: { sky: 0xc7d6e4, fog: [50, 180], ground: ['#e8eef3', '#dbe5ed'], leaf: 0x3d6b4e, tree: 'cone', stone: 0x9aa3ab, mount: 0x8c9db0, cap: 0xffffff, hemi: [0xf0f6ff, 0xb8c8d8, 0.85], sun: [0xf4f8ff, 0.95] } },
-    { id: 'oken', name: 'Ökenkanjonen', len: 1100, stars: 5, desc: 'Het sand, kaktusar och massor av stenblock.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
+      theme: { sky: 0xc7d6e4, fog: [50, 243], ground: ['#e8eef3', '#dbe5ed'], leaf: 0x3d6b4e, tree: 'cone', stone: 0x9aa3ab, mount: 0x8c9db0, cap: 0xffffff, hemi: [0xf0f6ff, 0xb8c8d8, 0.85], sun: [0xf4f8ff, 0.95] } },
+    { id: 'oken', name: 'Ökenkanjonen', len: 1100, hills: 1.3, desc: 'Het sand, kaktusar och massor av stenblock.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
       kinds: ALL_KINDS, weights: { boulder: 2 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil',
-      theme: { sky: 0xf1c48a, fog: [60, 200], ground: ['#d9a35b', '#cf9750'], leaf: 0x4f8a3a, tree: 'cactus', stone: 0xb5653a, mount: 0xb86b3c, cap: 0xd99a5b, hemi: [0xfff0d8, 0xb07a40, 0.85], sun: [0xffe0b0, 1.15] } },
-    { id: 'vulkan', name: 'Vulkanberget', len: 1200, stars: 8, desc: 'Svart mark och lavapölar som bränner bilen.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
+      theme: { sky: 0xf1c48a, fog: [60, 270], ground: ['#d9a35b', '#cf9750'], leaf: 0x4f8a3a, tree: 'cactus', stone: 0xb5653a, mount: 0xb86b3c, cap: 0xd99a5b, hemi: [0xfff0d8, 0xb07a40, 0.85], sun: [0xffe0b0, 1.15] } },
+    { id: 'vulkan', name: 'Vulkanberget', len: 1200, hills: 1.45, desc: 'Svart mark och lavapölar som bränner bilen.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
       kinds: ALL_KINDS, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava',
-      theme: { sky: 0x5a2c22, fog: [40, 170], ground: ['#2b2522', '#342b27'], leaf: 0x2a2522, tree: 'dead', stone: 0x4a3f3a, mount: 0x2e2220, cap: 0xff6a1a, hemi: [0xffb090, 0x301a10, 0.65], sun: [0xffa070, 0.9] } },
-    { id: 'natt', name: 'Midnattsbacken', len: 1300, stars: 11, desc: 'Mörker, strålkastare och alla hinder på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
+      theme: { sky: 0x5a2c22, fog: [40, 229], ground: ['#2b2522', '#342b27'], leaf: 0x2a2522, tree: 'dead', stone: 0x4a3f3a, mount: 0x2e2220, cap: 0xff6a1a, hemi: [0xffb090, 0x301a10, 0.65], sun: [0xffa070, 0.9] } },
+    { id: 'natt', name: 'Midnattsbacken', len: 1300, hills: 1.6, desc: 'Mörker, strålkastare och alla hinder på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
       kinds: ALL_KINDS, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil',
-      theme: { sky: 0x0d1530, fog: [30, 150], ground: ['#1f3a22', '#22402a'], leaf: 0x173a1c, tree: 'cone', stone: 0x55524c, mount: 0x1a2440, cap: 0x8a9ab8, hemi: [0x7090d0, 0x101810, 0.35], sun: [0x9ab0ff, 0.3], night: true } },
+      theme: { sky: 0x0d1530, fog: [30, 202], ground: ['#1f3a22', '#22402a'], leaf: 0x173a1c, tree: 'cone', stone: 0x55524c, mount: 0x1a2440, cap: 0x8a9ab8, hemi: [0x7090d0, 0x101810, 0.35], sun: [0x9ab0ff, 0.3], night: true } },
   ];
   const VEHICLES = {
     small: { name: 'Liten', desc: 'Kvick men skör', lvl: 2, scale: 0.8, armor: 1.35, steer: 9.5, speed: 1.05 },
@@ -637,7 +664,7 @@
   const level = () => levelFor(save.xp);
   const xpRange = L => [50 * (L - 1) * L, 50 * L * (L + 1)];
   const totalStars = () => Object.values(save.stars).reduce((a, b) => a + b, 0);
-  const trackOpen = T => totalStars() >= T.stars;
+  const trackOpen = T => { const i = TRACKS.indexOf(T); return i <= 0 || (save.stars[TRACKS[i - 1].id] || 0) > 0; };
   function unlocksAt(L) {
     return [
       ...Object.values(VEHICLES).filter(v => v.lvl === L).map(v => 'Bil: ' + v.name),
@@ -652,7 +679,8 @@
 
   let TRACK = TRACKS.find(T => T.id === save.track && trackOpen(T)) || TRACKS[0];
   let VEH = VEHICLES.sport, SC = 1, ACC = {};
-  const topH = () => 1.4 * SC + player.y;
+  const relY = () => player.y - hillY(player.z);
+  const topH = () => 1.4 * SC + Math.max(0, relY());
 
   function applyTheme(T) {
     const th = T.theme;
@@ -672,13 +700,15 @@
       trunk.scale.y = th.tree === 'dead' ? 3.4 : 1; trunk.position.y = th.tree === 'dead' ? 2 : 0.6;
     }
     for (const m of mountains.children) { m.material.color.set(th.mount); m.children[0].material.color.set(th.cap); }
+    valley.material.color.set(th.ground[0]).multiplyScalar(0.82);
   }
 
   // ---------- Spelstatus ----------
   let seen = new Set();
   let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, obstacles, nextSpawn, nextSign, lastKind, inv;
   let FINISH = TRACK.len;
-  let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false;
+  let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false, portalPull = false, teleT = 0;
+  let camIdx = 0, camFrom = 0, camBlend = 1, nextCam = 70, camTagT = 0;
 
   function clearWorld() {
     for (const o of obstacles || []) o.remove();
@@ -694,6 +724,7 @@
     const skin = SKINS.find(x => x.id === save.skin && x.lvl <= L) || SKINS[0];
     ACC = {}; for (const a of ACCS) ACC[a.id] = !!save.acc[a.id] && a.lvl <= L;
     VEH = VEHICLES[save.vehicle]; SC = VEH.scale; CR = 0.95 * SC; FINISH = TRACK.len;
+    HILL = TRACK.hills; for (const m of strips) m.userData.at = NaN;
     car = buildCar(skin.color, true, { skin, acc: ACC });
     car.g.scale.setScalar(SC);
     if (TRACK.theme.night) {
@@ -704,19 +735,20 @@
     player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0 };
     dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; inv = 0;
     obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set();
-    runTime = 0; lostParts = 0; finishMade = false; scrapShown = false;
-    for (const s of scenery) s.position.z = s.position.z % 252;
+    runTime = 0; lostParts = 0; finishMade = false; scrapShown = false; portalPull = false; teleT = 0;
+    camIdx = 0; camFrom = 0; camBlend = 1; nextCam = 70; $('camTag').hidden = true; $('flash').classList.remove('on');
+    for (const s of scenery) s.position.z = s.position.z % 378;
   }
 
   const meters = () => Math.floor(dist);
   const missingWheels = () => ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR'].filter(w => !hasPart(car, w)).length;
   const perf = () => Math.max(0.42, 1 - damage * 0.0042 - missingWheels() * 0.08);
-  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed * TRACK.speed * (ACC.turbo ? 1.08 : 1) * perf();
+  const targetSpeed = () => (18 + Math.min(16, dist * 0.025)) * VEH.speed * TRACK.speed * (ACC.turbo ? 1.08 : 1) * perf();
 
   // ---------- Kollision (i vägplanet x/z) ----------
   function carCircles() { return [{ x: player.x, z: player.z - 1.1 * SC }, { x: player.x, z: player.z + 1.1 * SC }]; }
   let CR = 0.95;
-  function groundAt(x, z) { let g = 0; for (const o of obstacles) if (o.ground) g = Math.max(g, o.ground(x, z)); return g; }
+  function groundAt(x, z) { let g = 0; for (const o of obstacles) if (o.ground) g = Math.max(g, o.ground(x, z)); return hillY(z) + g; }
   function hitRect(x, z, w, d) {
     for (const c of carCircles()) {
       const px = clamp(c.x, x - w / 2, x + w / 2), pz = clamp(c.z, z - d / 2, z + d / 2);
@@ -846,7 +878,7 @@
           const rx = rand(1.4, 2), rz = rand(2, 2.8) * (P === 'ice' ? 1.4 : 1); m.scale.set(rx, rz, 1);
           o.x = pick(LANES); g.position.x = o.x; o.hitH = 0.05;
           o.update = () => {
-            if (P === 'lava' && Math.abs(o.z - player.z) < 90 && Math.random() < 0.3) fire(new V3(o.x + rand(-rx, rx) * 0.7, 0.1, o.z + rand(-rz, rz) * 0.7));
+            if (P === 'lava' && Math.abs(o.z - player.z) < 90 && Math.random() < 0.3) fire(new V3(o.x + rand(-rx, rx) * 0.7, hillY(o.z) + 0.1, o.z + rand(-rz, rz) * 0.7));
           };
           o.hit = () => {
             const inside = Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5;
@@ -907,16 +939,18 @@
         return [obstacle('bulge', z, (o, g) => {
           const H = rand(1.5, 2.3), L = rand(12, 16), W = ROAD_HALF * 2 + 1.4;
           const prof = lz => Math.abs(lz) < L / 2 ? H * 0.5 * (1 + Math.cos(2 * Math.PI * lz / L)) : 0;
+          const hill = lz => hillY(z + lz) - hillY(z);
           const geo = new THREE.PlaneGeometry(W, L, 1, 28); geo.rotateX(-Math.PI / 2);
           const a = geo.attributes.position;
-          for (let i = 0; i < a.count; i++) a.setY(i, prof(a.getZ(i)) + 0.02);
+          for (let i = 0; i < a.count; i++) a.setY(i, hill(a.getZ(i)) + prof(a.getZ(i)) + 0.02);
           geo.computeVertexNormals();
           const m = mk(geo, new THREE.MeshStandardMaterial({ map: bulgeTex, roughness: 0.85 }), g, 0, 0, 0, false);
           m.receiveShadow = true;
           // Sidoväggar så gupet inte ser ihåligt ut
           for (const s of [-1, 1]) {
-            const shape = new THREE.Shape(); shape.moveTo(-L / 2, 0);
-            for (let i = 0; i <= 28; i++) { const lz = -L / 2 + (L * i) / 28; shape.lineTo(lz, prof(lz)); }
+            const shape = new THREE.Shape(); shape.moveTo(L / 2, hill(-L / 2));
+            for (let i = 0; i <= 28; i++) { const lz = -L / 2 + (L * i) / 28; shape.lineTo(-lz, hill(lz) + prof(lz)); }
+            for (let i = 28; i >= 0; i--) { const lz = -L / 2 + (L * i) / 28; shape.lineTo(-lz, hill(lz)); }
             const side = mk(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: 0x2b2e34, side: THREE.DoubleSide }), g, s * W / 2, 0, 0, false);
             side.rotation.y = Math.PI / 2;
           }
@@ -943,7 +977,7 @@
             const k = u < 0.13 ? (u / 0.13) ** 2 : u < 0.4 ? 1 : u < 0.78 ? 1 - ((u - 0.4) / 0.38) ** 0.8 : 0;
             if (k >= 1 && !o.down) {
               const near = Math.abs(o.z - player.z);
-              for (let i = 0; i < 8; i++) smoke(new V3(px - s * rand(2, L), 0.3, o.z + rand(-1.5, 1.5)), false);
+              for (let i = 0; i < 8; i++) smoke(new V3(px - s * rand(2, L), hillY(o.z) + 0.3, o.z + rand(-1.5, 1.5)), false);
               if (near < 45) { shake = Math.max(shake, 0.35 * (1 - near / 45)); beep(70, 0.25, 'sine', 0.1 * (1 - near / 45), -30); }
             }
             o.down = k >= 1; o.k = k; piv.rotation.z = o.th();
@@ -1070,7 +1104,7 @@
   function onHit(o, h) {
     if (o.cool > 0 || inv > 0) return;
     o.cool = 1.2; inv = 0.3;
-    const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - player.y) / SC, 0.3, 1.4);
+    const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - relY()) / SC, 0.3, 1.4);
     const side = lx > 0.4 ? 'R' : lx < -0.4 ? 'L' : (Math.random() < 0.5 ? 'L' : 'R');
     const front = !h.top && !h.burn && lz < -1, isSide = !h.top && !h.burn && Math.abs(lx) > 0.4 && Math.abs(lz) <= 1.3;
     let mult = VEH.armor * (ACC.armor ? 0.85 : 1);
@@ -1081,7 +1115,7 @@
     damage = Math.min(100, damage + sev);
     const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : h.burn ? new V3(0, 1, 0) : new V3(-lx, -0.15, -lz * 0.7).normalize();
     dent(car, local(lx, h.burn ? 0.3 : ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
-    if (h.burn) fire(new V3(player.x, 0.5, player.z), 12);
+    if (h.burn) fire(new V3(player.x, player.y + 0.5, player.z), 12);
 
     const out = new V3(side === 'R' ? 1 : -1, 0, lz < -1 ? -1 : lz > 1 ? 1 : 0);
     const cand = [];
@@ -1099,7 +1133,7 @@
       glass(track.worldToLocal(car.parts.wind.getWorldPosition(new V3())), 26);
     }
 
-    const contact = new V3(h.x, h.y, h.z);
+    const contact = new V3(h.x, h.y + hillY(h.z), h.z);
     sparks(contact, 22); smoke(contact, false, 4);
     player.kx += Math.sign(player.x - h.x || (Math.random() - 0.5)) * (4 + sev * 0.22);
     player.yawKick += rand(-1, 1) * 0.04 * sev;
@@ -1113,9 +1147,9 @@
 
   function landing(impact) {
     shake = Math.max(shake, 0.25);
-    sparks(new V3(player.x, 0.1, player.z), 14, 6);
+    sparks(new V3(player.x, player.y + 0.1, player.z), 14, 6);
     crunch(0.12 + impact * 0.01);
-    if (impact < 9) return;
+    if (impact < 9.5) return;
     const sev = (impact - 9) * 3.4 * VEH.armor * (ACC.susp ? 0.5 : 1) * (ACC.tires ? 0.8 : 1) * (ACC.armor ? 0.85 : 1);
     damage = Math.min(100, damage + sev);
     dent(car, local(rand(-0.5, 0.5), 0.35, -2.0), new V3(0, 0.55, 0.85).normalize(), 0.15 + sev * 0.02, 1.2 + sev * 0.03);
@@ -1125,7 +1159,7 @@
     if (impact > 14 && Math.random() < 0.5) detach(car, 'wheelF' + side, new V3(side === 'R' ? 1 : -1, 0, 0), -speed * 0.75);
     speed *= 0.8;
     try { navigator.vibrate && navigator.vibrate(50 + sev * 4); } catch (e) {}
-    scrapPopup(`HÅRD LANDNING +${Math.round(sev)} %`);
+    if (sev >= 1) scrapPopup(`HÅRD LANDNING +${Math.round(sev)} %`);
   }
 
   function scrapPopup(text) {
@@ -1139,7 +1173,7 @@
     state = 'finish';
     const cond = Math.max(0, Math.round(100 - damage));
     const stars = cond >= 75 ? 3 : cond >= 40 ? 2 : 1;
-    const prevL = level(), prevStars = totalStars();
+    const prevL = level(), prevOpen = TRACKS.filter(trackOpen).length;
     const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + stars * 20);
     save.xp += gain;
     save.stars[TRACK.id] = Math.max(save.stars[TRACK.id] || 0, stars);
@@ -1148,7 +1182,10 @@
     persist();
     const L = level(), [a, b] = xpRange(L);
     $('ovTitle').textContent = verdict(cond);
-    $('ovSign').textContent = '🏁 I mål · ' + TRACK.name;
+    $('ovSign').textContent = '🌀 Teleporterad från ' + TRACK.name;
+    const nextT = TRACKS[TRACKS.indexOf(TRACK) + 1];
+    $('nextBtn').hidden = !nextT;
+    if (nextT) $('nextBtn').textContent = `Vidare till ${nextT.name} →`;
     $('ovStars').innerHTML = starHtml(stars);
     $('ovStars').setAttribute('aria-label', stars + ' av 3 stjärnor');
     $('ovCond').textContent = cond + ' %';
@@ -1160,32 +1197,52 @@
     $('ovBar').style.width = ((save.xp - a) / (b - a) * 100) + '%';
     const lines = [];
     for (let l = prevL + 1; l <= L; l++) lines.push(...unlocksAt(l));
-    for (const T of TRACKS) if (T.stars > prevStars && T.stars <= totalStars()) lines.push('Bana: ' + T.name);
+    for (const T of TRACKS.filter(trackOpen).slice(prevOpen)) lines.push('Bana: ' + T.name);
     const box = $('ovUnlocks');
     box.hidden = !lines.length;
     box.innerHTML = (L > prevL ? `<b>Nivå ${L}!</b>` : '<b>Ny bana!</b>') + lines.map(x => `<span>Upplåst: ${x}</span>`).join('');
     $('ovNew').hidden = !isNew; $('pauseBtn').hidden = true;
-    const p = new V3(player.x, 3, player.z - 4);
-    for (let i = 0; i < 50; i++) emit(p, new V3(rand(-8, 8), rand(4, 12), rand(-6, 2)), rand(0.15, 0.3), rand(1, 1.8), pick([0xffc21a, 0xe8452c, 0xffffff, 0x2f9be0, 0x4fbf5a]), false, 0, -12);
-    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square', 0.05), i * 130));
-    setTimeout(() => { if (state === 'finish') { $('over').hidden = false; $('hud').hidden = true; } }, 2400);
+    const p = new V3(0, 3.2 + hillY(-FINISH), -FINISH);
+    for (let i = 0; i < 60; i++) emit(p, new V3(rand(-10, 10), rand(-6, 10), rand(-4, 8)), rand(0.2, 0.45), rand(0.8, 1.6), pick([0x7ff4ff, 0xb48cff, 0xffffff]), true, 0, -4);
+    beep(200, 1.1, 'sine', 0.09, 1400);
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square', 0.05), 600 + i * 130));
+    setTimeout(() => { if (state === 'finish') $('flash').classList.add('on'); }, 550);
+    setTimeout(() => { if (state === 'finish') { $('flash').classList.remove('on'); $('over').hidden = false; $('hud').hidden = true; $('camTag').hidden = true; } }, 1300);
   }
 
-  function makeFinish(z) {
-    return obstacle('finish', z, (o, g) => {
-      for (const s of [-1, 1]) mk(G.gantryPost, M.steel, g, s * (ROAD_HALF + 1.2), 3, 0).scale.y = 0.55;
-      const tex = canvasTex(512, 128, (c, w, h) => {
-        const q = 32;
-        for (let y = 0; y < h; y += q) for (let x = 0; x < w; x += q) { c.fillStyle = ((x + y) / q) % 2 ? '#111' : '#fff'; c.fillRect(x, y, q, q); }
-        c.fillStyle = '#ffc21a'; c.fillRect(w / 2 - 110, 18, 220, h - 36);
-        c.fillStyle = '#1b1d21'; c.font = '68px Bungee, Impact, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-        c.fillText('MÅL', w / 2, h / 2 + 4);
-      });
-      const banner = mk(new THREE.PlaneGeometry(ROAD_HALF * 2 + 2.4, 2.4), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }), g, 0, 5.4, 0, false);
-      const line = mk(new THREE.PlaneGeometry(ROAD_HALF * 2, 1.2), new THREE.MeshBasicMaterial({ map: tex }), g, 0, 0.04, 0, false);
-      line.rotation.x = -Math.PI / 2;
-      o.dispose = () => { tex.dispose(); banner.geometry.dispose(); line.geometry.dispose(); };
-      o.update = () => {}; o.hit = () => null;
+  const portalTex = canvasTex(256, 256, (c, w) => {
+    const r = w / 2;
+    const gr = c.createRadialGradient(r, r, 0, r, r, r);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(140,247,255,0.95)'); gr.addColorStop(0.7, 'rgba(110,60,255,0.75)'); gr.addColorStop(1, 'rgba(40,10,90,0)');
+    c.fillStyle = gr; c.fillRect(0, 0, w, w);
+    c.lineWidth = 6; c.lineCap = 'round';
+    for (let k = 0; k < 6; k++) {
+      c.strokeStyle = k % 2 ? 'rgba(255,255,255,0.55)' : 'rgba(80,240,255,0.6)';
+      c.beginPath();
+      for (let i = 0; i <= 60; i++) { const f = i / 60, a = k * Math.PI / 3 + f * 4.2, rr = f * r * 0.95; c.lineTo(r + Math.cos(a) * rr, r + Math.sin(a) * rr); }
+      c.stroke();
+    }
+  });
+  function makePortal(z) {
+    return obstacle('portal', z, (o, g) => {
+      const R = 7.6, CY = 3.2;
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x6ff6ff, fog: false });
+      const ring = mk(new THREE.TorusGeometry(R, 0.65, 14, 64), ringMat, g, 0, CY, 0, false);
+      const halo = mk(new THREE.TorusGeometry(R + 0.9, 0.18, 8, 64), new THREE.MeshBasicMaterial({ color: 0xb48cff, fog: false, transparent: true, opacity: 0.7 }), g, 0, CY, 0, false);
+      const dmat = new THREE.MeshBasicMaterial({ map: portalTex, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, side: THREE.DoubleSide });
+      const d1 = mk(new THREE.CircleGeometry(R - 0.3, 48), dmat, g, 0, CY, 0, false);
+      const d2 = mk(new THREE.CircleGeometry((R - 0.3) * 0.7, 48), dmat, g, 0, CY, 0.05, false);
+      o.update = dt => {
+        d1.rotation.z += dt * 1.6; d2.rotation.z -= dt * 2.6;
+        flash.color.set(0x7ff4ff); flash.distance = 60; flash.position.set(0, CY + hillY(o.z), o.z + 3); flash.intensity = 3;
+        const pulse = 1 + Math.sin(t * 4) * 0.03; ring.scale.setScalar(pulse); halo.rotation.z += dt * 0.5;
+        if (Math.abs(o.z - player.z) < 120 && Math.random() < 0.6) {
+          const a = rand(0, Math.PI * 2);
+          emit(new V3(Math.cos(a) * R, CY + Math.sin(a) * R + hillY(o.z), o.z), new V3(-Math.cos(a) * 3, -Math.sin(a) * 3, rand(-1, 1)), rand(0.2, 0.4), rand(0.5, 0.9), pick([0x7ff4ff, 0xb48cff, 0xffffff]), true);
+        }
+      };
+      o.hit = () => null;
+      o.dispose = () => { for (const m of [ring, halo, d1, d2]) m.geometry.dispose(); ringMat.dispose(); halo.material.dispose(); dmat.dispose(); };
     });
   }
 
@@ -1203,7 +1260,7 @@
   cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
   window.addEventListener('keydown', e => {
     keys[e.key] = true;
-    if ((e.key === 'Enter' || e.key === ' ') && state === 'finish' && !$('over').hidden) { e.preventDefault(); startTrack(TRACK); }
+    if ((e.key === 'Enter' || e.key === ' ') && state === 'finish' && !$('over').hidden) { e.preventDefault(); startTrack(TRACKS[TRACKS.indexOf(TRACK) + 1] || TRACK); }
     if (e.key === 'p' || e.key === 'Escape') state === 'play' ? pause() : state === 'paused' && resume();
   });
   window.addEventListener('keyup', e => { keys[e.key] = false; });
@@ -1226,7 +1283,7 @@
     const list = $('trackList'); list.innerHTML = '';
     for (const T of TRACKS) {
       const open = trackOpen(T), st = save.stars[T.id] || 0, bst = save.best[T.id];
-      const b = el('button', 'track', `<b>${T.name}</b><span class="st" aria-label="${st} av 3 stjärnor">${starHtml(st)}</span><small>${open ? `${T.len} m · ${T.desc}${bst != null ? ` Bästa skick: ${bst} %.` : ''}` : `🔒 Kräver ${T.stars} ★ totalt`}</small>`);
+      const b = el('button', 'track', `<b>${T.name}</b><span class="st" aria-label="${st} av 3 stjärnor">${starHtml(st)}</span><small>${open ? `${T.len} m · ${T.desc}${bst != null ? ` Bästa skick: ${bst} %.` : ''}` : `🔒 Nå portalen på ${TRACKS[TRACKS.indexOf(T) - 1].name} först`}</small>`);
       b.style.setProperty('--tbg', T.css); b.disabled = !open;
       b.addEventListener('click', () => startTrack(T));
       list.append(b);
@@ -1279,12 +1336,27 @@
   $('tracksBack').addEventListener('click', goMenu);
   $('garageBack').addEventListener('click', goMenu);
   $('againBtn').addEventListener('click', () => startTrack(TRACK));
+  $('nextBtn').addEventListener('click', () => { const n = TRACKS[TRACKS.indexOf(TRACK) + 1]; if (n) startTrack(n); });
   $('ovTracks').addEventListener('click', goTracks);
   $('ovGarage').addEventListener('click', goGarage);
   $('pauseBtn').addEventListener('click', pause);
   $('resumeBtn').addEventListener('click', resume);
   $('quitBtn').addEventListener('click', goMenu);
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+
+  const TILTED = new Set(['traffic', 'oil', 'gate', 'crusher', 'coin']);
+
+  // ---------- Kameravinklar ----------
+  // pos/look är relativt bilen i vägens koordinater (bilen kör mot -z). follow = hur mycket kameran följer bilen i sidled.
+  const CAMS = [
+    { name: 'Bakifrån', pos: [0, 3.9, 9], look: [0, 0.8, -8], follow: 0.6, lift: 2.2 },
+    { name: 'Uppifrån', pos: [0, 15, 6], look: [0, 0, -8], follow: 0.8, lift: 0 },
+    { name: 'Lågt bakom', pos: [1.4, 0.9, 5.6], look: [0, 1, -14], follow: 1, lift: 1.5 },
+    { name: 'Från vänster', pos: [-7, 4.2, 6], look: [2, 0.5, -3], follow: 0.5, lift: 0.4 },
+    { name: 'Från höger', pos: [7, 4.2, 6], look: [-2, 0.5, -3], follow: 0.5, lift: 0.4 },
+    { name: 'Snett ovanifrån', pos: [6, 9, 9], look: [-1, 0, -6], follow: 0.6, lift: 0.3 },
+    { name: 'Långt bakom', pos: [0, 8, 21], look: [0, 0, -16], follow: 0.5, lift: 3 },
+  ];
 
   // ---------- Uppdatering ----------
   const tmp = new V3();
@@ -1301,6 +1373,12 @@
       if (damage > 65 && Math.random() < dt * (damage - 60) * 0.025) { speed *= 0.82; smoke(carPoint(0, 0.6, 2.2), true, 3); beep(90, 0.12, 'sawtooth', 0.05); }
       // Skev hjulinställning: bilen vinglar mer ju trasigare den är
       if (damage > 30) player.tx = clamp(player.tx + Math.sin(t * 1.7 + Math.sin(t * 0.6) * 2) * (damage - 30) * 0.035 * dt, -6, 6);
+      // Sista biten drar portalen in bilen, så även en kvaddad bil glider in.
+      if (dist > FINISH - 40) {
+        if (!portalPull) { portalPull = true; popup('PORTALEN DRAR!'); beep(300, 0.6, 'sine', 0.06, 500); }
+        player.tx += (0 - player.tx) * Math.min(1, dt * 1.2);
+        speed = Math.max(speed, 11);
+      }
       if (dist >= FINISH) finish();
       if (keys.ArrowLeft || keys.a) player.tx = clamp(player.tx - 16 * dt, -6, 6);
       if (keys.ArrowRight || keys.d) player.tx = clamp(player.tx + 16 * dt, -6, 6);
@@ -1310,7 +1388,7 @@
     } else if (state === 'menu') {
       speed = 18; player.tx = Math.sin(t * 0.7) * 4;
     } else if (state === 'finish') {
-      speed *= Math.pow(0.35, dt);
+      teleT += dt; speed = Math.max(4, speed * Math.pow(0.5, dt));
     } else if (state === 'garage') {
       speed = 0; player.tx = 0;
     }
@@ -1332,13 +1410,13 @@
       car.pitch += ((((fl ? 0 : 1) + (fr ? 0 : 1)) - ((rl ? 0 : 1) + (rr ? 0 : 1))) * -0.06 - car.pitch) * Math.min(1, dt * 5);
       // Höjd: följer marken, eller flyger om marken försvinner snabbare än tyngdkraften drar.
       const gY = groundAt(player.x, player.z);
+      const gv = (gY - (player.gPrev ?? gY)) / Math.max(dt, 1e-4); player.gPrev = gY;
       if (!player.air) {
-        const nv = (gY - player.y) / Math.max(dt, 1e-4);
-        if (nv < player.vy - 22 * dt && player.vy > 1) { player.air = true; player.vy -= 22 * dt; player.y += player.vy * dt; }
-        else { player.vy = clamp(nv, -20, 16); player.y = gY; }
+        if (gv < player.vy - 22 * dt * 1.1) { player.air = true; player.vy -= 22 * dt; player.y += player.vy * dt; }
+        else { player.vy = clamp(gv, -30, 20); player.y = gY; }
       } else {
         player.vy -= 22 * dt; player.y += player.vy * dt;
-        if (player.y <= gY) { const imp = -player.vy; player.y = gY; player.vy = 0; player.air = false; if (state === 'play') landing(imp); }
+        if (player.y <= gY) { const imp = gv - player.vy; player.y = gY; player.vy = gv; player.air = false; if (state === 'play') landing(imp); }
       }
       const slopeP = Math.atan2(groundAt(player.x, player.z - 1.5) - groundAt(player.x, player.z + 1.5), 3);
       const airP = player.air ? clamp(player.vy * 0.025, -0.35, 0.3) : slopeP;
@@ -1346,6 +1424,12 @@
       const bump = state === 'play' && !player.air ? Math.sin(t * 31) * 0.012 * (speed / 30) : 0;
       car.g.position.set(player.x, player.y + bump - (Math.abs(car.roll) + Math.abs(car.pitch)) * 2 * SC - (missingWheels() === 4 ? 0.3 * SC : 0), player.z);
       car.g.rotation.set(car.pitch + car.airPitch, player.yaw, car.roll);
+      if (state === 'finish') {
+        const k = Math.min(1, teleT / 0.8);
+        car.g.position.y += k * 2.6; car.g.rotation.z += teleT * 9;
+        car.g.scale.set(SC * (1 - k * 0.95), SC * (1 - k * 0.95), SC * (1 + k * 2));
+        car.g.visible = k < 1;
+      }
       for (const w of ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR']) if (hasPart(car, w)) { car.parts[w].rotation.x -= speed * dt / 0.4; if (w[5] === 'F') car.parts[w].rotation.y = clamp(-vx * 0.05, -0.5, 0.5); }
       // Gnistor där hjul saknas
       if (state === 'play' && !player.air) for (const [w, x, z] of [['wheelFL', -0.9, -1.35], ['wheelFR', 0.9, -1.35], ['wheelRL', -0.9, 1.35], ['wheelRR', 0.9, 1.35]])
@@ -1363,12 +1447,14 @@
     if (state === 'play') {
       while (nextSpawn > player.z - 230 && nextSpawn > -FINISH + 45) spawn();
       while (nextSign > player.z - 230 && nextSign > -FINISH) { obstacles.push(makeSign(nextSign)); nextSign -= 100; }
-      if (!finishMade && player.z - 230 < -FINISH) { finishMade = true; obstacles.push(makeFinish(-FINISH)); }
+      if (!finishMade && player.z - 460 < -FINISH) { finishMade = true; obstacles.push(makePortal(-FINISH)); }
     }
     for (const o of obstacles) {
       o.cool = Math.max(0, o.cool - dt);
       o.update(dt);
-      if (state === 'play' && !(o.hitH !== undefined && player.y > o.hitH)) { const h = o.hit(); if (h) onHit(o, h); }
+      o.g.position.y = hillY(o.z);
+      if (TILTED.has(o.kind)) o.g.rotation.x = hillPitch(o.z);
+      if (state === 'play' && !(o.hitH !== undefined && relY() > o.hitH)) { const h = o.hit(); if (h) onHit(o, h); }
     }
     obstacles = obstacles.filter(o => { if (o.z > player.z + 30) { o.remove(); return false; } return true; });
 
@@ -1376,8 +1462,9 @@
       const d = debris[i];
       d.v.addScaledVector(GRAV, dt); d.m.position.addScaledVector(d.v, dt);
       d.m.rotation.x += d.w.x * dt; d.m.rotation.y += d.w.y * dt; d.m.rotation.z += d.w.z * dt;
-      if (d.m.position.y < d.r) {
-        d.m.position.y = d.r;
+      const gy = hillY(d.m.position.z) + d.r;
+      if (d.m.position.y < gy) {
+        d.m.position.y = gy;
         if (d.v.y < -2 && Math.random() < 0.5) sparks(d.m.position.clone(), 3, 4);
         d.v.y *= -0.4; d.v.x *= 0.75; d.v.z *= 0.75; d.w.multiplyScalar(0.7);
       }
@@ -1394,27 +1481,52 @@
     }
 
     // Miljön följer med
-    const snap = Math.round(player.z / 24) * 24;
-    road.position.z = grass.position.z = snap - ROAD_LEN / 2 + 40;
-    for (const c of curbs) c.position.z = Math.round(player.z / 6) * 6 - ROAD_LEN / 2 + 40;
-    for (const s of scenery) if (s.position.z > player.z + 25) { s.position.z -= 252; s.position.x = (s.position.x > 0 ? 1 : -1) * (9.5 + Math.random() * 28); }
+    const snap = Math.round(player.z / 24) * 24 - ROAD_LEN / 2 + 40;
+    fitStrip(road, snap); fitStrip(grass, snap);
+    for (const c of curbs) fitStrip(c, Math.round(player.z / 6) * 6 - ROAD_LEN / 2 + 40);
+    for (const s of scenery) {
+      if (s.position.z > player.z + 25) { s.position.z -= 378; s.position.x = (s.position.x > 0 ? 1 : -1) * (9.5 + Math.random() * 28); }
+      s.position.y = hillY(s.position.z) - 0.1;
+    }
 
-    // Kamera
-    const camLocal = new V3(player.x * 0.6, 3.7 * (0.75 + SC * 0.25) + player.y * 0.6, player.z + 8.6 * (0.8 + SC * 0.2));
-    const look = new V3(player.x * 0.8, 0.8 + player.y * 0.7, player.z - 7);
+    // Kamera: byter vinkel under resan. Sista biten före portalen är alltid bakifrån.
+    if (state === 'play') {
+      if (dist > FINISH - 80) { if (camIdx !== 0) switchCam(0); }
+      else if (dist > nextCam) { switchCam(pickCam()); nextCam = dist + rand(90, 140); }
+    }
+    camBlend = Math.min(1, camBlend + rdt / 1.1);
+    const e = camBlend * camBlend * (3 - 2 * camBlend);
+    const A = CAMS[camFrom], B = CAMS[camIdx];
+    const mix = (a, b) => a + (b - a) * e;
+    const cs = 0.75 + SC * 0.25;
+    const fol = mix(A.follow, B.follow);
+    player.camY = (player.camY ?? player.y) + (player.y - (player.camY ?? player.y)) * Math.min(1, rdt * 5);
+    const camZ = player.z + mix(A.pos[2], B.pos[2]) * cs, lookZ = player.z + mix(A.look[2], B.look[2]);
+    const camLocal = new V3(player.x * fol + mix(A.pos[0], B.pos[0]) * cs, mix(A.pos[1], B.pos[1]) * cs + Math.max(player.camY, hillY(camZ) + 0.5), camZ);
+    const look = new V3(player.x * 0.8 + mix(A.look[0], B.look[0]), mix(A.look[1], B.look[1]) + hillY(lookZ) + relY() * 0.7, lookZ);
     const camW = track.localToWorld(camLocal), lookW = track.localToWorld(look);
+    lookW.y += mix(A.lift, B.lift); // titta lite uppåt så att man ser vägen stupa nedför backen
     camera.position.lerp(camW, Math.min(1, rdt * 10));
     if (shake > 0) camera.position.add(rv(shake * 0.5));
     camera.lookAt(lookW);
+    if (camTagT > 0) { camTagT -= rdt; if (camTagT <= 0) $('camTag').hidden = true; }
     if (state === 'garage') {
       const a = t * 0.35, r = 8.2 * SC;
       camera.position.copy(track.localToWorld(new V3(player.x + Math.sin(a) * r, 2.3 * SC, player.z + Math.cos(a) * r)));
       camera.lookAt(track.localToWorld(new V3(player.x, 0.7 * SC - 2.3, player.z)));
     }
     mountains.position.set(camera.position.x * 0.9, camera.position.y, camera.position.z);
-    const cw = track.localToWorld(new V3(player.x, 0, player.z));
+    const cw = track.localToWorld(new V3(player.x, player.y, player.z));
     sun.position.set(cw.x - 10, cw.y + 24, cw.z + 6); sun.target.position.copy(cw);
+    const base = track.localToWorld(new V3(player.x, 0, player.z));
+    valley.position.set(base.x, base.y - 45, base.z - 1500);
   }
+
+  function switchCam(i) {
+    camFrom = camIdx; camIdx = i; camBlend = 0;
+    $('camTag').textContent = '📷 ' + CAMS[i].name; $('camTag').hidden = false; camTagT = 2.2;
+  }
+  function pickCam() { let i; do i = Math.floor(Math.random() * CAMS.length); while (i === camIdx); return i; }
 
   function hud() {
     $('hudDist').textContent = Math.max(0, FINISH - meters()) + ' m';
