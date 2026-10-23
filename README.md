@@ -68,4 +68,4 @@ Vinterbacken och Vulkanberget gynnar den lilla bilen, Ökenkanjonen och Midnatts
 
 ## Teknik
 
-Allt ligger i `index.html` och använder Three.js (laddas från cdnjs). `klassisk.html` är den första 2D-versionen.
+Allt ligger i `index.html` och använder Three.js (laddas från cdnjs). Grafiken har rundade karosser, speglingar från himlen och filmisk färgåtergivning. Grafiknivån (knappen i menyn) står på Auto som standard: spelet börjar på hög nivå och sänker upplösning och skuggkvalitet själv om enheten inte hinner med. `klassisk.html` är den första 2D-versionen.

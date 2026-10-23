@@ -209,7 +209,7 @@
     </div>
     <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Ta dig till den stora portalen längst ner, så teleporteras du till nästa bana. Kameran byter vinkel under resan, så håll koll. Tjäna XP, gå upp i nivå och lås upp lacker och tillbehör.</p>
     <div class="row2"><button class="btn" id="playBtn">Kör</button><button class="btn alt" id="garageBtn">Garage</button></div>
-    <span class="hint">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span>
+    <div class="head"><span class="hint">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span><button class="back" id="gfxBtn">Grafik: Auto</button></div>
   </div>
 
   <div class="screen" id="tracks" hidden>
@@ -283,10 +283,12 @@
   try {
     renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' });
   } catch (e) { $('menu').hidden = true; $('nogl').hidden = false; return; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
 
   const SKY = 0xa9d4f0;
   const scene = new THREE.Scene();
@@ -320,7 +322,7 @@
   scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff2dd, 1.0);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 22, bottom: -22, near: 1, far: 80 });
   sun.shadow.bias = -0.0015;
   scene.add(sun, sun.target);
@@ -337,17 +339,58 @@
     if (repeat) { t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.RepeatWrapping; }
     return t;
   }
+  // Slår ihop flera geometrier till en, så träd och fälgar blir ett enda ritanrop.
+  function mergeGeos(list) {
+    const parts = list.map(([geo, pos = [0, 0, 0], rot = [0, 0, 0], scl = [1, 1, 1]]) => {
+      const g = geo.index ? geo.toNonIndexed() : geo.clone();
+      g.applyMatrix4(new THREE.Matrix4().compose(new V3(...pos), new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)), new V3(...scl)));
+      return g;
+    });
+    const out = new THREE.BufferGeometry();
+    for (const name of ['position', 'normal']) {
+      const arr = new Float32Array(parts.reduce((n, g) => n + g.attributes[name].array.length, 0));
+      let o = 0; for (const g of parts) { arr.set(g.attributes[name].array, o); o += g.attributes[name].array.length; }
+      out.setAttribute(name, new THREE.BufferAttribute(arr, 3));
+    }
+    return out;
+  }
+  // Klump med mjuka, lite ojämna former (lövkrona).
+  function blob(r, seed) {
+    const g = new THREE.IcosahedronGeometry(r, 2), p = g.attributes.position, n = g.attributes.normal, v = new V3();
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      const k = 1 + 0.18 * Math.sin(v.x * 2.1 + seed) * Math.cos(v.z * 1.7 + seed * 2) + 0.1 * Math.sin(v.y * 3 + seed);
+      n.setXYZ(i, v.x / r, v.y / r, v.z / r); v.multiplyScalar(k); p.setXYZ(i, v.x, v.y, v.z);
+    }
+    return g;
+  }
+
   const ROAD_TILE = 12;
-  const roadTex = canvasTex(256, 256, (g, w, h) => {
-    g.fillStyle = '#373b42'; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 1400; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.12)'; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-    g.fillStyle = '#f4f1ea'; g.fillRect(8, 0, 5, h); g.fillRect(w - 13, 0, 5, h);
-    g.fillStyle = 'rgba(244,241,234,0.85)';
-    for (const x of [64, 128, 192]) g.fillRect(x - 2.5, 0, 5, h / 2);
+  const roadTex = canvasTex(512, 512, (g, w, h) => {
+    g.fillStyle = '#3a3e45'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9000; i++) { const c = Math.random(); g.fillStyle = c < 0.5 ? `rgba(255,255,255,${0.03 + c * 0.05})` : `rgba(0,0,0,${0.06 + (c - 0.5) * 0.12})`; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 1 + Math.random() * 2); }
+    // Däckslitage i varje fil
+    for (const lane of [64, 192, 320, 448]) for (const off of [-24, 24]) {
+      const gr = g.createLinearGradient(lane + off - 14, 0, lane + off + 14, 0);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.16)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr; g.fillRect(lane + off - 14, 0, 28, h);
+    }
+    // Sprickor och lagningar
+    g.strokeStyle = 'rgba(15,15,18,0.55)'; g.lineWidth = 1.2;
+    for (let i = 0; i < 7; i++) { let x = Math.random() * w, y = Math.random() * h; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 6; k++) { x += (Math.random() - 0.5) * 40; y += Math.random() * 30; g.lineTo(x, y); } g.stroke(); }
+    g.fillStyle = 'rgba(20,20,24,0.35)'; g.fillRect(150, 300, 70, 46); g.fillRect(380, 90, 40, 60);
+    g.fillStyle = 'rgba(244,241,234,0.92)'; g.fillRect(16, 0, 9, h); g.fillRect(w - 25, 0, 9, h);
+    g.fillStyle = 'rgba(244,241,234,0.8)';
+    for (const x of [128, 256, 384]) g.fillRect(x - 4, 0, 8, h / 2);
   }, true);
-  const groundTex = ([a, b]) => canvasTex(64, 64, (g, w, h) => {
+  const groundTex = ([a, b]) => canvasTex(256, 256, (g, w, h) => {
     g.fillStyle = a; g.fillRect(0, 0, w, h / 2); g.fillStyle = b; g.fillRect(0, h / 2, w, h / 2);
-    for (let i = 0; i < 200; i++) { g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(Math.random() * w, Math.random() * h, 1, 2); }
+    for (let i = 0; i < 60; i++) {
+      const x = Math.random() * w, y = Math.random() * h, r = 8 + Math.random() * 30, gr = g.createRadialGradient(x, y, 0, x, y, r);
+      const dark = Math.random() < 0.5; gr.addColorStop(0, dark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    for (let i = 0; i < 2600; i++) { g.fillStyle = Math.random() < 0.5 ? 'rgba(0,0,0,0.13)' : 'rgba(255,255,255,0.07)'; g.fillRect(Math.random() * w, Math.random() * h, 1, 2 + Math.random() * 3); }
   }, true);
   const grassTex = groundTex(['#4f8f3a', '#58993f']);
   const flamesTex = canvasTex(128, 128, (g, w, h) => {
@@ -397,9 +440,9 @@
   // ---------- Material ----------
   const M = {
     dark: new THREE.MeshStandardMaterial({ color: 0x1d1f23, roughness: 0.7 }),
-    tire: new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.9 }),
-    hub: new THREE.MeshStandardMaterial({ color: 0xc9ccd1, roughness: 0.3, metalness: 0.8 }),
-    glass: new THREE.MeshStandardMaterial({ color: 0x2a3b4c, roughness: 0.08, metalness: 0.7 }),
+    tire: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.85 }),
+    hub: new THREE.MeshStandardMaterial({ color: 0xd6d9de, roughness: 0.18, metalness: 1 }),
+    glass: new THREE.MeshStandardMaterial({ color: 0x1c2833, roughness: 0.04, metalness: 0.9 }),
     head: new THREE.MeshStandardMaterial({ color: 0xfff6d0, emissive: 0xfff2b0, emissiveIntensity: 0.8 }),
     tail: new THREE.MeshStandardMaterial({ color: 0xff3b2a, emissive: 0xff2010, emissiveIntensity: 0.6 }),
     steel: new THREE.MeshStandardMaterial({ color: 0x5b616c, roughness: 0.45, metalness: 0.75 }),
@@ -416,10 +459,16 @@
     led: new THREE.MeshBasicMaterial({ color: 0xff2020 }),
     ice: new THREE.MeshStandardMaterial({ color: 0xcfe9ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
     lava: new THREE.MeshStandardMaterial({ color: 0xff5a10, emissive: 0xff3a00, emissiveIntensity: 1, roughness: 0.6 }),
-    leaf: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.9, flatShading: true }),
+    leaf: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.85 }),
+    leaf2: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.85 }),
+    leaf3: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.85 }),
     trunk: new THREE.MeshStandardMaterial({ color: 0x5b3a1f, roughness: 0.9 }),
     sign: new THREE.MeshStandardMaterial({ color: 0x1f6e3a, roughness: 0.6 }),
   };
+  // Färgerna anges som vanliga hex-färger; ljusberäkningen vill ha dem linjära.
+  const lin = c => new THREE.Color(c).convertSRGBToLinear();
+  for (const m of Object.values(M)) { if (m.color) m.color.convertSRGBToLinear(); if (m.emissive) m.emissive.convertSRGBToLinear(); }
+  const BURNT = lin(0x2a2522);
 
   // ---------- Miljö ----------
   const ROAD_LEN = 520;
@@ -451,15 +500,26 @@
     return m;
   });
 
-  const treeGeo = { cactus: new THREE.CylinderGeometry(0.34, 0.4, 3.2, 8), leaf: new THREE.ConeGeometry(1.7, 4.2, 7), trunk: new THREE.CylinderGeometry(0.25, 0.3, 1.2, 6), rock: new THREE.DodecahedronGeometry(0.9, 0) };
+  const treeGeo = {
+    pine: mergeGeos([[new THREE.ConeGeometry(1.9, 2.3, 12), [0, 0, 0]], [new THREE.ConeGeometry(1.5, 2.0, 12), [0, 1.15, 0]], [new THREE.ConeGeometry(1.0, 1.7, 12), [0, 2.2, 0]]]),
+    round: mergeGeos([[blob(1.5, 1), [0, 0.4, 0]], [blob(1.1, 4), [0.75, 0.0, 0.3]], [blob(1.0, 7), [-0.6, 0.1, -0.4]]]),
+    cactus: mergeGeos([[new THREE.CylinderGeometry(0.34, 0.4, 3.2, 12), [0, 0, 0]], [new THREE.SphereGeometry(0.34, 12, 8), [0, 1.6, 0]],
+      [new THREE.CylinderGeometry(0.18, 0.18, 0.7, 10), [0.45, -0.1, 0], [0, 0, Math.PI / 2]], [new THREE.CylinderGeometry(0.18, 0.2, 1.0, 10), [0.78, 0.35, 0]], [new THREE.SphereGeometry(0.18, 10, 6), [0.78, 0.85, 0]],
+      [new THREE.CylinderGeometry(0.16, 0.16, 0.6, 10), [-0.4, 0.3, 0], [0, 0, Math.PI / 2]], [new THREE.CylinderGeometry(0.16, 0.18, 0.8, 10), [-0.68, 0.65, 0]], [new THREE.SphereGeometry(0.16, 10, 6), [-0.68, 1.05, 0]]]),
+    dead: mergeGeos([[new THREE.CylinderGeometry(0.06, 0.12, 1.8, 7), [0.45, 0.2, 0], [0, 0, -0.8]], [new THREE.CylinderGeometry(0.05, 0.1, 1.4, 7), [-0.4, 0.6, 0.1], [0.3, 0, 0.9]],
+      [new THREE.CylinderGeometry(0.04, 0.08, 1.1, 7), [0.1, 1.0, -0.35], [-0.8, 0, 0.2]], [new THREE.CylinderGeometry(0.04, 0.07, 0.9, 7), [-0.1, 1.3, 0.3], [0.7, 0, -0.3]]]),
+    trunk: new THREE.CylinderGeometry(0.22, 0.32, 1.4, 10), rock: new THREE.DodecahedronGeometry(0.9, 1),
+  };
+  const LEAF_Y = { pine: 2.0, round: 2.6, cactus: 1.6, dead: 2.4 };
   const scenery = [];
   for (let i = 0; i < 90; i++) {
     const g = new THREE.Group();
     if (i % 5 === 4) { const r = new THREE.Mesh(treeGeo.rock, M.stone); r.scale.set(1.2, 0.7, 1); r.position.y = 0.3; g.add(r); }
     else {
-      const t = new THREE.Mesh(treeGeo.trunk, M.trunk); t.position.y = 0.6; g.add(t);
-      const l = new THREE.Mesh(treeGeo.leaf, M.leaf); l.position.y = 3.1; g.add(l);
-      g.userData = { leaf: l, trunk: t };
+      const t = new THREE.Mesh(treeGeo.trunk, M.trunk); t.position.y = 0.7; g.add(t);
+      const l = new THREE.Mesh(treeGeo.pine, [M.leaf, M.leaf2, M.leaf3][i % 3]); l.position.y = LEAF_Y.pine; l.castShadow = true; g.add(l);
+      l.rotation.y = Math.random() * 6.28;
+      g.userData = { leaf: l, trunk: t, round: i % 3 === 0 };
       g.scale.setScalar(0.8 + Math.random() * 0.7);
     }
     const side = i % 2 ? 1 : -1;
@@ -467,6 +527,32 @@
     g.position.set(side * (9.5 + Math.random() * 28), 0, -i * 4.2 + 20);
     track.add(g); scenery.push(g);
   }
+  // Himmel med färgövergång och sol. Samma himmel används för speglingar i lack och glas.
+  const skyGeo = new THREE.SphereGeometry(480, 32, 20);
+  skyGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(skyGeo.attributes.position.count * 3), 3));
+  const sky = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
+  sky.renderOrder = -1; scene.add(sky);
+  const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0xfff1cc, blending: THREE.AdditiveBlending, fog: false, depthWrite: false, transparent: true }));
+  sunGlow.scale.setScalar(110); scene.add(sunGlow);
+  const tmpDir = new V3();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  let envTex = null;
+  function paintSky(th) {
+    const hz = new THREE.Color(th.sky), top = hz.clone().offsetHSL(0.01, 0.12, th.night ? -0.06 : -0.22), bot = new THREE.Color(th.ground[0]).multiplyScalar(0.7);
+    const p = skyGeo.attributes.position, c = skyGeo.attributes.color, col = new THREE.Color();
+    for (let i = 0; i < p.count; i++) {
+      const h = p.getY(i) / 480;
+      if (h >= 0) col.copy(hz).lerp(top, Math.pow(h, 0.55)); else col.copy(hz).lerp(bot, Math.min(1, -h * 4));
+      col.convertSRGBToLinear(); c.setXYZ(i, col.r, col.g, col.b);
+    }
+    c.needsUpdate = true;
+    scene.fog.color.copy(hz).convertSRGBToLinear(); scene.background.copy(scene.fog.color);
+    sunGlow.material.color.set(th.sun[0]); sunGlow.scale.setScalar(th.night ? 45 : 110);
+    const es = new THREE.Scene(), sk = new THREE.Mesh(skyGeo, sky.material); es.add(sk);
+    const old = envTex; envTex = pmrem.fromScene(es, 0.03, 1, 1000).texture; scene.environment = envTex;
+    if (old) old.dispose();
+  }
+
   // Platt dal långt nedanför: vägen stupar ner mot den, så backen syns.
   const valley = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x4a8436, roughness: 1 }));
   valley.rotation.x = -Math.PI / 2; scene.add(valley);
@@ -474,8 +560,10 @@
   const mountains = new THREE.Group(); scene.add(mountains);
   for (let i = 0; i < 9; i++) {
     const h = 60 + Math.random() * 70;
-    const m = new THREE.Mesh(new THREE.ConeGeometry(h * 0.9, h, 5), new THREE.MeshBasicMaterial({ color: 0x7d95ad, fog: false }));
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(h * 0.27, h * 0.3, 5), new THREE.MeshBasicMaterial({ color: 0xf2f6fa, fog: false }));
+    const mg = new THREE.ConeGeometry(h * 0.9, h, 10, 5), mp = mg.attributes.position;
+    for (let k = 0; k < mp.count; k++) { const y = mp.getY(k); if (y < h / 2 - 0.01) { const j = 1 + 0.18 * Math.sin(mp.getX(k) * 0.08 + i) * Math.cos(mp.getZ(k) * 0.07 + y * 0.05); mp.setX(k, mp.getX(k) * j); mp.setZ(k, mp.getZ(k) * j); } }
+    const m = new THREE.Mesh(mg, new THREE.MeshBasicMaterial({ color: 0x7d95ad, fog: false }));
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(h * 0.27, h * 0.3, 10), new THREE.MeshBasicMaterial({ color: 0xf2f6fa, fog: false }));
     cap.position.y = h * 0.35; m.add(cap);
     m.position.set((i - 4) * 70 + Math.random() * 30, h / 2 - 90, -330 - Math.random() * 60);
     mountains.add(m);
@@ -507,28 +595,60 @@
 
   // ---------- Bilar ----------
   function hash3(x, y, z) { const s = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453; return s - Math.floor(s); }
-  function segBox(w, h, d, sw, sh, sd) { const g = new THREE.BoxGeometry(w, h, d, sw, sh, sd); g.userData.orig = Float32Array.from(g.attributes.position.array); return g; }
+  // Låda med rundade kanter. Normalerna pekar ut från en inre kärna, så kanterna blir mjuka. taper smalnar av ovansidan.
+  function roundBox(w, h, d, sw, sh, sd, r, taper = 0) {
+    const g = new THREE.BoxGeometry(w, h, d, sw, sh, sd);
+    const p = g.attributes.position, n = g.attributes.normal, v = new V3(), c = new V3();
+    const hx = w / 2 - r, hy = h / 2 - r, hz = d / 2 - r;
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      c.set(clamp(v.x, -hx, hx), clamp(v.y, -hy, hy), clamp(v.z, -hz, hz));
+      v.sub(c); const L = v.length();
+      if (L > 1e-6) { v.multiplyScalar(1 / L); n.setXYZ(i, v.x, v.y, v.z); v.multiplyScalar(r).add(c); } else v.copy(c);
+      if (taper && v.y > 0) { const f = v.y / (h / 2); v.x *= 1 - taper * f; v.z *= 1 - taper * 0.6 * f; }
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+    g.userData.orig = Float32Array.from(p.array); g.userData.normals = Float32Array.from(n.array);
+    return g;
+  }
+  const segBox = (w, h, d, sw, sh, sd, r = 0.02, taper = 0) => roundBox(w, h, d, sw, sh, sd, r, taper);
+  // Hjul: rundat däck och blanka ekrar.
+  const wheelGeo = {};
+  function getWheel(wr, ww) {
+    const key = wr + ':' + ww;
+    if (!wheelGeo[key]) {
+      const pts = [[0, -ww / 2], [wr - 0.07, -ww / 2], [wr - 0.015, -ww / 2 + 0.05], [wr, -ww / 2 + 0.11], [wr, ww / 2 - 0.11], [wr - 0.015, ww / 2 - 0.05], [wr - 0.07, ww / 2], [0, ww / 2]].map(([x, y]) => new THREE.Vector2(x, y));
+      const tire = new THREE.LatheGeometry(pts, 28);
+      const spokes = [[new THREE.CylinderGeometry(0.075, 0.075, ww + 0.05, 14)]];
+      for (let k = 0; k < 5; k++) spokes.push([new THREE.BoxGeometry(0.07, ww + 0.03, wr * 0.62), [0, 0, 0], [0, k * Math.PI * 2 / 5, 0], [1, 1, 1]]);
+      spokes.push([new THREE.TorusGeometry(wr * 0.66, 0.03, 6, 28), [0, ww / 2 + 0.01, 0], [Math.PI / 2, 0, 0]], [new THREE.TorusGeometry(wr * 0.66, 0.03, 6, 28), [0, -ww / 2 - 0.01, 0], [Math.PI / 2, 0, 0]]);
+      // ekrarna ska sitta i hjulets plan (vinkelrätt mot axeln, som är y här)
+      for (const s of spokes.slice(1, 6)) s[0].translate(0, 0, wr * 0.31);
+      wheelGeo[key] = { tire, rim: mergeGeos(spokes) };
+    }
+    return wheelGeo[key];
+  }
 
   function buildCar(color, isPlayer, opt = {}) {
     const g = new THREE.Group();
     const sk = opt.skin || {}, A = opt.acc || {};
-    const paint = new THREE.MeshStandardMaterial({ color, roughness: sk.rough ?? 0.32, metalness: sk.metal ?? 0.45, flatShading: true });
+    const paint = new THREE.MeshStandardMaterial({ color: lin(color), roughness: sk.rough ?? 0.28, metalness: sk.metal ?? 0.35 });
     if (sk.map) paint.map = sk.map === 'flames' ? flamesTex : camoTex;
-    if (sk.emissive) { paint.emissive.set(sk.emissive); paint.emissiveIntensity = 0.6; }
-    const stripe = sk.stripe != null ? new THREE.MeshStandardMaterial({ color: sk.stripe, roughness: 0.5, emissive: sk.emissive ? sk.stripe : 0x000000, emissiveIntensity: sk.emissive ? 0.5 : 0 }) : null;
+    if (sk.emissive) { paint.emissive.copy(lin(sk.emissive)); paint.emissiveIntensity = 0.6; }
+    const stripe = sk.stripe != null ? new THREE.MeshStandardMaterial({ color: lin(sk.stripe), roughness: 0.4, emissive: sk.emissive ? lin(sk.stripe) : 0x000000, emissiveIntensity: sk.emissive ? 0.5 : 0 }) : null;
     const parts = {};
     const add = (name, geo, mat, x, y, z, deform = true, parent = g) => {
       const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.userData.deform = deform;
       parent.add(m); if (name) parts[name] = m; return m;
     };
-    add('body', segBox(1.9, 0.55, 4.2, 6, 3, 12), paint, 0, 0.6, 0);
-    add('cabin', segBox(1.62, 0.52, 2.0, 5, 2, 6), paint, 0, 1.13, 0.25);
-    add('hood', segBox(1.78, 0.07, 1.3, 5, 1, 4), paint, 0, 0.91, -1.38);
-    add('trunk', segBox(1.78, 0.07, 0.75, 5, 1, 2), paint, 0, 0.91, 1.7);
-    add('bumperF', segBox(1.98, 0.28, 0.26, 6, 1, 1), M.dark, 0, 0.45, -2.17);
-    add('bumperR', segBox(1.98, 0.28, 0.26, 6, 1, 1), M.dark, 0, 0.45, 2.17);
-    add('doorL', segBox(0.07, 0.42, 1.35, 1, 2, 4), paint, -0.98, 0.72, 0.15);
-    add('doorR', segBox(0.07, 0.42, 1.35, 1, 2, 4), paint, 0.98, 0.72, 0.15);
+    add('body', segBox(1.9, 0.56, 4.2, 10, 4, 18, 0.18), paint, 0, 0.6, 0);
+    add('cabin', segBox(1.62, 0.52, 2.0, 8, 4, 10, 0.2, 0.2), paint, 0, 1.13, 0.25);
+    add('hood', segBox(1.78, 0.07, 1.3, 8, 1, 6, 0.033), paint, 0, 0.91, -1.38);
+    add('trunk', segBox(1.78, 0.07, 0.75, 8, 1, 4, 0.033), paint, 0, 0.91, 1.7);
+    add('bumperF', segBox(1.98, 0.28, 0.26, 10, 2, 2, 0.11), M.dark, 0, 0.45, -2.17);
+    add('bumperR', segBox(1.98, 0.28, 0.26, 10, 2, 2, 0.11), M.dark, 0, 0.45, 2.17);
+    add('doorL', segBox(0.07, 0.42, 1.35, 1, 3, 6, 0.033), paint, -0.98, 0.72, 0.15);
+    add('doorR', segBox(0.07, 0.42, 1.35, 1, 3, 6, 0.033), paint, 0.98, 0.72, 0.15);
     add('mirrorL', new THREE.BoxGeometry(0.28, 0.14, 0.16), paint, -1.08, 1.02, -0.62, false);
     add('mirrorR', new THREE.BoxGeometry(0.28, 0.14, 0.16), paint, 1.08, 1.02, -0.62, false);
     const ws = add('wind', new THREE.BoxGeometry(1.5, 0.62, 0.04), M.glass.clone(), 0, 1.16, -0.86, false); ws.rotation.x = -0.95;
@@ -551,13 +671,13 @@
       buildAccessories(g, parts, A, add);
     }
     const big = isPlayer && A.tires, wr = big ? 0.47 : 0.4;
-    const tireGeo = new THREE.CylinderGeometry(wr, wr, big ? 0.44 : 0.32, 16), hubGeo = new THREE.CylinderGeometry(0.22, 0.22, big ? 0.46 : 0.34, 10);
+    const WG = getWheel(wr, big ? 0.44 : 0.32);
     for (const [n, x, z] of [['wheelFL', -0.93, -1.35], ['wheelFR', 0.93, -1.35], ['wheelRL', -0.93, 1.35], ['wheelRR', 0.93, 1.35]]) {
       const pivot = new THREE.Group(); pivot.position.set(x * (big ? 1.05 : 1), wr, z); g.add(pivot); parts[n] = pivot;
-      const t = new THREE.Mesh(tireGeo, M.tire); t.rotation.z = Math.PI / 2; t.castShadow = true; pivot.add(t);
-      const h = new THREE.Mesh(hubGeo, M.hub); h.rotation.z = Math.PI / 2; pivot.add(h);
+      const t = new THREE.Mesh(WG.tire, M.tire); t.rotation.z = Math.PI / 2; t.castShadow = true; pivot.add(t);
+      const h = new THREE.Mesh(WG.rim, M.hub); h.rotation.z = Math.PI / 2; pivot.add(h);
     }
-    return { g, parts, paint, base: new THREE.Color(color), wind: 0, roll: 0, pitch: 0 };
+    return { g, parts, paint, base: paint.color.clone(), wind: 0, roll: 0, pitch: 0 };
   }
 
   // Tillbehör: syns på bilen, ger bonus så länge de sitter kvar och kan slitas loss.
@@ -603,8 +723,13 @@
         if (d >= radius) continue;
         const f = 1 - d / radius, k = depth * f * f * (0.55 + 0.9 * hash3(o[i], o[i + 1], o[i + 2]));
         a[i] += dir.x * k; a[i + 1] += dir.y * k; a[i + 2] += dir.z * k; touched = true;
+        (m.geometry.userData.mask || (m.geometry.userData.mask = new Uint8Array(a.length / 3)))[i / 3] = 1;
       }
-      if (touched) { pos.needsUpdate = true; m.geometry.computeVertexNormals(); }
+      if (touched) {
+        pos.needsUpdate = true; m.geometry.computeVertexNormals();
+        const N = m.geometry.userData.normals, mask = m.geometry.userData.mask, na = m.geometry.attributes.normal.array;
+        if (N) for (let j = 0; j < mask.length; j++) if (!mask[j]) { na[j * 3] = N[j * 3]; na[j * 3 + 1] = N[j * 3 + 1]; na[j * 3 + 2] = N[j * 3 + 2]; }
+      }
     }
   }
 
@@ -673,7 +798,7 @@
   ];
 
   const SAVE_KEY = 'dodsbacken.save.v1';
-  const save = { xp: 0, stars: {}, best: {}, vehicle: 'sport', skin: 'red', acc: {}, track: 'sommar' };
+  const save = { xp: 0, stars: {}, best: {}, vehicle: 'sport', skin: 'red', acc: {}, track: 'sommar', gfx: 'auto' };
   try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY)) || {}); } catch (e) {}
   const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} };
   const levelFor = xp => { let L = 1; while (xp >= 50 * L * (L + 1)) L++; return L; };
@@ -701,22 +826,24 @@
   function applyTheme(T) {
     const th = T.theme;
     scene.background.set(th.sky); scene.fog.color.set(th.sky); scene.fog.near = th.fog[0]; scene.fog.far = th.fog[1];
-    hemi.color.set(th.hemi[0]); hemi.groundColor.set(th.hemi[1]); hemi.intensity = th.hemi[2];
+    hemi.color.set(th.hemi[0]); hemi.groundColor.set(th.hemi[1]); hemi.intensity = th.hemi[2] * 0.55;
     sun.color.set(th.sun[0]); sun.intensity = th.sun[1];
     const old = grass.material.map;
     grass.material.map = groundTex(th.ground); grass.material.map.repeat.set(10, ROAD_LEN / 24); grass.material.needsUpdate = true;
     if (old && old !== grassTex) old.dispose();
-    M.leaf.color.set(th.leaf); M.stone.color.set(th.stone); M.trunk.color.set(th.tree === 'dead' ? 0x241d1a : 0x5b3a1f);
+    M.leaf.color.set(th.leaf).convertSRGBToLinear(); M.leaf2.color.set(th.leaf).offsetHSL(0.02, 0.05, 0.05).convertSRGBToLinear(); M.leaf3.color.set(th.leaf).offsetHSL(-0.02, -0.05, -0.04).convertSRGBToLinear();
+    M.stone.color.copy(lin(th.stone)); M.trunk.color.copy(lin(th.tree === 'dead' ? 0x241d1a : 0x5b3a1f));
     for (const sc of scenery) {
-      const { leaf, trunk } = sc.userData; if (!leaf) continue;
-      leaf.visible = th.tree !== 'dead';
-      leaf.geometry = th.tree === 'cactus' ? treeGeo.cactus : treeGeo.leaf;
-      leaf.position.y = th.tree === 'cactus' ? 1.6 : 3.1;
-      trunk.visible = th.tree !== 'cactus';
-      trunk.scale.y = th.tree === 'dead' ? 3.4 : 1; trunk.position.y = th.tree === 'dead' ? 2 : 0.6;
+      const { leaf, trunk, round } = sc.userData; if (!leaf) continue;
+      const kind = th.tree === 'cone' ? (round && !th.night ? 'round' : 'pine') : th.tree;
+      leaf.geometry = treeGeo[kind]; leaf.position.y = LEAF_Y[kind];
+      leaf.material = kind === 'dead' ? M.trunk : leaf.material === M.trunk ? M.leaf : leaf.material;
+      trunk.visible = kind !== 'cactus';
+      trunk.scale.y = kind === 'dead' ? 2.6 : 1; trunk.position.y = kind === 'dead' ? 1.8 : 0.7;
     }
-    for (const m of mountains.children) { m.material.color.set(th.mount); m.children[0].material.color.set(th.cap); }
-    valley.material.color.set(th.ground[0]).multiplyScalar(0.82);
+    paintSky(th);
+    for (const m of mountains.children) { m.material.color.copy(lin(th.mount)); m.children[0].material.color.copy(lin(th.cap)); }
+    valley.material.color.copy(lin(th.ground[0])).multiplyScalar(0.7);
   }
 
   // ---------- Spelstatus ----------
@@ -1202,14 +1329,14 @@
     { name: 'Vampyr', skin: 0xe8e2f0, body: 0x8a1420, legs: 0x1b1d21, eyes: 0xff2a2a, cape: true, armsUp: true },
   ];
   const MG = {
-    leg: new THREE.BoxGeometry(0.32, 0.6, 0.38), hip: new THREE.BoxGeometry(0.72, 0.18, 0.4), torso: new THREE.BoxGeometry(0.84, 0.72, 0.42),
-    arm: new THREE.BoxGeometry(0.2, 0.55, 0.22), hand: new THREE.CylinderGeometry(0.11, 0.11, 0.16, 8), head: new THREE.CylinderGeometry(0.3, 0.3, 0.46, 14),
-    stud: new THREE.CylinderGeometry(0.14, 0.14, 0.12, 10), eye: new THREE.BoxGeometry(0.1, 0.1, 0.04), mouth: new THREE.BoxGeometry(0.24, 0.05, 0.04),
+    leg: roundBox(0.32, 0.6, 0.38, 2, 3, 2, 0.05), hip: roundBox(0.72, 0.18, 0.4, 3, 2, 2, 0.05), torso: roundBox(0.84, 0.72, 0.42, 3, 3, 2, 0.06, 0.12),
+    arm: roundBox(0.2, 0.55, 0.22, 2, 3, 2, 0.06), hand: new THREE.TorusGeometry(0.09, 0.04, 8, 14, 4.6), head: new THREE.CylinderGeometry(0.3, 0.3, 0.46, 20),
+    stud: new THREE.CylinderGeometry(0.14, 0.14, 0.12, 16), eye: new THREE.BoxGeometry(0.1, 0.1, 0.04), mouth: new THREE.BoxGeometry(0.24, 0.05, 0.04),
     rib: new THREE.BoxGeometry(0.62, 0.05, 0.03), horn: new THREE.ConeGeometry(0.09, 0.32, 6), bigEye: new THREE.CylinderGeometry(0.15, 0.15, 0.04, 14),
     pupil: new THREE.CylinderGeometry(0.06, 0.06, 0.05, 10), cape: new THREE.BoxGeometry(0.86, 1.25, 0.04),
   };
   const matCache = new Map();
-  const matC = c => { if (!matCache.has(c)) matCache.set(c, new THREE.MeshStandardMaterial({ color: c, roughness: 0.35, metalness: 0.05 })); return matCache.get(c); };
+  const matC = c => { if (!matCache.has(c)) matCache.set(c, new THREE.MeshStandardMaterial({ color: lin(c), roughness: 0.25, metalness: 0 })); return matCache.get(c); };
   function buildMonster(T) {
     const g = new THREE.Group(), parts = [];
     const add = (geo, c, x, y, z, parent = g) => { const m = new THREE.Mesh(geo, matC(c)); m.position.set(x, y, z); m.castShadow = true; parent.add(m); parts.push(m); return m; };
@@ -1702,7 +1829,7 @@
     // Rök och eld efter skadenivå
     if (damage > 30 && Math.random() < dt * (damage / 6)) smoke(carPoint(0, 1.05, -1.5), damage > 60);
     if (damage > 78 && Math.random() < dt * 25) fire(carPoint(rand(-0.4, 0.4), 1.0, -1.5));
-    car.paint.color.copy(car.base).lerp(new THREE.Color(0x2a2522), clamp((damage - 50) / 50, 0, 1) * 0.55);
+    car.paint.color.copy(car.base).lerp(BURNT, clamp((damage - 50) / 50, 0, 1) * 0.55);
 
     inv = Math.max(0, inv - dt); shake = Math.max(0, shake - rdt);
     flash.intensity = Math.max(0, flash.intensity - rdt * 4);
@@ -1780,7 +1907,9 @@
     }
     mountains.position.set(camera.position.x * 0.9, camera.position.y, camera.position.z);
     const cw = track.localToWorld(new V3(player.x, player.y, player.z));
-    sun.position.set(cw.x - 10, cw.y + 24, cw.z + 6); sun.target.position.copy(cw);
+    sun.position.set(cw.x - 12, cw.y + 20, cw.z - 18); sun.target.position.copy(cw);
+    sky.position.copy(camera.position);
+    sunGlow.position.copy(camera.position).addScaledVector(tmpDir.copy(sun.position).sub(cw).normalize(), 400);
     const base = track.localToWorld(new V3(player.x, 0, player.z));
     valley.position.set(base.x, base.y - 45, base.z - 1500);
   }
@@ -1803,12 +1932,41 @@
     bar.style.backgroundColor = d < 40 ? 'var(--ok)' : d < 75 ? 'var(--hazard)' : 'var(--signal)';
   }
 
+  // Grafiknivå: Auto börjar högt och sänker själv om enheten inte hinner med.
+  const DPR = window.devicePixelRatio || 1;
+  const QUALITY = { hög: { pr: Math.min(DPR, 2), sh: 2048 }, mellan: { pr: Math.min(DPR, 1.5), sh: 1024 }, låg: { pr: 1, sh: 512 } };
+  const GFX_ORDER = ['auto', 'hög', 'mellan', 'låg'];
+  let qNow = null, ftSum = 0, ftN = 0;
+  function setQuality(q) {
+    if (q === qNow) return;
+    qNow = q; const Q = QUALITY[q];
+    renderer.setPixelRatio(Q.pr); resize();
+    sun.shadow.mapSize.set(Q.sh, Q.sh);
+    if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+  }
+  const gfxLabel = () => 'Grafik: ' + (save.gfx === 'auto' ? `Auto (${qNow})` : save.gfx[0].toUpperCase() + save.gfx.slice(1));
+  $('gfxBtn').addEventListener('click', () => {
+    save.gfx = GFX_ORDER[(GFX_ORDER.indexOf(save.gfx) + 1) % GFX_ORDER.length]; persist();
+    setQuality(save.gfx === 'auto' ? 'hög' : save.gfx); $('gfxBtn').textContent = gfxLabel();
+  });
+  function autoQuality(ft) {
+    if (save.gfx !== 'auto' || state !== 'play') return;
+    ftSum += ft; ftN++;
+    if (ftN < 120) return;
+    const avg = ftSum / ftN; ftSum = 0; ftN = 0;
+    if (avg > 1 / 42 && qNow !== 'låg') { setQuality(qNow === 'hög' ? 'mellan' : 'låg'); $('gfxBtn').textContent = gfxLabel(); }
+  }
+  if (!GFX_ORDER.includes(save.gfx)) save.gfx = 'auto';
+  setQuality(save.gfx === 'auto' ? 'hög' : save.gfx);
+  $('gfxBtn').textContent = gfxLabel();
+
   applyTheme(TRACK);
   reset();
   renderMenu();
   let last = performance.now();
   function frame(now) {
     const rdt = Math.min(0.05, (now - last) / 1000);
+    autoQuality((now - last) / 1000);
     last = now;
     if (state !== 'paused') update(rdt);
     renderer.render(scene, camera);
