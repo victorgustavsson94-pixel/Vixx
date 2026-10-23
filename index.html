@@ -112,6 +112,9 @@
   .tab[aria-selected="true"] { background: var(--hazard); color: var(--ink); }
   .tab:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
   .tabBody { max-height: 36vh; overflow-y: auto; }
+  .vehPanel { display: grid; gap: 8px; }
+  .vehPanel p { margin: 0; }
+  .edge { display: block; margin-top: 4px; font-weight: 800; color: var(--hazard); }
   .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .sw {
     display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; text-align: left; cursor: pointer;
@@ -162,10 +165,10 @@
   .opt[aria-checked="true"] { background: var(--hazard); color: var(--ink); border-color: var(--hazard); }
   .opt[aria-checked="true"] small { color: var(--ink); }
   .opt:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
-  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .stats div { background: rgba(255,247,230,0.06); border-top: 3px solid var(--hazard); padding: 8px 10px; }
   .stats span { display: block; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-  .stats strong { font-family: var(--display); font-weight: 400; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .stats strong { font-family: var(--display); font-weight: 400; font-size: 20px; font-variant-numeric: tabular-nums; }
   .newbest { color: var(--hazard); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: 14px; }
   #pauseBtn {
     position: absolute; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -180,7 +183,7 @@
 
   <div class="hud" id="hud" hidden>
     <div class="chip">
-      <span class="label">Kvar till portalen</span>
+      <span class="label">Till portalen</span>
       <span class="big" id="hudDist">1000 m</span>
     </div>
     <div class="right">
@@ -188,7 +191,7 @@
         <span class="label">Skada <span id="hudDmg">0 %</span></span>
         <div class="bar"><i id="hudBar"></i></div>
       </div>
-      <div class="chip"><span id="hudSpeed">0</span> km/h · <span id="hudCoins">0</span> mynt</div>
+      <div class="chip"><span id="hudSpeed">0</span> km/h · <span id="hudCoins">0</span> mynt · <span id="hudMon">0</span> 👾</div>
     </div>
   </div>
   <div id="pop"></div>
@@ -225,7 +228,7 @@
         <button class="tab" role="tab" data-tab="acc" aria-selected="false">Tillbehör</button>
       </div>
       <div class="tabBody">
-        <div class="pick" id="gVeh" data-panel="veh" role="radiogroup" aria-label="Bil"></div>
+        <div class="vehPanel" data-panel="veh"><div class="pick" id="gVeh" role="radiogroup" aria-label="Bil"></div><p class="hint" id="gVehInfo"></p></div>
         <div class="swatches" id="gSkin" data-panel="skin" role="radiogroup" aria-label="Lack" hidden></div>
         <div class="accs" id="gAcc" data-panel="acc" hidden></div>
       </div>
@@ -239,8 +242,10 @@
     <div class="stats">
       <div><span>Bilens skick</span><strong id="ovCond">0 %</strong></div>
       <div><span>Tid</span><strong id="ovTime">0 s</strong></div>
+      <div><span>Monster</span><strong id="ovMon">0</strong></div>
       <div><span>Tappade delar</span><strong id="ovParts">0</strong></div>
       <div><span>Mynt</span><strong id="ovCoins">0</strong></div>
+      <div><span>Bästa skick</span><strong id="ovBestC">0 %</strong></div>
     </div>
     <div class="lvl">
       <div class="lvlTop"><b id="ovLvl">Nivå 1</b><span id="ovXp">+0 XP</span></div>
@@ -360,6 +365,7 @@
       g.fillStyle = c; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 8 + Math.random() * 16, 5 + Math.random() * 10, Math.random() * 3, 0, 7); g.fill();
     }
   });
+  const jerseyTex = canvasTex(64, 16, (g, w, h) => { for (let i = 0; i < 4; i++) { g.fillStyle = i % 2 ? '#f4f1ea' : '#e8452c'; g.fillRect(i * 16, 0, 16, h); } });
   const curbTex = canvasTex(8, 64, (g, w, h) => { g.fillStyle = '#e8452c'; g.fillRect(0, 0, w, h / 2); g.fillStyle = '#f4f1ea'; g.fillRect(0, h / 2, w, h / 2); }, true);
   const hazardTex = canvasTex(128, 32, (g, w, h) => {
     g.fillStyle = '#ffc21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1b1d21';
@@ -405,6 +411,9 @@
     yellow: new THREE.MeshStandardMaterial({ color: 0xffc21a, roughness: 0.5 }),
     gold: new THREE.MeshStandardMaterial({ color: 0xffc83a, roughness: 0.25, metalness: 0.9, emissive: 0x6a4a00, emissiveIntensity: 0.4 }),
     oil: new THREE.MeshStandardMaterial({ color: 0x15161b, roughness: 0.12, metalness: 0.3 }),
+    jersey: new THREE.MeshStandardMaterial({ map: jerseyTex, roughness: 0.7 }),
+    hole: new THREE.MeshBasicMaterial({ color: 0x050505 }),
+    led: new THREE.MeshBasicMaterial({ color: 0xff2020 }),
     ice: new THREE.MeshStandardMaterial({ color: 0xcfe9ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
     lava: new THREE.MeshStandardMaterial({ color: 0xff5a10, emissive: 0xff3a00, emissiveIntensity: 1, roughness: 0.6 }),
     leaf: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.9, flatShading: true }),
@@ -612,29 +621,36 @@
   const hasPart = (c, n) => c.parts[n] && c.parts[n].parent === c.g;
 
   // ---------- Banor, fordon, lacker, tillbehör ----------
-  const ALL_KINDS = ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum', 'crusher'];
   const TRACKS = [
-    { id: 'sommar', name: 'Sommarbacken', len: 800, hills: 1, desc: 'Sol, grönt gräs och de första hindren.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
-      kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil',
+    { id: 'sommar', name: 'Sommarbacken', len: 800, hills: 1, desc: 'Sol, grönt gräs och de första fällorna.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
+      edge: null,
+      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil', monsterRate: 0.45,
       theme: { sky: 0xa9d4f0, fog: [70, 283], ground: ['#4f8f3a', '#58993f'], leaf: 0x2d6a2b, tree: 'cone', stone: 0x8b8577, mount: 0x7d95ad, cap: 0xf2f6fa, hemi: [0xe6f2ff, 0x4f7f3a, 0.8], sun: [0xfff2dd, 1.0] } },
-    { id: 'vinter', name: 'Vinterbacken', len: 1000, hills: 1.2, desc: 'Snö, isfläckar som får bilen att sladda och pendelklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
-      kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum'], intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice',
+    { id: 'vinter', name: 'Vinterbacken', len: 1000, hills: 1.2, desc: 'Snö, isfläckar, smala passager och sågklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
+      edge: { v: 'small', why: 'den greppar bäst på isen och smiter igenom smala passager' },
+      kinds: ['traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'narrow', 'saw', 'gate', 'slam', 'pendulum'], weights: { narrow: 2.5, oil: 1.8 }, intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice', monsterRate: 0.4,
       theme: { sky: 0xc7d6e4, fog: [50, 243], ground: ['#e8eef3', '#dbe5ed'], leaf: 0x3d6b4e, tree: 'cone', stone: 0x9aa3ab, mount: 0x8c9db0, cap: 0xffffff, hemi: [0xf0f6ff, 0xb8c8d8, 0.85], sun: [0xf4f8ff, 0.95] } },
-    { id: 'oken', name: 'Ökenkanjonen', len: 1100, hills: 1.3, desc: 'Het sand, kaktusar och massor av stenblock.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
-      kinds: ALL_KINDS, weights: { boulder: 2 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil',
+    { id: 'oken', name: 'Ökenkanjonen', len: 1100, hills: 1.3, desc: 'Stenblock, tunnor, minor och monsterhorder.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
+      edge: { v: 'big', why: 'den plöjer genom stenblock, tunnor och monster utan att ta mycket skada' },
+      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'crusher', 'saw'], weights: { boulder: 2.5, barrels: 2, traffic: 1.6, monsters: 1.8 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil', monsterRate: 0.6,
       theme: { sky: 0xf1c48a, fog: [60, 270], ground: ['#d9a35b', '#cf9750'], leaf: 0x4f8a3a, tree: 'cactus', stone: 0xb5653a, mount: 0xb86b3c, cap: 0xd99a5b, hemi: [0xfff0d8, 0xb07a40, 0.85], sun: [0xffe0b0, 1.15] } },
-    { id: 'vulkan', name: 'Vulkanberget', len: 1200, hills: 1.45, desc: 'Svart mark och lavapölar som bränner bilen.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
-      kinds: ALL_KINDS, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava',
+    { id: 'vulkan', name: 'Vulkanberget', len: 1200, hills: 1.45, desc: 'Lavapölar, eldkastare, fallluckor och låga balkar.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
+      edge: { v: 'small', why: 'den slinker under de låga balkarna som den stora bilen slår i' },
+      kinds: ['traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'oil', 'beam', 'flame', 'pit', 'saw', 'pendulum', 'crusher', 'slam'], weights: { beam: 3, flame: 2, pit: 2 }, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava', monsterRate: 0.4,
       theme: { sky: 0x5a2c22, fog: [40, 229], ground: ['#2b2522', '#342b27'], leaf: 0x2a2522, tree: 'dead', stone: 0x4a3f3a, mount: 0x2e2220, cap: 0xff6a1a, hemi: [0xffb090, 0x301a10, 0.65], sun: [0xffa070, 0.9] } },
-    { id: 'natt', name: 'Midnattsbacken', len: 1300, hills: 1.6, desc: 'Mörker, strålkastare och alla hinder på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
-      kinds: ALL_KINDS, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil',
+    { id: 'natt', name: 'Midnattsbacken', len: 1300, hills: 1.6, desc: 'Monsterhorder i mörkret och alla fällor på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
+      edge: { v: 'big', why: 'den kör över monsterhorderna utan att ta skada' },
+      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'pendulum', 'crusher', 'saw', 'flame', 'pit', 'narrow'], weights: { monsters: 3, barrels: 2, traffic: 1.5 }, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil', monsterRate: 0.8,
       theme: { sky: 0x0d1530, fog: [30, 202], ground: ['#1f3a22', '#22402a'], leaf: 0x173a1c, tree: 'cone', stone: 0x55524c, mount: 0x1a2440, cap: 0x8a9ab8, hemi: [0x7090d0, 0x101810, 0.35], sun: [0x9ab0ff, 0.3], night: true } },
   ];
+  // Ingen bil är bäst överallt: liten greppar på is, ryms under balkar och genom smala passager men tål lite när den
+  // rammar saker. Stor plöjer genom bilar, stenar, tunnor och monster men halkar, landar hårt och slår i låga balkar.
   const VEHICLES = {
-    small: { name: 'Liten', desc: 'Kvick men skör', lvl: 2, scale: 0.8, armor: 1.35, steer: 9.5, speed: 1.05 },
-    sport: { name: 'Sportbil', desc: 'Mitt emellan', lvl: 1, scale: 1, armor: 1, steer: 7, speed: 1 },
-    big: { name: 'Stor', desc: 'Tålig men trög', lvl: 4, scale: 1.35, armor: 0.62, steer: 4.5, speed: 0.93 },
+    small: { name: 'Liten', desc: 'Kvick, ryms överallt', info: 'Greppar på is, ryms under låga balkar och genom smala passager. Tar mycket skada när den rammar bilar, stenar, tunnor och monster.', lvl: 2, scale: 0.8, armor: 1.15, ram: 1.7, grip: 0.5, land: 0.8, steer: 9.5, speed: 1.05 },
+    sport: { name: 'Sportbil', desc: 'Allround', info: 'Mitt emellan i allt. Klarar sig hyfsat överallt men utmärker sig ingenstans.', lvl: 1, scale: 1, armor: 1, ram: 1, grip: 1, land: 1, steer: 7, speed: 1 },
+    big: { name: 'Stor', desc: 'Plöjer, men trög', info: 'Plöjer genom bilar, stenar, tunnor och monster nästan utan skada. Halkar länge, landar hårt, slår i låga balkar och har svårt i smala passager.', lvl: 4, scale: 1.35, armor: 0.85, ram: 0.45, grip: 1.7, land: 1.3, steer: 4.8, speed: 0.95 },
   };
+  const RAM = new Set(['traffic', 'boulder', 'barrels', 'monster']);
   const SKINS = [
     { id: 'red', name: 'Röd', lvl: 1, color: 0xe8452c, stripe: 0xffc21a, css: '#e8452c' },
     { id: 'blue', name: 'Blå', lvl: 1, color: 0x2f6fdb, stripe: 0xf4f1ea, css: '#2f6fdb' },
@@ -680,7 +696,7 @@
   let TRACK = TRACKS.find(T => T.id === save.track && trackOpen(T)) || TRACKS[0];
   let VEH = VEHICLES.sport, SC = 1, ACC = {};
   const relY = () => player.y - hillY(player.z);
-  const topH = () => 1.4 * SC + Math.max(0, relY());
+  const topH = () => (1.4 + (car && hasPart(car, 'accCage') ? 0.62 : 0)) * SC + Math.max(0, relY());
 
   function applyTheme(T) {
     const th = T.theme;
@@ -704,7 +720,7 @@
   }
 
   // ---------- Spelstatus ----------
-  let seen = new Set();
+  let seen = new Set(), recent = [];
   let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, obstacles, nextSpawn, nextSign, lastKind, inv;
   let FINISH = TRACK.len;
   let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false, portalPull = false, teleT = 0;
@@ -734,7 +750,7 @@
     track.add(car.g);
     player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0 };
     dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; inv = 0;
-    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set();
+    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set(); recent = []; monstersHit = 0;
     runTime = 0; lostParts = 0; finishMade = false; scrapShown = false; portalPull = false; teleT = 0;
     camIdx = 0; camFrom = 0; camBlend = 1; nextCam = 70; $('camTag').hidden = true; $('flash').classList.remove('on');
     for (const s of scenery) s.position.z = s.position.z % 378;
@@ -778,6 +794,13 @@
     const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = shadow; m.receiveShadow = shadow; parent.add(m); return m;
   }
   const G = {
+    barrel: new THREE.CylinderGeometry(0.5, 0.5, 1.1, 14),
+    barrelBand: new THREE.CylinderGeometry(0.52, 0.52, 0.12, 14),
+    mine: new THREE.CylinderGeometry(0.4, 0.45, 0.12, 12),
+    led: new THREE.SphereGeometry(0.07, 8, 6),
+    sawBlade: new THREE.CylinderGeometry(1.1, 1.1, 0.08, 24),
+    sawEdge: new THREE.TorusGeometry(1.1, 0.06, 6, 24),
+    nozzle: new THREE.CylinderGeometry(0.18, 0.25, 0.6, 10),
     unit: new THREE.BoxGeometry(1, 1, 1),
     post: new THREE.CylinderGeometry(0.35, 0.45, 2.2, 10),
     hub: new THREE.CylinderGeometry(0.5, 0.5, 0.5, 12),
@@ -883,7 +906,7 @@
           o.hit = () => {
             const inside = Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5;
             if (P === 'lava') return inside ? { x: player.x, z: player.z, y: 0.3, power: 9, burn: true } : null;
-            if (!o.done && inside) { o.done = true; slip = (P === 'ice' ? 2.4 : 1.5) * (ACC.tires ? 0.5 : 1); beep(220, 0.35, 'sawtooth', 0.05, -150); }
+            if (!o.done && inside) { o.done = true; slip = (P === 'ice' ? 2.4 : 1.5) * (ACC.tires ? 0.5 : 1) * VEH.grip; beep(220, 0.35, 'sawtooth', 0.05, -150); }
             return null;
           };
         })];
@@ -998,6 +1021,147 @@
         })];
       }
     },
+    monsters: {
+      unlock: 0, weight: 2,
+      make(z) { return Array.from({ length: 4 + Math.floor(Math.random() * 4) }, () => makeMonster(z + rand(-7, 7))); }
+    },
+    barrels: {
+      unlock: 30, weight: 2,
+      make(z) {
+        return Array.from({ length: 2 + Math.floor(Math.random() * 3) }, (_, i) => obstacle('barrels', z - i * rand(3, 6), (o, g) => {
+          const bar = new THREE.Group(); bar.position.y = 0.5; g.add(bar);
+          const body = mk(G.barrel, pick([M.red, M.steel, M.yellow]), bar); body.rotation.z = Math.PI / 2;
+          for (const sx of [-0.35, 0.35]) { const b = mk(G.barrelBand, M.hazard, bar, sx, 0, 0); b.rotation.z = Math.PI / 2; }
+          Object.assign(o, { hitH: 1, x: pick(LANES) + rand(-0.8, 0.8), v: rand(3, 6) });
+          o.update = dt => { if (o.dead) return; o.z += o.v * dt; bar.rotation.x += o.v / 0.5 * dt; g.position.x = o.x; g.position.z = o.z; };
+          o.hit = () => { if (o.dead) return null; const h = hitCircle(o.x, o.z, 0.55); return h && { ...h, y: 0.5, power: 11 }; };
+          o.onHit = () => { o.dead = true; g.updateMatrixWorld(true); track.attach(bar); debris.push({ m: bar, v: new V3(rand(-5, 5), rand(5, 9), -speed * 1.1), w: rv(8), life: 6, r: 0.5 }); };
+        }));
+      }
+    },
+    spikes: {
+      unlock: 70, weight: 2.5,
+      make(z) {
+        return [obstacle('spikes', z, (o, g) => {
+          const lanes = [...LANES].sort(() => Math.random() - 0.5).slice(0, Math.random() < 0.5 ? 2 : 3);
+          const groups = lanes.map(lx => {
+            const plate = mk(G.unit, M.dark, g, lx, 0.04, 0, false); plate.scale.set(3.3, 0.08, 1.8);
+            const sp = new THREE.Group(); sp.position.x = lx; g.add(sp);
+            for (let i = 0; i < 5; i++) for (let j = 0; j < 2; j++) mk(G.spike, M.bright, sp, -1.3 + i * 0.65, 0.3, -0.45 + j * 0.9);
+            return sp;
+          });
+          Object.assign(o, { hitH: 0.7, lanes, w: rand(2.2, 3), ph: rand(0, 6.28), k: 0 });
+          o.update = () => { o.k = clamp(Math.sin(t * o.w + o.ph) * 1.8 + 0.4, 0, 1); for (const sp of groups) sp.position.y = -0.62 + 0.62 * o.k; };
+          o.hit = () => {
+            if (o.k < 0.4) return null;
+            for (const lx of o.lanes) { const h = hitRect(lx, o.z, 3.3, 1.8); if (h) return { ...h, y: 0.25, power: 9, under: true, spikes: true }; }
+            return null;
+          };
+        })];
+      }
+    },
+    mines: {
+      unlock: 110, weight: 2,
+      make(z) {
+        return Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => obstacle('mines', z + rand(-8, 8), (o, g) => {
+          o.x = rand(-6, 6); g.position.x = o.x; o.hitH = 0.3;
+          mk(G.mine, M.dark, g, 0, 0.06, 0);
+          const led = mk(G.led, M.led, g, 0, 0.15, 0, false);
+          o.update = () => { led.visible = !o.dead && Math.sin(t * 10 + o.x) > 0; };
+          o.hit = () => { if (o.dead) return null; const h = hitCircle(o.x, o.z, 0.45); return h && { ...h, y: 0.2, power: 16, under: true, blast: true }; };
+          o.onHit = () => { o.dead = true; g.visible = false; };
+        }));
+      }
+    },
+    saw: {
+      unlock: 160, weight: 2,
+      make(z) {
+        return [obstacle('saw', z, (o, g) => {
+          const slot = mk(G.unit, M.dark, g, 0, 0.02, 0, false); slot.scale.set(ROAD_HALF * 2, 0.04, 0.35);
+          const holder = new THREE.Group(); holder.position.y = 0.15; g.add(holder);
+          const bl = mk(G.sawBlade, M.bright, holder); bl.rotation.x = Math.PI / 2;
+          mk(G.sawEdge, M.red, holder);
+          Object.assign(o, { hitH: 1.2, amp: 5.6, w: rand(0.9, 1.5), ph: rand(0, 6.28), bx: 0 });
+          o.update = dt => {
+            o.bx = o.amp * Math.sin(t * o.w + o.ph); holder.position.x = o.bx; holder.rotation.z -= 14 * dt;
+            if (Math.abs(o.z - player.z) < 60 && Math.random() < 0.3) sparks(new V3(o.bx, hillY(o.z) + 0.1, o.z), 1, 3);
+          };
+          o.hit = () => { const h = hitRect(o.bx, o.z, 2.2, 0.3); return h && { ...h, y: 0.5, power: 17, saw: true }; };
+        })];
+      }
+    },
+    flame: {
+      unlock: 200, weight: 2,
+      make(z) {
+        return [obstacle('flame', z, (o, g) => {
+          for (const sx of [-1, 1]) { mk(G.post, M.steel, g, sx * (ROAD_HALF + 0.8), 1.1, 0); const n = mk(G.nozzle, M.dark, g, sx * (ROAD_HALF + 0.3), 1.0, 0); n.rotation.z = Math.PI / 2; }
+          Object.assign(o, { hitH: 2.2, P: rand(2.4, 3.2), ph: rand(0, 3), on: [false, false] });
+          o.update = () => {
+            const u = ((t + o.ph) % o.P) / o.P;
+            o.on = [u < 0.42, u > 0.5 && u < 0.92];
+            if (Math.abs(o.z - player.z) > 90) return;
+            const y0 = hillY(o.z) + 1.0;
+            o.on.forEach((on, i) => {
+              if (!on) return;
+              const sx = i ? 1 : -1;
+              for (let k = 0; k < 2; k++) emit(new V3(sx * (ROAD_HALF - rand(0, 8.5)), y0 + rand(-0.2, 0.2), o.z + rand(-0.4, 0.4)), new V3(-sx * rand(4, 8), rand(0.5, 2), rand(-0.5, 0.5)), rand(0.7, 1.2), rand(0.25, 0.45), pick([0xff7a1a, 0xffb02a, 0xff4a10]), true, 0.8);
+            });
+          };
+          o.hit = () => {
+            if (o.on[0]) { const h = hitRect(-ROAD_HALF + 4.25, o.z, 8.5, 1.4); if (h) return { ...h, y: 0.9, power: 7, burn: true }; }
+            if (o.on[1]) { const h = hitRect(ROAD_HALF - 4.25, o.z, 8.5, 1.4); if (h) return { ...h, y: 0.9, power: 7, burn: true }; }
+            return null;
+          };
+        })];
+      }
+    },
+    pit: {
+      unlock: 240, weight: 2,
+      make(z) {
+        return [obstacle('pit', z, (o, g) => {
+          const cx = pick([-3.5, 0, 3.5]), W = 7, D = 4.5;
+          const hole = mk(G.unit, M.hole, g, cx, 0.015, 0, false); hole.scale.set(W, 0.01, D);
+          const doors = [-1, 1].map(sx => {
+            const hinge = new THREE.Group(); hinge.position.set(cx + sx * W / 2, 0.05, 0); g.add(hinge);
+            const d = mk(G.unit, M.hazard, hinge, -sx * W / 4, 0, 0, false); d.scale.set(W / 2, 0.08, D);
+            return { sx, hinge };
+          });
+          Object.assign(o, { hitH: 0.5, cx, W, D, P: rand(2.4, 3.2), ph: rand(0, 3), k: 0 });
+          o.update = () => {
+            const u = ((t + o.ph) % o.P) / o.P;
+            o.k = u < 0.15 ? u / 0.15 : u < 0.55 ? 1 : u < 0.7 ? 1 - (u - 0.55) / 0.15 : 0;
+            for (const { sx, hinge } of doors) hinge.rotation.z = sx * o.k * 1.5;
+          };
+          o.hit = () => (o.k > 0.6 && Math.abs(player.x - o.cx) < o.W / 2 - 0.4 && Math.abs(player.z - o.z) < o.D / 2) ? { x: player.x, z: player.z, y: 0.2, power: 15, under: true, pit: true } : null;
+        })];
+      }
+    },
+    beam: {
+      unlock: 260, weight: 2,
+      make(z) {
+        return [obstacle('beam', z, (o, g) => {
+          const BOT = 1.6;
+          for (const sx of [-1, 1]) { const p = mk(G.unit, M.hazard, g, sx * (ROAD_HALF + 0.5), (BOT + 0.7) / 2, 0); p.scale.set(0.6, BOT + 0.7, 0.8); }
+          const b = mk(G.unit, M.hazard, g, 0, BOT + 0.35, 0); b.scale.set(ROAD_HALF * 2 + 1.6, 0.7, 0.8);
+          for (let i = -3; i <= 3; i++) { const c = mk(G.rope, M.steel, g, i * 2, BOT - 0.15, 0, false); c.scale.y = 0.3; }
+          o.update = () => {};
+          o.hit = () => (topH() > BOT && Math.abs(o.z - player.z) < 0.4 + 2.1 * SC) ? { x: player.x, z: o.z, y: 1.4, power: 22, top: true, beam: true } : null;
+        })];
+      }
+    },
+    narrow: {
+      unlock: 140, weight: 2,
+      make(z) {
+        return [obstacle('narrow', z, (o, g) => {
+          const gap = 3.3, c = rand(-ROAD_HALF + gap / 2 + 0.6, ROAD_HALF - gap / 2 - 0.6);
+          const rects = [[(-ROAD_HALF + c - gap / 2) / 2, c - gap / 2 + ROAD_HALF], [(c + gap / 2 + ROAD_HALF) / 2, ROAD_HALF - c - gap / 2]];
+          for (const [x, w] of rects) { const m = mk(G.unit, M.jersey, g, x, 0.55, 0); m.scale.set(w, 1.1, 1.4); }
+          Object.assign(o, { hitH: 1.1, rects });
+          o.update = () => {};
+          o.hit = () => { for (const [x, w] of o.rects) { const h = hitRect(x, o.z, w, 1.4); if (h) return { ...h, y: 0.5, power: 14 }; } return null; };
+        })];
+      }
+    },
     crusher: {
       unlock: 300, weight: 2.5,
       make(z) {
@@ -1028,6 +1192,83 @@
       }
     },
   };
+
+  // Monster i Lego-stil: går över vägen och sprätter isär i bitar när man kör på dem.
+  const MONSTERS = [
+    { name: 'Zombie', skin: 0x7fbf5a, body: 0x3b5bab, legs: 0x5b3a1f, eyes: 0xff2a2a, armsUp: true },
+    { name: 'Skelett', skin: 0xf2efe6, body: 0xf2efe6, legs: 0xf2efe6, eyes: 0x111111, ribs: true },
+    { name: 'Cyklop', skin: 0x8a4fd0, body: 0x5a2f9a, legs: 0x2a2a40, cyclops: true, hop: true },
+    { name: 'Troll', skin: 0x4f6b2a, body: 0x7a4a22, legs: 0x3a2a1a, eyes: 0xffd34d, horns: true },
+    { name: 'Vampyr', skin: 0xe8e2f0, body: 0x8a1420, legs: 0x1b1d21, eyes: 0xff2a2a, cape: true, armsUp: true },
+  ];
+  const MG = {
+    leg: new THREE.BoxGeometry(0.32, 0.6, 0.38), hip: new THREE.BoxGeometry(0.72, 0.18, 0.4), torso: new THREE.BoxGeometry(0.84, 0.72, 0.42),
+    arm: new THREE.BoxGeometry(0.2, 0.55, 0.22), hand: new THREE.CylinderGeometry(0.11, 0.11, 0.16, 8), head: new THREE.CylinderGeometry(0.3, 0.3, 0.46, 14),
+    stud: new THREE.CylinderGeometry(0.14, 0.14, 0.12, 10), eye: new THREE.BoxGeometry(0.1, 0.1, 0.04), mouth: new THREE.BoxGeometry(0.24, 0.05, 0.04),
+    rib: new THREE.BoxGeometry(0.62, 0.05, 0.03), horn: new THREE.ConeGeometry(0.09, 0.32, 6), bigEye: new THREE.CylinderGeometry(0.15, 0.15, 0.04, 14),
+    pupil: new THREE.CylinderGeometry(0.06, 0.06, 0.05, 10), cape: new THREE.BoxGeometry(0.86, 1.25, 0.04),
+  };
+  const matCache = new Map();
+  const matC = c => { if (!matCache.has(c)) matCache.set(c, new THREE.MeshStandardMaterial({ color: c, roughness: 0.35, metalness: 0.05 })); return matCache.get(c); };
+  function buildMonster(T) {
+    const g = new THREE.Group(), parts = [];
+    const add = (geo, c, x, y, z, parent = g) => { const m = new THREE.Mesh(geo, matC(c)); m.position.set(x, y, z); m.castShadow = true; parent.add(m); parts.push(m); return m; };
+    const pivot = (x, y) => { const p = new THREE.Group(); p.position.set(x, y, 0); g.add(p); return p; };
+    const legL = pivot(-0.18, 0.62), legR = pivot(0.18, 0.62);
+    add(MG.leg, T.legs, 0, -0.3, 0, legL); add(MG.leg, T.legs, 0, -0.3, 0, legR);
+    add(MG.hip, T.legs, 0, 0.68, 0);
+    add(MG.torso, T.body, 0, 1.12, 0);
+    if (T.ribs) for (let i = 0; i < 3; i++) add(MG.rib, 0x2a2a2a, 0, 0.98 + i * 0.16, 0.22);
+    if (T.cape) add(MG.cape, 0x1b1d21, 0, 1.0, -0.26);
+    const armL = pivot(-0.53, 1.42), armR = pivot(0.53, 1.42);
+    for (const a of [armL, armR]) { add(MG.arm, T.body, 0, -0.25, 0, a); add(MG.hand, 0xffc83a, 0, -0.56, 0, a); }
+    if (T.armsUp) { armL.rotation.x = -1.35; armR.rotation.x = -1.35; }
+    add(MG.head, T.skin, 0, 1.73, 0); add(MG.stud, T.skin, 0, 2.02, 0);
+    if (T.cyclops) {
+      const e = add(MG.bigEye, 0xffffff, 0, 1.78, 0.29); e.rotation.x = Math.PI / 2;
+      const p = add(MG.pupil, 0x111111, 0, 1.78, 0.31); p.rotation.x = Math.PI / 2;
+      add(MG.horn, 0xf2efe6, 0, 2.15, 0);
+    } else {
+      add(MG.eye, T.eyes, -0.11, 1.8, 0.29); add(MG.eye, T.eyes, 0.11, 1.8, 0.29);
+    }
+    add(MG.mouth, 0x1b1d21, 0, 1.62, 0.29);
+    if (T.horns) for (const s of [-1, 1]) { const h = add(MG.horn, 0xf2efe6, s * 0.24, 2.02, 0); h.rotation.z = -s * 0.5; }
+    return { g, parts, legL, legR, armL, armR };
+  }
+  function makeMonster(z, x) {
+    return obstacle('monster', z, (o, g) => {
+      const T = pick(MONSTERS), mon = buildMonster(T);
+      mon.g.scale.setScalar(rand(0.95, 1.2)); g.add(mon.g);
+      Object.assign(o, { mon, T, hitH: 1.9, x: x ?? rand(-6, 6), vx: (Math.random() < 0.5 ? -1 : 1) * rand(0.6, 1.6), ph: rand(0, 6.28), hop: T.hop || Math.random() < 0.15 });
+      o.update = dt => {
+        if (o.dead) return;
+        o.x += o.vx * dt; if (Math.abs(o.x) > 6.3) { o.vx *= -1; o.x = clamp(o.x, -6.3, 6.3); }
+        const sw = Math.sin(t * 6 + o.ph);
+        mon.legL.rotation.x = sw * 0.6; mon.legR.rotation.x = -sw * 0.6;
+        if (!T.armsUp) { mon.armL.rotation.x = -sw * 0.5; mon.armR.rotation.x = sw * 0.5; }
+        mon.g.position.y = o.hop ? Math.abs(Math.sin(t * 4 + o.ph)) * 0.9 : 0;
+        mon.g.rotation.y = Math.sign(o.vx) * 0.7;
+        g.position.x = o.x;
+      };
+      o.hit = () => (o.dead ? null : (hitCircle(o.x, o.z, 0.45) && { x: o.x, z: o.z, y: 1, monster: true }));
+    });
+  }
+  let monstersHit = 0;
+  function smashMonster(o) {
+    o.dead = true; monstersHit++;
+    o.g.updateMatrixWorld(true);
+    for (const m of o.mon.parts) {
+      track.attach(m);
+      debris.push({ m, v: new V3(rand(-5, 5) + player.kx, rand(4, 10), -speed * rand(0.8, 1.3)), w: rv(12), life: 4, r: 0.12 });
+    }
+    const sev = 4 * VEH.ram * (hasPart(car, 'accBull') ? 0.5 : 1) * (ACC.armor ? 0.85 : 1);
+    damage = Math.min(100, damage + sev);
+    dent(car, local(rand(-0.6, 0.6), 0.6, -2.1), new V3(0, -0.1, 1).normalize(), 0.06 + sev * 0.012, 0.7);
+    speed *= 0.96;
+    sparks(new V3(o.x, hillY(o.z) + 1, o.z), 6, 5);
+    beep(520 + rand(0, 300), 0.08, 'square', 0.05, -200); crunch(0.08);
+    popup(`SPLAT! MONSTER ×${monstersHit}`);
+  }
 
   function makeCoins(z) {
     const lane = pick(LANES);
@@ -1061,7 +1302,9 @@
 
   function spawn() {
     const m = -nextSpawn;
-    const avail = Object.entries(KINDS).filter(([k, d]) => TRACK.kinds.includes(k) && m >= d.unlock * TRACK.intro && k !== lastKind);
+    const ok = ([k, d]) => TRACK.kinds.includes(k) && m >= d.unlock * TRACK.intro;
+    let avail = Object.entries(KINDS).filter(e => ok(e) && !recent.includes(e[0]));
+    if (!avail.length) avail = Object.entries(KINDS).filter(e => ok(e) && e[0] !== lastKind);
     const fresh = avail.find(([k, d]) => d.unlock > 0 && m < d.unlock * TRACK.intro + 40 && !seen.has(k));
     let chosen;
     if (fresh) chosen = fresh;
@@ -1071,9 +1314,11 @@
       chosen = avail.find(e => (r -= wt(e)) < 0) || avail[0];
     }
     lastKind = chosen[0]; seen.add(lastKind);
+    recent.push(lastKind); if (recent.length > 3) recent.shift();
     obstacles.push(...chosen[1].make(nextSpawn));
     const gap = Math.max(30, (Math.max(36, 66 - m * 0.035) + (chosen[0] === 'traffic' ? 14 : 0)) * TRACK.gap);
     if (Math.random() < 0.55) obstacles.push(...makeCoins(nextSpawn - gap * 0.45));
+    if (Math.random() < TRACK.monsterRate) for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) obstacles.push(makeMonster(nextSpawn - gap * rand(0.25, 0.75)));
     nextSpawn -= gap;
   }
 
@@ -1102,23 +1347,27 @@
   const local = (x, y, z) => new V3(x, y, z);
 
   function onHit(o, h) {
+    if (h.monster) { smashMonster(o); return; }
     if (o.cool > 0 || inv > 0) return;
     o.cool = 1.2; inv = 0.3;
     const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - relY()) / SC, 0.3, 1.4);
     const side = lx > 0.4 ? 'R' : lx < -0.4 ? 'L' : (Math.random() < 0.5 ? 'L' : 'R');
-    const front = !h.top && !h.burn && lz < -1, isSide = !h.top && !h.burn && Math.abs(lx) > 0.4 && Math.abs(lz) <= 1.3;
-    let mult = VEH.armor * (ACC.armor ? 0.85 : 1);
+    const under = h.burn || h.under;
+    const front = !h.top && !under && lz < -1, isSide = !h.top && !under && Math.abs(lx) > 0.4 && Math.abs(lz) <= 1.3;
+    let mult = (RAM.has(o.kind) ? VEH.ram : VEH.armor) * (ACC.armor ? 0.85 : 1);
+    let label = null;
     if (front && hasPart(car, 'accBull')) mult *= 0.65;
     if (h.top && hasPart(car, 'accCage')) mult *= 0.6;
     if (isSide && hasPart(car, 'accSide' + side)) mult *= 0.7;
     const sev = h.power * (0.45 + speed / 50) * mult;
     damage = Math.min(100, damage + sev);
-    const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : h.burn ? new V3(0, 1, 0) : new V3(-lx, -0.15, -lz * 0.7).normalize();
-    dent(car, local(lx, h.burn ? 0.3 : ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
+    const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : under ? new V3(0, 1, 0) : new V3(-lx, -0.15, -lz * 0.7).normalize();
+    dent(car, local(lx, under ? 0.3 : ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
     if (h.burn) fire(new V3(player.x, player.y + 0.5, player.z), 12);
 
     const out = new V3(side === 'R' ? 1 : -1, 0, lz < -1 ? -1 : lz > 1 ? 1 : 0);
     const cand = [];
+    if (h.saw) cand.push(['accSide' + side, 0.5], ['door' + side, 0.6], [(lz < 0 ? 'wheelF' : 'wheelR') + side, 0.35]);
     if (h.top) cand.push(['accCage', sev > 18 ? 0.35 : 0], ['hood', 0.5], ['spoiler', 0.5], ['trunk', 0.35]);
     if (isSide) cand.push(['accSide' + side, 0.3]);
     if (lz < -1) cand.push(['accBull', sev > 14 ? 0.35 : 0], ['bumperF', 0.9], ['hood', damage > 25 ? 0.7 : 0.2], ['wheelF' + side, damage > 55 ? 0.5 : 0]);
@@ -1135,14 +1384,25 @@
 
     const contact = new V3(h.x, h.y + hillY(h.z), h.z);
     sparks(contact, 22); smoke(contact, false, 4);
+    if (h.spikes && Math.random() < 0.55) {
+      const w = pick(['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR'].filter(n => hasPart(car, n)));
+      if (w && detach(car, w, new V3(w.endsWith('R') ? 1 : -1, 0, 0), -speed * 0.7)) label = 'PUNKA!';
+    }
+    if (h.blast) {
+      fire(contact, 25); smoke(contact, true, 12); sparks(contact, 30, 12);
+      flash.color.set(0xff8a2a); flash.distance = 30; flash.position.copy(contact); flash.intensity = 6;
+      player.air = true; player.vy = 10; label = 'BOOM!'; crunch(0.5);
+    }
+    if (h.pit) { player.air = true; player.vy = 5; label = 'FALLUCKA!'; }
+    if (h.beam) label = 'FÖR HÖG!';
     player.kx += Math.sign(player.x - h.x || (Math.random() - 0.5)) * (4 + sev * 0.22);
     player.yawKick += rand(-1, 1) * 0.04 * sev;
-    speed *= h.top ? 0.55 : h.burn ? 0.85 : 0.65;
+    speed *= h.pit ? 0.5 : h.top ? 0.55 : h.burn ? 0.85 : 0.65;
     shake = 0.5;
     if (o.onHit) o.onHit(h);
     crunch(0.18 + sev * 0.006); beep(110, 0.3, 'sawtooth', 0.06, -60);
     try { navigator.vibrate && navigator.vibrate(60 + sev * 4); } catch (e) {}
-    scrapPopup(`KRASCH +${Math.round(sev)} %`);
+    scrapPopup(`${label ? label + ' ' : 'KRASCH '}+${Math.round(sev)} %`);
   }
 
   function landing(impact) {
@@ -1150,7 +1410,7 @@
     sparks(new V3(player.x, player.y + 0.1, player.z), 14, 6);
     crunch(0.12 + impact * 0.01);
     if (impact < 9.5) return;
-    const sev = (impact - 9) * 3.4 * VEH.armor * (ACC.susp ? 0.5 : 1) * (ACC.tires ? 0.8 : 1) * (ACC.armor ? 0.85 : 1);
+    const sev = (impact - 9) * 3.4 * VEH.land * (ACC.susp ? 0.5 : 1) * (ACC.tires ? 0.8 : 1) * (ACC.armor ? 0.85 : 1);
     damage = Math.min(100, damage + sev);
     dent(car, local(rand(-0.5, 0.5), 0.35, -2.0), new V3(0, 0.55, 0.85).normalize(), 0.15 + sev * 0.02, 1.2 + sev * 0.03);
     dent(car, local(0, 1.4, 0.2), new V3(0, -1, 0), 0.05 + sev * 0.008, 1.4);
@@ -1174,7 +1434,7 @@
     const cond = Math.max(0, Math.round(100 - damage));
     const stars = cond >= 75 ? 3 : cond >= 40 ? 2 : 1;
     const prevL = level(), prevOpen = TRACKS.filter(trackOpen).length;
-    const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + stars * 20);
+    const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + monstersHit * 4 + stars * 20);
     save.xp += gain;
     save.stars[TRACK.id] = Math.max(save.stars[TRACK.id] || 0, stars);
     const isNew = cond > (save.best[TRACK.id] ?? -1);
@@ -1192,6 +1452,8 @@
     $('ovTime').textContent = runTime.toFixed(1) + ' s';
     $('ovParts').textContent = lostParts;
     $('ovCoins').textContent = coins;
+    $('ovMon').textContent = monstersHit;
+    $('ovBestC').textContent = save.best[TRACK.id] + ' %';
     $('ovLvl').textContent = 'Nivå ' + L;
     $('ovXp').textContent = `+${gain} XP · ${save.xp - a} / ${b - a}`;
     $('ovBar').style.width = ((save.xp - a) / (b - a) * 100) + '%';
@@ -1283,7 +1545,7 @@
     const list = $('trackList'); list.innerHTML = '';
     for (const T of TRACKS) {
       const open = trackOpen(T), st = save.stars[T.id] || 0, bst = save.best[T.id];
-      const b = el('button', 'track', `<b>${T.name}</b><span class="st" aria-label="${st} av 3 stjärnor">${starHtml(st)}</span><small>${open ? `${T.len} m · ${T.desc}${bst != null ? ` Bästa skick: ${bst} %.` : ''}` : `🔒 Nå portalen på ${TRACKS[TRACKS.indexOf(T) - 1].name} först`}</small>`);
+      const b = el('button', 'track', `<b>${T.name}</b><span class="st" aria-label="${st} av 3 stjärnor">${starHtml(st)}</span><small>${open ? `${T.len} m · ${T.desc}${bst != null ? ` Bästa skick: ${bst} %.` : ''}<span class="edge">${T.edge ? `Fördel ${VEHICLES[T.edge.v].name.toLowerCase()} bil: ${T.edge.why}.` : 'Ingen bil har fördel här.'}</span>` : `🔒 Nå portalen på ${TRACKS[TRACKS.indexOf(T) - 1].name} först`}</small>`);
       b.style.setProperty('--tbg', T.css); b.disabled = !open;
       b.addEventListener('click', () => startTrack(T));
       list.append(b);
@@ -1307,6 +1569,7 @@
       b.addEventListener('click', () => { save.vehicle = id; persist(); reset(); renderGarage(); });
       gv.append(b);
     }
+    $('gVehInfo').textContent = VEHICLES[save.vehicle].info;
     const gs = $('gSkin'); gs.innerHTML = '';
     for (const sk of SKINS) {
       const locked = sk.lvl > L, b = el('button', 'sw', `<i></i><span>${sk.name}${locked ? `<small>🔒 Nivå ${sk.lvl}</small>` : ''}</span>`);
@@ -1344,14 +1607,14 @@
   $('quitBtn').addEventListener('click', goMenu);
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 
-  const TILTED = new Set(['traffic', 'oil', 'gate', 'crusher', 'coin']);
+  const TILTED = new Set(['traffic', 'oil', 'gate', 'crusher', 'coin', 'spikes', 'mines', 'saw', 'pit', 'narrow', 'barrels']);
 
   // ---------- Kameravinklar ----------
   // pos/look är relativt bilen i vägens koordinater (bilen kör mot -z). follow = hur mycket kameran följer bilen i sidled.
   const CAMS = [
     { name: 'Bakifrån', pos: [0, 3.9, 9], look: [0, 0.8, -8], follow: 0.6, lift: 2.2 },
     { name: 'Uppifrån', pos: [0, 15, 6], look: [0, 0, -8], follow: 0.8, lift: 0 },
-    { name: 'Lågt bakom', pos: [1.4, 0.9, 5.6], look: [0, 1, -14], follow: 1, lift: 1.5 },
+    { name: 'Lågt bakom', pos: [1.4, 1.2, 7.2], look: [0, 1, -14], follow: 1, lift: 1.5 },
     { name: 'Från vänster', pos: [-7, 4.2, 6], look: [2, 0.5, -3], follow: 0.5, lift: 0.4 },
     { name: 'Från höger', pos: [7, 4.2, 6], look: [-2, 0.5, -3], follow: 0.5, lift: 0.4 },
     { name: 'Snett ovanifrån', pos: [6, 9, 9], look: [-1, 0, -6], follow: 0.6, lift: 0.3 },
@@ -1532,6 +1795,7 @@
     $('hudDist').textContent = Math.max(0, FINISH - meters()) + ' m';
     $('hudSpeed').textContent = Math.round(speed * 3.6);
     $('hudCoins').textContent = coins;
+    $('hudMon').textContent = monstersHit;
     const d = Math.round(damage);
     $('hudDmg').textContent = d + ' %';
     const bar = $('hudBar');
@@ -1552,7 +1816,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; }, addXp(v) { save.xp += v; persist(); renderMenu(); }, get save() { return save; } };
+  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; }, spawnKind(k, d = 40) { obstacles.push(...(k === 'monster' ? [makeMonster(player.z - d, player.x)] : KINDS[k].make(player.z - d))); }, addXp(v) { save.xp += v; persist(); renderMenu(); }, get save() { return save; } };
 })();
 </script>
 <!-- GAME END -->

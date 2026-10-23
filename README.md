@@ -48,9 +48,23 @@ Tillbehören syns på bilen och ger en bonus. Frontskydd, rollbur och sidoskydd 
 
 Framsteg sparas i webbläsaren på enheten.
 
-## Hinder
+## Hinder och fällor
 
-Bilar i vägen, rullande stenblock, snurrande hammare, jättegupp, olja/is/lava, glidande mur, jättehammare, pendelklinga och krossväggar.
+Bilar i vägen, rullande stenblock, tunnor som rullar mot en, snurrande hammare, jättegupp, olja/is/lava, glidande mur, jättehammare, pendelklinga, krossväggar, spikmattor som skjuter upp (kan ge punka), minor som spränger upp bilen, sågklingor som glider i en skåra, eldkastare från vägkanten, fallluckor, låga balkar och smala passager. Samma hindertyp kommer inte två gånger inom tre hinder.
+
+## Monster
+
+Lego-liknande monster (zombie, skelett, cyklop, troll, vampyr) vandrar över vägen och sprätter isär i bitar när man kör på dem. Varje monster ger XP men lite skada.
+
+## Liten eller stor bil
+
+Ingen bil är bäst överallt:
+
+- **Liten** – greppar på is, ryms under låga balkar och genom smala passager, men tar mycket skada när den rammar bilar, stenar, tunnor och monster.
+- **Sportbil** – allround.
+- **Stor** – plöjer genom bilar, stenar, tunnor och monster nästan utan skada, men halkar länge, landar hårt och slår i låga balkar.
+
+Vinterbacken och Vulkanberget gynnar den lilla bilen, Ökenkanjonen och Midnattsbacken den stora.
 
 ## Teknik
 
