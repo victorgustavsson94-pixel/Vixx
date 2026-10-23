@@ -4,7 +4,9 @@ Ett 3D-mobilspel där en bil rullar nerför en backe och ska ta sig förbi hinde
 
 Varje krock syns på bilen: plåten bucklas där den träffas, stötfångare, speglar, dörrar, huv och till och med hjul kan slitas loss och flyga iväg, vindrutan spricker och krossas, och motorn börjar ryka och brinna. Vid 100 % skada voltar bilen i slow motion och rundan är slut.
 
-`klassisk.html` är den första 2D-versionen.
+Välj mellan liten bil (kvick men skör), sportbil och stor bil (tålig men trög).
+
+Inspirerat av BeamNG-klippen på YouTube-kanalen Monster Chases. `klassisk.html` är den första 2D-versionen.
 
 ## Spela
 
@@ -19,8 +21,10 @@ Lägg upp det via GitHub Pages (Settings → Pages → branch) så kan du öppna
 | 0 m    | Bilar i vägen       | Kör om; vissa byter fil                    |
 | 0 m    | Rullande stenblock  | Studsar mellan vägkanterna                 |
 | 50 m   | Snurrande hammare   | Tajma passagen eller ta ytterkanten        |
+| 80 m   | Jättegupp           | Bilen flyger – för hård landning ger skada |
 | 100 m  | Oljefläckar         | Ingen krock, men bilen sladdar en stund    |
 | 150 m  | Glidande mur        | Hitta luckan som glider fram och tillbaka  |
+| 180 m  | Jättehammare        | Slår ner tvärs över vägen, kör när den är uppe |
 | 220 m  | Pendelklinga        | Svänger över vägen från en portal          |
 | 300 m  | Krossväggar         | Kör igenom när väggarna är öppna           |
 

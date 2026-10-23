@@ -92,6 +92,15 @@
   .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #8d2414; }
   .btn:focus-visible { outline: 3px solid var(--hazard); outline-offset: 3px; }
   .hint { font-size: 13px; color: var(--muted); }
+  .pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .opt {
+    font: 800 15px/1.2 var(--body); color: var(--paper); text-align: left; cursor: pointer;
+    background: rgba(255,247,230,0.06); border: 2px solid rgba(255,247,230,0.25); border-radius: 6px; padding: 8px 9px;
+  }
+  .opt small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .opt[aria-checked="true"] { background: var(--hazard); color: var(--ink); border-color: var(--hazard); }
+  .opt[aria-checked="true"] small { color: var(--ink); }
+  .opt:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .stats div { background: rgba(255,247,230,0.06); border-top: 3px solid var(--hazard); padding: 8px 10px; }
   .stats span { display: block; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
@@ -127,13 +136,20 @@
   <div class="screen" id="menu">
     <span class="sign">⚠ Brant lutning 11 %</span>
     <h1>Döds&shy;backen</h1>
-    <p>Bilen rullar nerför backen och går fortare ju längre du kommer. Dra med fingret för att styra. Varje smäll bucklar bilen och slår loss delar. Vid 100 % skada är den skrot.</p>
+    <p>Bilen rullar nerför backen och går fortare ju längre du kommer. Dra med fingret för att styra. Varje smäll bucklar bilen och slår loss delar. Vid 100 % är den skrot.</p>
+    <div class="pick" role="radiogroup" aria-label="Välj bil">
+      <button class="opt" id="vSmall" data-v="small" role="radio" aria-checked="false">Liten<small>Kvick men skör</small></button>
+      <button class="opt" id="vSport" data-v="sport" role="radio" aria-checked="true">Sportbil<small>Mitt emellan</small></button>
+      <button class="opt" id="vBig" data-v="big" role="radio" aria-checked="false">Stor<small>Tålig men trög</small></button>
+    </div>
     <ul class="obstacles">
       <li><b>0 m</b> Bilar i vägen</li>
       <li><b>0 m</b> Rullande stenblock</li>
       <li><b>60 m</b> Snurrande hammare</li>
+      <li><b>80 m</b> Jättegupp</li>
       <li><b>100 m</b> Oljefläckar</li>
       <li><b>150 m</b> Glidande mur</li>
+      <li><b>180 m</b> Jättehammare</li>
       <li><b>220 m</b> Pendelklinga</li>
       <li><b>300 m</b> Krossväggar</li>
     </ul>
@@ -247,6 +263,11 @@
   const hazardTex = canvasTex(128, 32, (g, w, h) => {
     g.fillStyle = '#ffc21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1b1d21';
     for (let x = -h; x < w + h; x += 32) { g.beginPath(); g.moveTo(x, h); g.lineTo(x + 16, h); g.lineTo(x + 16 + h, 0); g.lineTo(x + h, 0); g.fill(); }
+  }, true);
+  const bulgeTex = canvasTex(256, 128, (g, w, h) => {
+    g.fillStyle = '#3d4149'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#ffc21a';
+    for (let x = 16; x < w; x += 56) { g.beginPath(); g.moveTo(x, h * 0.75); g.lineTo(x + 20, h * 0.25); g.lineTo(x + 40, h * 0.75); g.lineTo(x + 30, h * 0.75); g.lineTo(x + 20, h * 0.5); g.lineTo(x + 10, h * 0.75); g.fill(); }
   }, true);
   const softTex = canvasTex(64, 64, (g, w) => {
     const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
@@ -426,7 +447,22 @@
   }
   const hasPart = (c, n) => c.parts[n] && c.parts[n].parent === c.g;
 
+  // ---------- Fordon ----------
+  const VEHICLES = {
+    small: { scale: 0.8, color: 0x2f9be0, armor: 1.35, steer: 9.5, speed: 1.05 },
+    sport: { scale: 1, color: 0xe8452c, armor: 1, steer: 7, speed: 1 },
+    big: { scale: 1.35, color: 0x3a7d44, armor: 0.62, steer: 4.5, speed: 0.93 },
+  };
+  let vehicle = 'sport', VEH = VEHICLES.sport, SC = 1;
+  const topH = () => 1.4 * SC + player.y;
+  for (const b of document.querySelectorAll('.opt')) b.addEventListener('click', () => {
+    vehicle = b.dataset.v;
+    for (const o of document.querySelectorAll('.opt')) o.setAttribute('aria-checked', String(o === b));
+    if (state === 'menu') reset();
+  });
+
   // ---------- Spelstatus ----------
+  let seen = new Set();
   let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, timeScale, obstacles, nextSpawn, nextSign, lastKind, inv, wreckT;
   let best = 0;
   try { best = Number(localStorage.getItem('dodsbacken3d.best')) || 0; } catch (e) {}
@@ -441,20 +477,23 @@
   }
   function reset() {
     clearWorld();
-    car = buildCar(0xe8452c, true);
+    VEH = VEHICLES[vehicle]; SC = VEH.scale; CR = 0.95 * SC;
+    car = buildCar(VEH.color, true);
+    car.g.scale.setScalar(SC);
     track.add(car.g);
-    player = { x: 0, z: 0, tx: 0, kx: 0, yaw: 0, yawKick: 0, wreck: null };
+    player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0, wreck: null };
     dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; timeScale = 1; inv = 0; wreckT = 0;
-    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = '';
+    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set();
     for (const s of scenery) s.position.z = s.position.z % 252;
   }
 
   const meters = () => Math.floor(dist);
-  const targetSpeed = () => 22 + Math.min(26, dist * 0.03);
+  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed;
 
   // ---------- Kollision (i vägplanet x/z) ----------
-  function carCircles() { return [{ x: player.x, z: player.z - 1.1 }, { x: player.x, z: player.z + 1.1 }]; }
-  const CR = 0.95;
+  function carCircles() { return [{ x: player.x, z: player.z - 1.1 * SC }, { x: player.x, z: player.z + 1.1 * SC }]; }
+  let CR = 0.95;
+  function groundAt(x, z) { let g = 0; for (const o of obstacles) if (o.ground) g = Math.max(g, o.ground(x, z)); return g; }
   function hitRect(x, z, w, d) {
     for (const c of carCircles()) {
       const px = clamp(c.x, x - w / 2, x + w / 2), pz = clamp(c.z, z - d / 2, z + d / 2);
@@ -514,7 +553,7 @@
         return lanes.map((lx, i) => obstacle('traffic', z - i * rand(6, 14), (o, g) => {
           o.car = buildCar(pick([0x2f6fdb, 0xf2f2ee, 0x7b3fb8, 0x1f9e8a, 0xe07b1a, 0x333840]), false);
           g.add(o.car.g);
-          Object.assign(o, { x: lx, tx: lx, v: rand(7, 13), kx: 0, spin: 0, yaw: 0, switchAt: Math.random() < 0.5 ? rand(0.8, 2.5) : Infinity, age: 0 });
+          Object.assign(o, { hitH: 1.45, x: lx, tx: lx, v: rand(7, 13), kx: 0, spin: 0, yaw: 0, switchAt: Math.random() < 0.5 ? rand(0.8, 2.5) : Infinity, age: 0 });
           o.update = dt => {
             o.age += dt; o.z -= o.v * dt;
             if (o.age > o.switchAt) { o.switchAt = Infinity; o.tx = LANES[clamp(LANES.indexOf(o.tx) + (Math.random() < 0.5 ? -1 : 1), 0, 3)]; }
@@ -542,7 +581,7 @@
           const r = rand(0.9, 1.4), dir = Math.random() < 0.5 ? -1 : 1;
           const rock = mk(new THREE.IcosahedronGeometry(r, 1), M.stone, g, 0, r, 0);
           o.dispose = () => rock.geometry.dispose();
-          Object.assign(o, { x: -dir * (ROAD_HALF - r - 0.3), r, vx: dir * rand(5, 8) });
+          Object.assign(o, { hitH: r * 2, x: -dir * (ROAD_HALF - r - 0.3), r, vx: dir * rand(5, 8) });
           o.update = dt => {
             o.x += o.vx * dt; o.z -= 3 * dt;
             if (Math.abs(o.x) > ROAD_HALF - o.r) { o.vx *= -1; o.x = clamp(o.x, -ROAD_HALF + o.r, ROAD_HALF - o.r); }
@@ -565,7 +604,7 @@
           const arm = mk(G.arm, M.wood, rot, L / 2, 0, 0); arm.scale.x = L;
           const head = mk(G.head, M.steel, rot, L, 0, 0); head.rotation.x = Math.PI / 2;
           for (const s of [-0.75, 0.75]) { const b = mk(G.band, M.hazard, rot, L, 0, s); b.rotation.x = Math.PI / 2; }
-          Object.assign(o, { px, L, a: rand(0, 6.28), w: (Math.random() < 0.5 ? -1 : 1) * rand(1.5, 2.2) });
+          Object.assign(o, { hitH: 2, px, L, a: rand(0, 6.28), w: (Math.random() < 0.5 ? -1 : 1) * rand(1.5, 2.2) });
           o.update = dt => { o.a += o.w * dt; rot.rotation.y = o.a; g.position.z = o.z; };
           o.hit = () => {
             const ex = o.px + Math.cos(o.a) * o.L, ez = o.z - Math.sin(o.a) * o.L;
@@ -584,7 +623,7 @@
           o.x = pick(LANES); g.position.x = o.x;
           o.update = () => {};
           o.hit = () => {
-            if (!o.done && Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5) { o.done = true; slip = 1.5; beep(220, 0.35, 'sawtooth', 0.05, -150); }
+            if (!o.done && !player.air && Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5) { o.done = true; slip = 1.5; beep(220, 0.35, 'sawtooth', 0.05, -150); }
             return null;
           };
         })];
@@ -595,7 +634,7 @@
       make(z) {
         return [obstacle('gate', z, (o, g) => {
           const L = mk(G.unit, M.hazard, g, 0, 0.65, 0), R = mk(G.unit, M.hazard, g, 0, 0.65, 0);
-          Object.assign(o, { gap: 4.6, amp: ROAD_HALF - 2.3 - 0.5, w: rand(0.9, 1.5), ph: rand(0, 6.28) });
+          Object.assign(o, { hitH: 1.3, gap: 4.6, amp: ROAD_HALF - 2.3 - 0.5, w: rand(0.9, 1.5), ph: rand(0, 6.28) });
           const rects = () => {
             const c = o.amp * Math.sin(t * o.w + o.ph), l = c - o.gap / 2, r = c + o.gap / 2;
             return [[(-ROAD_HALF + l) / 2, l + ROAD_HALF], [(r + ROAD_HALF) / 2, ROAD_HALF - r]];
@@ -627,8 +666,71 @@
           o.update = dt => { o.th = o.amp * Math.sin(t * o.w + o.ph); piv.rotation.z = o.th; holder.rotation.z += 9 * dt; g.position.z = o.z; };
           o.hit = () => {
             const bx = Math.sin(o.th) * 8.4, by = 10.5 - Math.cos(o.th) * 8.4;
-            if (by - 1.5 < 1.35 && Math.abs(bx - player.x) < 0.95 + 1.3 * Math.min(1, (1.35 - (by - 1.5)) / 0.6 + 0.4) && Math.abs(o.z - player.z) < 2.2)
+            if (by - 1.5 < topH() && Math.abs(bx - player.x) < CR + 1.3 * Math.min(1, (topH() - (by - 1.5)) / 0.6 + 0.4) && Math.abs(o.z - player.z) < 2.2 * SC)
               return { x: bx, z: o.z, y: 1.3, power: 26, top: true };
+            return null;
+          };
+        })];
+      }
+    },
+    bulge: {
+      unlock: 80, weight: 2,
+      make(z) {
+        return [obstacle('bulge', z, (o, g) => {
+          const H = rand(1.5, 2.3), L = rand(12, 16), W = ROAD_HALF * 2 + 1.4;
+          const prof = lz => Math.abs(lz) < L / 2 ? H * 0.5 * (1 + Math.cos(2 * Math.PI * lz / L)) : 0;
+          const geo = new THREE.PlaneGeometry(W, L, 1, 28); geo.rotateX(-Math.PI / 2);
+          const a = geo.attributes.position;
+          for (let i = 0; i < a.count; i++) a.setY(i, prof(a.getZ(i)) + 0.02);
+          geo.computeVertexNormals();
+          const m = mk(geo, new THREE.MeshStandardMaterial({ map: bulgeTex, roughness: 0.85 }), g, 0, 0, 0, false);
+          m.receiveShadow = true;
+          // Sidoväggar så gupet inte ser ihåligt ut
+          for (const s of [-1, 1]) {
+            const shape = new THREE.Shape(); shape.moveTo(-L / 2, 0);
+            for (let i = 0; i <= 28; i++) { const lz = -L / 2 + (L * i) / 28; shape.lineTo(lz, prof(lz)); }
+            const side = mk(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: 0x2b2e34, side: THREE.DoubleSide }), g, s * W / 2, 0, 0, false);
+            side.rotation.y = Math.PI / 2;
+          }
+          o.dispose = () => { geo.dispose(); m.material.dispose(); };
+          o.ground = (x, zz) => Math.abs(x) < W / 2 ? prof(zz - o.z) : 0;
+          o.update = () => {}; o.hit = () => null;
+        })];
+      }
+    },
+    slam: {
+      unlock: 180, weight: 2.5,
+      make(z) {
+        return [obstacle('slam', z, (o, g) => {
+          const s = Math.random() < 0.5 ? -1 : 1, px = s * (ROAD_HALF + 1.6), L = ROAD_HALF * 2 + 0.6, PY = 1.3;
+          const base = mk(G.unit, M.steel, g, px, 1.2, 0); base.scale.set(1.6, 2.4, 2.2);
+          const piv = new THREE.Group(); piv.position.set(px, PY, 0); g.add(piv);
+          const arm = mk(G.unit, M.wood, piv, 0, L / 2, 0); arm.scale.set(0.55, L, 0.55);
+          const head = mk(new THREE.CylinderGeometry(1.3, 1.3, 3.4, 18), M.steel, piv, 0, L, 0); head.rotation.x = Math.PI / 2;
+          for (const zz of [-1.25, 1.25]) { const b = mk(new THREE.CylinderGeometry(1.33, 1.33, 0.5, 18), M.hazard, piv, 0, L, zz); b.rotation.x = Math.PI / 2; }
+          Object.assign(o, { s, px, L, P: rand(2.6, 3.4), ph: rand(0, 3), k: 0, down: false });
+          o.th = () => o.s * (Math.PI / 2) * o.k;
+          o.update = () => {
+            const u = ((t + o.ph) % o.P) / o.P;
+            const k = u < 0.13 ? (u / 0.13) ** 2 : u < 0.4 ? 1 : u < 0.78 ? 1 - ((u - 0.4) / 0.38) ** 0.8 : 0;
+            if (k >= 1 && !o.down) {
+              const near = Math.abs(o.z - player.z);
+              for (let i = 0; i < 8; i++) smoke(new V3(px - s * rand(2, L), 0.3, o.z + rand(-1.5, 1.5)), false);
+              if (near < 45) { shake = Math.max(shake, 0.35 * (1 - near / 45)); beep(70, 0.25, 'sine', 0.1 * (1 - near / 45), -30); }
+            }
+            o.down = k >= 1; o.k = k; piv.rotation.z = o.th();
+            g.position.z = o.z;
+          };
+          o.hit = () => {
+            const th = o.th(), sn = -Math.sin(th), cs = Math.cos(th);
+            const hx = o.px + sn * o.L, hy = PY + cs * o.L;
+            if (Math.abs(hx - player.x) < 1.3 + CR && hy - 1.3 < topH() && Math.abs(o.z - player.z) < 1.7 + 2.1 * SC)
+              return { x: hx, z: o.z, y: 1.3, power: 34, top: true };
+            if (Math.abs(sn) > 0.05) {
+              const d = (player.x - o.px) / sn;
+              if (d > 0 && d < o.L && PY + cs * d - 0.3 < topH() && Math.abs(o.z - player.z) < 0.3 + 2.1 * SC)
+                return { x: player.x, z: o.z, y: 1.3, power: 24, top: true };
+            }
             return null;
           };
         })];
@@ -645,7 +747,7 @@
             for (let k = 0; k < 3; k++) for (let j = 0; j < 2; j++) { const sp = mk(G.spike, M.bright, grp, -s * 0.3, 0.6 + j * 1.1, -0.7 + k * 0.7); sp.rotation.z = s * Math.PI / 2; }
             return { s, grp, block, stripe };
           });
-          Object.assign(o, { w: rand(1.8, 2.5), ph: rand(0, 6.28) });
+          Object.assign(o, { hitH: 2.4, w: rand(1.8, 2.5), ph: rand(0, 6.28) });
           o.bw = () => { const c = Math.pow(0.5 + 0.5 * Math.sin(t * o.w + o.ph), 1.6); return ROAD_HALF * (0.08 + 0.92 * c); };
           o.update = () => {
             const bw = o.bw();
@@ -698,14 +800,14 @@
   function spawn() {
     const m = -nextSpawn;
     const avail = Object.entries(KINDS).filter(([k, d]) => m >= d.unlock && k !== lastKind);
-    const fresh = avail.find(([, d]) => d.unlock > 0 && m < d.unlock + 30);
+    const fresh = avail.find(([k, d]) => d.unlock > 0 && m < d.unlock + 40 && !seen.has(k));
     let chosen;
-    if (fresh && !obstacles.some(o => o.kind === fresh[0])) chosen = fresh;
+    if (fresh) chosen = fresh;
     else {
       let r = Math.random() * avail.reduce((s, [, d]) => s + d.weight, 0);
       chosen = avail.find(([, d]) => (r -= d.weight) < 0) || avail[0];
     }
-    lastKind = chosen[0];
+    lastKind = chosen[0]; seen.add(lastKind);
     obstacles.push(...chosen[1].make(nextSpawn));
     const gap = Math.max(36, 66 - m * 0.035) + (chosen[0] === 'traffic' ? 14 : 0);
     if (Math.random() < 0.55) obstacles.push(...makeCoins(nextSpawn - gap * 0.45));
@@ -739,9 +841,9 @@
   function onHit(o, h) {
     if (o.cool > 0 || inv > 0 || player.wreck) return;
     o.cool = 1.2; inv = 0.3;
-    const sev = h.power * (0.45 + speed / 50);
+    const sev = h.power * (0.45 + speed / 50) * VEH.armor;
     damage = Math.min(100, damage + sev);
-    const lx = clamp(h.x - player.x, -0.95, 0.95), lz = clamp(h.z - player.z, -2.15, 2.15), ly = h.y;
+    const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - player.y) / SC, 0.3, 1.4);
     const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : new V3(-lx, -0.15, -lz * 0.7).normalize();
     dent(car, local(lx, ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
 
@@ -761,7 +863,7 @@
       glass(track.worldToLocal(car.parts.wind.getWorldPosition(new V3())), 26);
     }
 
-    const contact = new V3(h.x, ly, h.z);
+    const contact = new V3(h.x, h.y, h.z);
     sparks(contact, 22); smoke(contact, false, 4);
     player.kx += Math.sign(player.x - h.x || (Math.random() - 0.5)) * (4 + sev * 0.22);
     player.yawKick += rand(-1, 1) * 0.04 * sev;
@@ -772,6 +874,24 @@
     try { navigator.vibrate && navigator.vibrate(60 + sev * 4); } catch (e) {}
     popup(damage >= 100 ? 'TOTALKVADD!' : `KRASCH +${Math.round(sev)} %`);
     if (damage >= 100) wreck(h);
+  }
+
+  function landing(impact) {
+    shake = Math.max(shake, 0.25);
+    sparks(new V3(player.x, 0.1, player.z), 14, 6);
+    crunch(0.12 + impact * 0.01);
+    if (impact < 9 || player.wreck) return;
+    const sev = (impact - 9) * 3.4 * VEH.armor;
+    damage = Math.min(100, damage + sev);
+    dent(car, local(rand(-0.5, 0.5), 0.35, -2.0), new V3(0, 0.55, 0.85).normalize(), 0.15 + sev * 0.02, 1.2 + sev * 0.03);
+    dent(car, local(0, 1.4, 0.2), new V3(0, -1, 0), 0.05 + sev * 0.008, 1.4);
+    const side = Math.random() < 0.5 ? 'L' : 'R';
+    if (impact > 12) detach(car, 'bumperF', new V3(side === 'R' ? 1 : -1, 0, -1), -speed * 0.75);
+    if (impact > 14 && Math.random() < 0.5) detach(car, 'wheelF' + side, new V3(side === 'R' ? 1 : -1, 0, 0), -speed * 0.75);
+    speed *= 0.8;
+    try { navigator.vibrate && navigator.vibrate(50 + sev * 4); } catch (e) {}
+    popup(damage >= 100 ? 'TOTALKVADD!' : `HÅRD LANDNING +${Math.round(sev)} %`);
+    if (damage >= 100) wreck({ x: player.x + rand(-1, 1) });
   }
 
   function wreck(h) {
@@ -848,7 +968,7 @@
     if (!player.wreck) {
       if (state !== 'over') { dist += speed * dt; player.z = -dist; }
       const prev = player.x;
-      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : 7)) + player.kx * dt;
+      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer)) + player.kx * dt;
       player.tx += player.kx * dt * 0.8;
       player.kx *= Math.pow(0.05, dt);
       if (slip > 0) { player.x += Math.sin(t * 13) * 2.2 * dt * 6; slip -= dt; }
@@ -860,12 +980,25 @@
       const fl = hasPart(car, 'wheelFL'), fr = hasPart(car, 'wheelFR'), rl = hasPart(car, 'wheelRL'), rr = hasPart(car, 'wheelRR');
       car.roll += ((((fl ? 0 : 1) + (rl ? 0 : 1)) - ((fr ? 0 : 1) + (rr ? 0 : 1))) * 0.09 - car.roll) * Math.min(1, dt * 5);
       car.pitch += ((((fl ? 0 : 1) + (fr ? 0 : 1)) - ((rl ? 0 : 1) + (rr ? 0 : 1))) * -0.06 - car.pitch) * Math.min(1, dt * 5);
-      const bump = state === 'play' ? Math.sin(t * 31) * 0.012 * (speed / 30) : 0;
-      car.g.position.set(player.x, bump - Math.abs(car.roll) * 2 - Math.abs(car.pitch) * 2, player.z);
-      car.g.rotation.set(car.pitch, player.yaw, car.roll);
+      // Höjd: följer marken, eller flyger om marken försvinner snabbare än tyngdkraften drar.
+      const gY = groundAt(player.x, player.z);
+      if (!player.air) {
+        const nv = (gY - player.y) / Math.max(dt, 1e-4);
+        if (nv < player.vy - 22 * dt && player.vy > 1) { player.air = true; player.vy -= 22 * dt; player.y += player.vy * dt; }
+        else { player.vy = clamp(nv, -20, 16); player.y = gY; }
+      } else {
+        player.vy -= 22 * dt; player.y += player.vy * dt;
+        if (player.y <= gY) { const imp = -player.vy; player.y = gY; player.vy = 0; player.air = false; if (state === 'play') landing(imp); }
+      }
+      const slopeP = Math.atan2(groundAt(player.x, player.z - 1.5) - groundAt(player.x, player.z + 1.5), 3);
+      const airP = player.air ? clamp(player.vy * 0.025, -0.35, 0.3) : slopeP;
+      car.airPitch = (car.airPitch || 0) + (airP - (car.airPitch || 0)) * Math.min(1, dt * 8);
+      const bump = state === 'play' && !player.air ? Math.sin(t * 31) * 0.012 * (speed / 30) : 0;
+      car.g.position.set(player.x, player.y + bump - (Math.abs(car.roll) + Math.abs(car.pitch)) * 2 * SC, player.z);
+      car.g.rotation.set(car.pitch + car.airPitch, player.yaw, car.roll);
       for (const w of ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR']) if (hasPart(car, w)) { car.parts[w].rotation.x -= speed * dt / 0.4; if (w[5] === 'F') car.parts[w].rotation.y = clamp(-vx * 0.05, -0.5, 0.5); }
       // Gnistor där hjul saknas
-      if (state === 'play') for (const [w, x, z] of [['wheelFL', -0.9, -1.35], ['wheelFR', 0.9, -1.35], ['wheelRL', -0.9, 1.35], ['wheelRR', 0.9, 1.35]])
+      if (state === 'play' && !player.air) for (const [w, x, z] of [['wheelFL', -0.9, -1.35], ['wheelFR', 0.9, -1.35], ['wheelRL', -0.9, 1.35], ['wheelRR', 0.9, 1.35]])
         if (!hasPart(car, w) && Math.random() < 0.8) sparks(carPoint(x, 0.05, z), 2, 4);
     } else {
       const w = player.wreck;
@@ -896,7 +1029,7 @@
     for (const o of obstacles) {
       o.cool = Math.max(0, o.cool - dt);
       o.update(dt);
-      if (state === 'play') { const h = o.hit(); if (h) onHit(o, h); }
+      if (state === 'play' && !(o.hitH !== undefined && player.y > o.hitH)) { const h = o.hit(); if (h) onHit(o, h); }
     }
     obstacles = obstacles.filter(o => { if (o.z > player.z + 30) { o.remove(); return false; } return true; });
 
@@ -928,8 +1061,8 @@
     for (const s of scenery) if (s.position.z > player.z + 25) { s.position.z -= 252; s.position.x = (s.position.x > 0 ? 1 : -1) * (9.5 + Math.random() * 28); }
 
     // Kamera
-    const camLocal = new V3(player.x * 0.6, 3.7 + (player.wreck ? 2 : 0), player.z + 8.6);
-    const look = new V3(player.x * 0.8, 0.8, player.z - 7);
+    const camLocal = new V3(player.x * 0.6, 3.7 * (0.75 + SC * 0.25) + player.y * 0.6 + (player.wreck ? 2 : 0), player.z + 8.6 * (0.8 + SC * 0.2));
+    const look = new V3(player.x * 0.8, 0.8 + player.y * 0.7, player.z - 7);
     const camW = track.localToWorld(camLocal), lookW = track.localToWorld(look);
     camera.position.lerp(camW, Math.min(1, rdt * (player.wreck ? 3 : 10)));
     if (shake > 0) camera.position.add(rv(shake * 0.5));
@@ -961,7 +1094,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__game = { get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; } };
+  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; } };
 })();
 </script>
 <!-- GAME END -->
