@@ -1,35 +1,55 @@
 # Dödsbacken
 
-Ett 3D-mobilspel där en bil rullar nerför en backe och ska ta sig förbi hinder. Bilen går fortare ju längre man kommer.
+Ett 3D-mobilspel där en bil ska ta sig nerför en backe full av hinder. Det finns inga liv: bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra, men den rullar alltid vidare. Frågan är hur mycket bil som är kvar i mål.
 
-Målet ligger 1000 meter ner. Det finns inga liv – i stället går bilen sönder mer och mer: plåten bucklas där den träffas, stötfångare, speglar, dörrar, huv och hjul slits loss, vindrutan spricker och krossas, och motorn ryker, brinner och hackar. Ju trasigare bilen är desto långsammare och vingligare går den, men den rullar alltid vidare. I mål visas bilens skick, tiden och hur många delar som tappats.
-
-Välj mellan liten bil (kvick men skör), sportbil och stor bil (tålig men trög).
-
-Inspirerat av BeamNG-klippen på YouTube-kanalen Monster Chases. `klassisk.html` är den första 2D-versionen.
+Inspirerat av BeamNG-klippen på YouTube-kanalen Monster Chases.
 
 ## Spela
 
-Öppna `index.html` i mobilens webbläsare. Dra med fingret åt sidorna för att styra. På dator används piltangenterna (P pausar).
+Öppna `index.html` i mobilens webbläsare. Dra med fingret för att styra. På dator: piltangenterna, P pausar.
 
-Lägg upp det via GitHub Pages (Settings → Pages → branch) så kan du öppna det på telefonen och välja "Lägg till på hemskärmen" – då startar det som en app i helskärm.
+## Skador
+
+Plåten bucklas där bilen träffas. Stötfångare, speglar, dörrar, huv, vinge och hjul kan slitas loss och flyga iväg. Vindrutan spricker och krossas, och motorn ryker, brinner och hackar.
+
+## Banor och stjärnor
+
+| Bana            | Längd  | Kräver | Speciellt                                  |
+|-----------------|--------|--------|--------------------------------------------|
+| Sommarbacken    | 800 m  | –      | De första hindren                          |
+| Vinterbacken    | 1000 m | 2 ★    | Isfläckar, pendelklingor                   |
+| Ökenkanjonen    | 1100 m | 5 ★    | Mycket stenblock, alla hinder              |
+| Vulkanberget    | 1200 m | 8 ★    | Lavapölar som bränner bilen                |
+| Midnattsbacken  | 1300 m | 11 ★   | Mörker och strålkastare, snabbast          |
+
+1 ★ för att komma i mål, 2 ★ med minst 40 % av bilen kvar, 3 ★ med minst 75 %.
+
+## Nivåer och upplåsningar
+
+Varje runda ger XP (sträcka, bilens skick, mynt och stjärnor).
+
+| Nivå | Låser upp                                   |
+|------|---------------------------------------------|
+| 1    | Sportbil, lack Röd och Blå                  |
+| 2    | Liten bil, lack Skog, Frontskydd            |
+| 3    | Lack Racing, Grova däck                     |
+| 4    | Stor bil, Rollbur                           |
+| 5    | Lack Flammor, Sidoskydd                     |
+| 6    | Lack Kamouflage, Superfjädring              |
+| 7    | Turbo                                       |
+| 8    | Lack Neon                                   |
+| 9    | Pansarplåt                                  |
+| 10   | Lack Krom                                   |
+| 12   | Lack Guld                                   |
+
+Tillbehören syns på bilen och ger en bonus. Frontskydd, rollbur och sidoskydd kan slitas loss under rundan, och då försvinner bonusen.
+
+Framsteg sparas i webbläsaren på enheten.
 
 ## Hinder
 
-| Från   | Hinder              | Hur man klarar det                         |
-|--------|---------------------|--------------------------------------------|
-| 0 m    | Bilar i vägen       | Kör om; vissa byter fil                    |
-| 0 m    | Rullande stenblock  | Studsar mellan vägkanterna                 |
-| 50 m   | Snurrande hammare   | Tajma passagen eller ta ytterkanten        |
-| 80 m   | Jättegupp           | Bilen flyger – för hård landning ger skada |
-| 100 m  | Oljefläckar         | Ingen krock, men bilen sladdar en stund    |
-| 150 m  | Glidande mur        | Hitta luckan som glider fram och tillbaka  |
-| 180 m  | Jättehammare        | Slår ner tvärs över vägen, kör när den är uppe |
-| 220 m  | Pendelklinga        | Svänger över vägen från en portal          |
-| 300 m  | Krossväggar         | Kör igenom när väggarna är öppna           |
-
-Mynt ligger utspridda längs vägen. Rekordet sparas i webbläsaren.
+Bilar i vägen, rullande stenblock, snurrande hammare, jättegupp, olja/is/lava, glidande mur, jättehammare, pendelklinga och krossväggar.
 
 ## Teknik
 
-Allt ligger i `index.html` och använder Three.js (laddas från cdnjs) för 3D. Nya hinder läggs till i objektet `KINDS` i skriptet.
+Allt ligger i `index.html` och använder Three.js (laddas från cdnjs). `klassisk.html` är den första 2D-versionen.

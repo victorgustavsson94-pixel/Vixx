@@ -66,10 +66,69 @@
 
   .screen {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column; justify-content: center; gap: 18px;
-    padding: 24px 22px;
+    display: flex; flex-direction: column; gap: 16px;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+    overflow-y: auto;
     background: linear-gradient(180deg, rgba(27,29,33,0.25), rgba(27,29,33,0.9) 50%);
   }
+  .screen > :first-child { margin-top: auto; }
+  .screen > :last-child { margin-bottom: auto; }
+  .screen h2 { font-family: var(--display); font-weight: 400; font-size: 26px; margin: 0; color: var(--hazard); }
+  .screen h3 { margin: 6px 0 0; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn.alt { background: transparent; border-color: var(--hazard); color: var(--hazard); box-shadow: 0 6px 0 rgba(255,194,26,0.3); font-size: 20px; }
+  .btn.alt:active { box-shadow: 0 2px 0 rgba(255,194,26,0.3); }
+  .lvl { background: rgba(255,247,230,0.07); border-left: 4px solid var(--hazard); padding: 10px 12px; display: grid; gap: 6px; }
+  .lvlTop { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .lvlTop b { font-family: var(--display); font-weight: 400; font-size: 20px; color: var(--hazard); }
+  .lvl .bar { height: 8px; margin: 0; }
+  .lvl .bar i { background: var(--hazard); }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .back { font: 800 15px var(--body); background: none; border: 2px solid rgba(255,247,230,0.3); color: var(--paper); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+  .back:focus-visible, .track:focus-visible, .sw:focus-visible, .acc:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
+  .starsTot { font-weight: 800; color: var(--hazard); font-variant-numeric: tabular-nums; }
+  .list { display: grid; gap: 10px; }
+  .track {
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 10px; text-align: left;
+    padding: 14px; border-radius: 8px; border: 2px solid rgba(255,247,230,0.25); color: var(--paper); cursor: pointer;
+    font-family: var(--body); text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    background: linear-gradient(rgba(27,29,33,0.4), rgba(27,29,33,0.55)), var(--tbg);
+  }
+  .track b { font-family: var(--display); font-weight: 400; font-size: 19px; }
+  .track small { grid-column: 1 / -1; font-size: 13px; line-height: 1.35; }
+  .st { color: var(--hazard); font-size: 18px; letter-spacing: 2px; white-space: nowrap; }
+  .off { color: rgba(255,247,230,0.25); }
+  .track[disabled] { cursor: default; filter: grayscale(0.85); opacity: 0.7; }
+  .screen.bottom { background: linear-gradient(180deg, transparent 32%, rgba(27,29,33,0.94) 50%); }
+  .screen.bottom > .sheet { margin-bottom: 0; }
+  .sheet { display: grid; gap: 10px; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: rgba(255,247,230,0.08); padding: 4px; border-radius: 8px; }
+  .tab { font: 800 14px var(--body); color: var(--paper); background: none; border: 0; border-radius: 6px; padding: 9px 4px; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--hazard); color: var(--ink); }
+  .tab:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
+  .tabBody { max-height: 36vh; overflow-y: auto; }
+  .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .sw {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; text-align: left; cursor: pointer;
+    border: 2px solid rgba(255,247,230,0.2); background: rgba(255,247,230,0.05); color: var(--paper); font: 600 13px/1.2 var(--body);
+  }
+  .sw i { width: 22px; height: 22px; border-radius: 50%; flex: none; background: var(--c); border: 2px solid rgba(255,255,255,0.55); }
+  .sw small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+  .sw[aria-checked="true"] { border-color: var(--hazard); background: rgba(255,194,26,0.16); }
+  .sw[disabled], .opt[disabled], .acc[disabled] { opacity: 0.5; cursor: default; }
+  .accs { display: grid; gap: 6px; }
+  .acc {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 10px; padding: 8px 10px; text-align: left; cursor: pointer;
+    border-radius: 6px; border: 2px solid rgba(255,247,230,0.2); background: rgba(255,247,230,0.05); color: var(--paper); font: 800 14px var(--body);
+  }
+  .acc small { font-weight: 400; font-size: 12px; color: var(--muted); }
+  .acc em { grid-row: 1 / span 2; grid-column: 2; font-style: normal; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 4px; background: rgba(255,247,230,0.12); white-space: nowrap; }
+  .acc[aria-pressed="true"] { border-color: var(--ok); }
+  .acc[aria-pressed="true"] em { background: var(--ok); color: var(--ink); }
+  .starsBig { font-size: 42px; color: var(--hazard); letter-spacing: 6px; line-height: 1; text-shadow: 2px 2px 0 var(--signal); }
+  .starsBig .off { text-shadow: none; }
+  .unlocks { background: var(--hazard); color: var(--ink); padding: 10px 12px; border-radius: 6px; display: grid; gap: 3px; font-size: 14px; }
+  .unlocks b { font-family: var(--display); font-weight: 400; font-size: 18px; }
   .screen h1 {
     font-family: var(--display); font-weight: 400; font-size: clamp(40px, 13vw, 62px); line-height: 0.95;
     margin: 0; color: var(--hazard); text-shadow: 4px 4px 0 var(--signal); text-wrap: balance;
@@ -81,9 +140,6 @@
     border: 3px solid var(--ink); outline: 2px solid var(--hazard); transform: rotate(-2deg);
   }
   .screen p { margin: 0; font-size: 16px; line-height: 1.45; max-width: 36ch; }
-  .obstacles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
-  .obstacles li { font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
-  .obstacles li b { color: var(--hazard); font-family: var(--display); font-weight: 400; font-size: 12px; min-width: 3.2em; }
   .btn {
     font-family: var(--display); font-size: 24px; padding: 14px 20px;
     border: 3px solid var(--ink); border-radius: 8px; background: var(--signal); color: var(--paper);
@@ -136,45 +192,64 @@
   <div class="screen" id="menu">
     <span class="sign">⚠ Brant lutning 11 %</span>
     <h1>Döds&shy;backen</h1>
-    <p>Ta dig 1000 meter nerför backen till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto långsammare och vingligare går den. Hur mycket bil har du kvar när du rullar i mål?</p>
-    <div class="pick" role="radiogroup" aria-label="Välj bil">
-      <button class="opt" id="vSmall" data-v="small" role="radio" aria-checked="false">Liten<small>Kvick men skör</small></button>
-      <button class="opt" id="vSport" data-v="sport" role="radio" aria-checked="true">Sportbil<small>Mitt emellan</small></button>
-      <button class="opt" id="vBig" data-v="big" role="radio" aria-checked="false">Stor<small>Tålig men trög</small></button>
+    <div class="lvl">
+      <div class="lvlTop"><b id="lvlNum">Nivå 1</b><span id="lvlXp">0 / 100 XP</span></div>
+      <div class="bar"><i id="lvlBar"></i></div>
+      <span class="hint" id="lvlNext"></span>
     </div>
-    <ul class="obstacles">
-      <li><b>0 m</b> Bilar i vägen</li>
-      <li><b>0 m</b> Rullande stenblock</li>
-      <li><b>60 m</b> Snurrande hammare</li>
-      <li><b>80 m</b> Jättegupp</li>
-      <li><b>100 m</b> Oljefläckar</li>
-      <li><b>150 m</b> Glidande mur</li>
-      <li><b>180 m</b> Jättehammare</li>
-      <li><b>220 m</b> Pendelklinga</li>
-      <li><b>300 m</b> Krossväggar</li>
-    </ul>
-    <button class="btn" id="startBtn">Kör!</button>
-    <span class="hint" id="bestMenu">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span>
+    <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Kör banor för att tjäna XP, gå upp i nivå och låsa upp nya banor, lacker och tillbehör.</p>
+    <div class="row2"><button class="btn" id="playBtn">Kör</button><button class="btn alt" id="garageBtn">Garage</button></div>
+    <span class="hint">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span>
+  </div>
+
+  <div class="screen" id="tracks" hidden>
+    <div class="head"><button class="back" id="tracksBack">‹ Meny</button><span class="starsTot" id="starsTot">★ 0 / 15</span></div>
+    <h2>Välj bana</h2>
+    <div class="list" id="trackList"></div>
+    <span class="hint">1 ★ för att komma i mål, 2 ★ med minst 40 % kvar av bilen, 3 ★ med minst 75 %.</span>
+  </div>
+
+  <div class="screen bottom" id="garage" hidden>
+    <div class="sheet">
+      <div class="head"><h2>Garage</h2><button class="back" id="garageBack">Klar</button></div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="veh" aria-selected="true">Bil</button>
+        <button class="tab" role="tab" data-tab="skin" aria-selected="false">Lack</button>
+        <button class="tab" role="tab" data-tab="acc" aria-selected="false">Tillbehör</button>
+      </div>
+      <div class="tabBody">
+        <div class="pick" id="gVeh" data-panel="veh" role="radiogroup" aria-label="Bil"></div>
+        <div class="swatches" id="gSkin" data-panel="skin" role="radiogroup" aria-label="Lack" hidden></div>
+        <div class="accs" id="gAcc" data-panel="acc" hidden></div>
+      </div>
+    </div>
   </div>
 
   <div class="screen" id="over" hidden>
-    <span class="sign">🏁 I mål</span>
+    <span class="sign" id="ovSign">🏁 I mål</span>
     <h1 id="ovTitle">Knappt i mål</h1>
+    <div class="starsBig" id="ovStars" aria-label="Stjärnor"></div>
     <div class="stats">
       <div><span>Bilens skick</span><strong id="ovCond">0 %</strong></div>
       <div><span>Tid</span><strong id="ovTime">0 s</strong></div>
       <div><span>Tappade delar</span><strong id="ovParts">0</strong></div>
       <div><span>Mynt</span><strong id="ovCoins">0</strong></div>
     </div>
-    <span class="newbest" id="ovNew" hidden>Nytt rekord!</span>
-    <span class="hint" id="ovBest"></span>
-    <button class="btn" id="againBtn">Ny bil</button>
+    <div class="lvl">
+      <div class="lvlTop"><b id="ovLvl">Nivå 1</b><span id="ovXp">+0 XP</span></div>
+      <div class="bar"><i id="ovBar"></i></div>
+    </div>
+    <div class="unlocks" id="ovUnlocks" hidden></div>
+    <span class="newbest" id="ovNew" hidden>Nytt rekord på banan!</span>
+    <button class="btn" id="againBtn">Kör igen</button>
+    <div class="row2"><button class="btn alt" id="ovTracks">Banor</button><button class="btn alt" id="ovGarage">Garage</button></div>
   </div>
 
   <div class="screen" id="paused" hidden>
     <span class="sign">Paus</span>
     <h1>Andas</h1>
     <button class="btn" id="resumeBtn">Fortsätt</button>
+    <button class="btn alt" id="quitBtn">Avsluta rundan</button>
   </div>
 
   <div class="screen" id="nogl" hidden>
@@ -229,7 +304,8 @@
   resize();
 
   // ---------- Ljus ----------
-  scene.add(new THREE.HemisphereLight(0xe6f2ff, 0x4f7f3a, 0.8));
+  const hemi = new THREE.HemisphereLight(0xe6f2ff, 0x4f7f3a, 0.8);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff2dd, 1.0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -257,10 +333,26 @@
     g.fillStyle = 'rgba(244,241,234,0.85)';
     for (const x of [64, 128, 192]) g.fillRect(x - 2.5, 0, 5, h / 2);
   }, true);
-  const grassTex = canvasTex(64, 64, (g, w, h) => {
-    g.fillStyle = '#4f8f3a'; g.fillRect(0, 0, w, h / 2); g.fillStyle = '#58993f'; g.fillRect(0, h / 2, w, h / 2);
-    for (let i = 0; i < 200; i++) { g.fillStyle = 'rgba(30,60,20,0.18)'; g.fillRect(Math.random() * w, Math.random() * h, 1, 2); }
+  const groundTex = ([a, b]) => canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = a; g.fillRect(0, 0, w, h / 2); g.fillStyle = b; g.fillRect(0, h / 2, w, h / 2);
+    for (let i = 0; i < 200; i++) { g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(Math.random() * w, Math.random() * h, 1, 2); }
   }, true);
+  const grassTex = groundTex(['#4f8f3a', '#58993f']);
+  const flamesTex = canvasTex(128, 128, (g, w, h) => {
+    g.fillStyle = '#1b1d21'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 9; i++) {
+      const x = i * 15 - 4, top = h * (0.15 + Math.random() * 0.3);
+      for (const [c, s] of [['#e8452c', 1], ['#ff9a2a', 0.7], ['#ffd34d', 0.4]]) {
+        g.fillStyle = c; g.beginPath(); g.moveTo(x, h); g.quadraticCurveTo(x - 6 * s, h - (h - top) * 0.5 * s, x + 8, h - (h - top) * s); g.quadraticCurveTo(x + 18 * s, h - (h - top) * 0.45 * s, x + 16, h); g.fill();
+      }
+    }
+  });
+  const camoTex = canvasTex(128, 128, (g, w, h) => {
+    g.fillStyle = '#6b7448'; g.fillRect(0, 0, w, h);
+    for (const c of ['#3b4529', '#8a8458', '#2a2f1f']) for (let i = 0; i < 9; i++) {
+      g.fillStyle = c; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 8 + Math.random() * 16, 5 + Math.random() * 10, Math.random() * 3, 0, 7); g.fill();
+    }
+  });
   const curbTex = canvasTex(8, 64, (g, w, h) => { g.fillStyle = '#e8452c'; g.fillRect(0, 0, w, h / 2); g.fillStyle = '#f4f1ea'; g.fillRect(0, h / 2, w, h / 2); }, true);
   const hazardTex = canvasTex(128, 32, (g, w, h) => {
     g.fillStyle = '#ffc21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1b1d21';
@@ -306,6 +398,8 @@
     yellow: new THREE.MeshStandardMaterial({ color: 0xffc21a, roughness: 0.5 }),
     gold: new THREE.MeshStandardMaterial({ color: 0xffc83a, roughness: 0.25, metalness: 0.9, emissive: 0x6a4a00, emissiveIntensity: 0.4 }),
     oil: new THREE.MeshStandardMaterial({ color: 0x15161b, roughness: 0.12, metalness: 0.3 }),
+    ice: new THREE.MeshStandardMaterial({ color: 0xcfe9ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
+    lava: new THREE.MeshStandardMaterial({ color: 0xff5a10, emissive: 0xff3a00, emissiveIntensity: 1, roughness: 0.6 }),
     leaf: new THREE.MeshStandardMaterial({ color: 0x2d6a2b, roughness: 0.9, flatShading: true }),
     trunk: new THREE.MeshStandardMaterial({ color: 0x5b3a1f, roughness: 0.9 }),
     sign: new THREE.MeshStandardMaterial({ color: 0x1f6e3a, roughness: 0.6 }),
@@ -325,7 +419,7 @@
     m.position.x = s * (ROAD_HALF + 0.35); m.position.y = 0.09; m.receiveShadow = true; track.add(m); return m;
   });
 
-  const treeGeo = { leaf: new THREE.ConeGeometry(1.7, 4.2, 7), trunk: new THREE.CylinderGeometry(0.25, 0.3, 1.2, 6), rock: new THREE.DodecahedronGeometry(0.9, 0) };
+  const treeGeo = { cactus: new THREE.CylinderGeometry(0.34, 0.4, 3.2, 8), leaf: new THREE.ConeGeometry(1.7, 4.2, 7), trunk: new THREE.CylinderGeometry(0.25, 0.3, 1.2, 6), rock: new THREE.DodecahedronGeometry(0.9, 0) };
   const scenery = [];
   for (let i = 0; i < 60; i++) {
     const g = new THREE.Group();
@@ -333,6 +427,7 @@
     else {
       const t = new THREE.Mesh(treeGeo.trunk, M.trunk); t.position.y = 0.6; g.add(t);
       const l = new THREE.Mesh(treeGeo.leaf, M.leaf); l.position.y = 3.1; g.add(l);
+      g.userData = { leaf: l, trunk: t };
       g.scale.setScalar(0.8 + Math.random() * 0.7);
     }
     const side = i % 2 ? 1 : -1;
@@ -378,9 +473,13 @@
   function hash3(x, y, z) { const s = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719) * 43758.5453; return s - Math.floor(s); }
   function segBox(w, h, d, sw, sh, sd) { const g = new THREE.BoxGeometry(w, h, d, sw, sh, sd); g.userData.orig = Float32Array.from(g.attributes.position.array); return g; }
 
-  function buildCar(color, isPlayer) {
+  function buildCar(color, isPlayer, opt = {}) {
     const g = new THREE.Group();
-    const paint = new THREE.MeshStandardMaterial({ color, roughness: 0.32, metalness: 0.45, flatShading: true });
+    const sk = opt.skin || {}, A = opt.acc || {};
+    const paint = new THREE.MeshStandardMaterial({ color, roughness: sk.rough ?? 0.32, metalness: sk.metal ?? 0.45, flatShading: true });
+    if (sk.map) paint.map = sk.map === 'flames' ? flamesTex : camoTex;
+    if (sk.emissive) { paint.emissive.set(sk.emissive); paint.emissiveIntensity = 0.6; }
+    const stripe = sk.stripe != null ? new THREE.MeshStandardMaterial({ color: sk.stripe, roughness: 0.5, emissive: sk.emissive ? sk.stripe : 0x000000, emissiveIntensity: sk.emissive ? 0.5 : 0 }) : null;
     const parts = {};
     const add = (name, geo, mat, x, y, z, deform = true, parent = g) => {
       const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.userData.deform = deform;
@@ -405,20 +504,55 @@
     add(null, new THREE.BoxGeometry(0.42, 0.12, 0.05), M.tail, -0.6, 0.7, 2.11, false);
     add(null, new THREE.BoxGeometry(0.42, 0.12, 0.05), M.tail, 0.6, 0.7, 2.11, false);
     if (isPlayer) {
-      add(null, new THREE.BoxGeometry(0.34, 0.01, 1.3), M.yellow, 0, 0.04, 0, false, parts.hood);
-      add(null, new THREE.BoxGeometry(0.34, 0.01, 0.75), M.yellow, 0, 0.04, 0, false, parts.trunk);
-      add(null, new THREE.BoxGeometry(0.34, 0.01, 2.0), M.yellow, -0, 0.265, 0, false, parts.cabin);
+      if (stripe) {
+        add(null, new THREE.BoxGeometry(0.34, 0.01, 1.3), stripe, 0, 0.04, 0, false, parts.hood);
+        add(null, new THREE.BoxGeometry(0.34, 0.01, 0.75), stripe, 0, 0.04, 0, false, parts.trunk);
+        add(null, new THREE.BoxGeometry(0.34, 0.01, 2.0), stripe, -0, 0.265, 0, false, parts.cabin);
+      }
       const sp = add('spoiler', new THREE.BoxGeometry(1.7, 0.06, 0.35), M.dark, 0, 1.2, 1.95, false);
       add(null, new THREE.BoxGeometry(0.06, 0.28, 0.2), M.dark, -0.6, -0.15, 0, false, sp);
       add(null, new THREE.BoxGeometry(0.06, 0.28, 0.2), M.dark, 0.6, -0.15, 0, false, sp);
+      buildAccessories(g, parts, A, add);
     }
-    const tireGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.32, 16), hubGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.34, 10);
+    const big = isPlayer && A.tires, wr = big ? 0.47 : 0.4;
+    const tireGeo = new THREE.CylinderGeometry(wr, wr, big ? 0.44 : 0.32, 16), hubGeo = new THREE.CylinderGeometry(0.22, 0.22, big ? 0.46 : 0.34, 10);
     for (const [n, x, z] of [['wheelFL', -0.93, -1.35], ['wheelFR', 0.93, -1.35], ['wheelRL', -0.93, 1.35], ['wheelRR', 0.93, 1.35]]) {
-      const pivot = new THREE.Group(); pivot.position.set(x, 0.4, z); g.add(pivot); parts[n] = pivot;
+      const pivot = new THREE.Group(); pivot.position.set(x * (big ? 1.05 : 1), wr, z); g.add(pivot); parts[n] = pivot;
       const t = new THREE.Mesh(tireGeo, M.tire); t.rotation.z = Math.PI / 2; t.castShadow = true; pivot.add(t);
       const h = new THREE.Mesh(hubGeo, M.hub); h.rotation.z = Math.PI / 2; pivot.add(h);
     }
     return { g, parts, paint, base: new THREE.Color(color), wind: 0, roll: 0, pitch: 0 };
+  }
+
+  // Tillbehör: syns på bilen, ger bonus så länge de sitter kvar och kan slitas loss.
+  const tubeGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 8);
+  function tube(parent, mat, x, y, z, len, axis) {
+    const m = new THREE.Mesh(tubeGeo, mat); m.position.set(x, y, z); m.scale.y = len; m.castShadow = true;
+    if (axis === 'x') m.rotation.z = Math.PI / 2; else if (axis === 'z') m.rotation.x = Math.PI / 2;
+    parent.add(m); return m;
+  }
+  function buildAccessories(g, parts, A, add) {
+    if (A.susp) for (const c of g.children) c.position.y += 0.14;
+    const lift = A.susp ? 0.14 : 0;
+    if (A.bull) {
+      const bb = new THREE.Group(); bb.position.set(0, 0.55 + lift, -2.42); g.add(bb); parts.accBull = bb;
+      for (const x of [-0.6, 0.6]) tube(bb, M.steel, x, 0, 0, 0.75);
+      for (const y of [-0.22, 0.05, 0.3]) tube(bb, M.steel, 0, y, 0, 1.4, 'x');
+    }
+    if (A.cage) {
+      const rc = new THREE.Group(); rc.position.set(0, 1.13 + lift, 0.25); g.add(rc); parts.accCage = rc;
+      for (const z of [-0.9, 0.9]) { for (const x of [-0.8, 0.8]) tube(rc, M.yellow, x, 0.28, z, 0.75); tube(rc, M.yellow, 0, 0.64, z, 1.66, 'x'); }
+      for (const x of [-0.8, 0.8]) tube(rc, M.yellow, x, 0.64, 0, 1.86, 'z');
+    }
+    if (A.side) for (const s of [-1, 1]) add('accSide' + (s < 0 ? 'L' : 'R'), new THREE.BoxGeometry(0.09, 0.26, 3.1), M.steel, s * 1.05, 0.46 + lift, 0, false);
+    if (A.turbo) {
+      add(null, new THREE.BoxGeometry(0.6, 0.16, 0.55), M.dark, 0, 0.1, 0.1, false, parts.hood);
+      for (const x of [-0.45, 0.45]) { const p = add(null, new THREE.CylinderGeometry(0.07, 0.07, 0.4, 8), M.hub, x, 0.38 + lift, 2.25, false); p.rotation.x = Math.PI / 2; }
+    }
+    if (A.armor) {
+      add(null, new THREE.BoxGeometry(1.5, 0.03, 1.0), M.steel, 0, 0.05, 0, false, parts.hood);
+      for (const s of [-1, 1]) add(null, new THREE.BoxGeometry(0.03, 0.34, 1.15), M.steel, s * 0.05, 0, 0, false, parts[s < 0 ? 'doorL' : 'doorR']);
+    }
   }
 
   // Bucklar: trycker in alla hörn nära träffpunkten (bilens lokala koordinater).
@@ -450,28 +584,101 @@
   }
   const hasPart = (c, n) => c.parts[n] && c.parts[n].parent === c.g;
 
-  // ---------- Fordon ----------
+  // ---------- Banor, fordon, lacker, tillbehör ----------
+  const ALL_KINDS = ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum', 'crusher'];
+  const TRACKS = [
+    { id: 'sommar', name: 'Sommarbacken', len: 800, stars: 0, desc: 'Sol, grönt gräs och de första hindren.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
+      kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil',
+      theme: { sky: 0xa9d4f0, fog: [70, 210], ground: ['#4f8f3a', '#58993f'], leaf: 0x2d6a2b, tree: 'cone', stone: 0x8b8577, mount: 0x7d95ad, cap: 0xf2f6fa, hemi: [0xe6f2ff, 0x4f7f3a, 0.8], sun: [0xfff2dd, 1.0] } },
+    { id: 'vinter', name: 'Vinterbacken', len: 1000, stars: 2, desc: 'Snö, isfläckar som får bilen att sladda och pendelklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
+      kinds: ['traffic', 'boulder', 'hammer', 'bulge', 'oil', 'gate', 'slam', 'pendulum'], intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice',
+      theme: { sky: 0xc7d6e4, fog: [50, 180], ground: ['#e8eef3', '#dbe5ed'], leaf: 0x3d6b4e, tree: 'cone', stone: 0x9aa3ab, mount: 0x8c9db0, cap: 0xffffff, hemi: [0xf0f6ff, 0xb8c8d8, 0.85], sun: [0xf4f8ff, 0.95] } },
+    { id: 'oken', name: 'Ökenkanjonen', len: 1100, stars: 5, desc: 'Het sand, kaktusar och massor av stenblock.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
+      kinds: ALL_KINDS, weights: { boulder: 2 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil',
+      theme: { sky: 0xf1c48a, fog: [60, 200], ground: ['#d9a35b', '#cf9750'], leaf: 0x4f8a3a, tree: 'cactus', stone: 0xb5653a, mount: 0xb86b3c, cap: 0xd99a5b, hemi: [0xfff0d8, 0xb07a40, 0.85], sun: [0xffe0b0, 1.15] } },
+    { id: 'vulkan', name: 'Vulkanberget', len: 1200, stars: 8, desc: 'Svart mark och lavapölar som bränner bilen.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
+      kinds: ALL_KINDS, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava',
+      theme: { sky: 0x5a2c22, fog: [40, 170], ground: ['#2b2522', '#342b27'], leaf: 0x2a2522, tree: 'dead', stone: 0x4a3f3a, mount: 0x2e2220, cap: 0xff6a1a, hemi: [0xffb090, 0x301a10, 0.65], sun: [0xffa070, 0.9] } },
+    { id: 'natt', name: 'Midnattsbacken', len: 1300, stars: 11, desc: 'Mörker, strålkastare och alla hinder på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
+      kinds: ALL_KINDS, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil',
+      theme: { sky: 0x0d1530, fog: [30, 150], ground: ['#1f3a22', '#22402a'], leaf: 0x173a1c, tree: 'cone', stone: 0x55524c, mount: 0x1a2440, cap: 0x8a9ab8, hemi: [0x7090d0, 0x101810, 0.35], sun: [0x9ab0ff, 0.3], night: true } },
+  ];
   const VEHICLES = {
-    small: { scale: 0.8, color: 0x2f9be0, armor: 1.35, steer: 9.5, speed: 1.05 },
-    sport: { scale: 1, color: 0xe8452c, armor: 1, steer: 7, speed: 1 },
-    big: { scale: 1.35, color: 0x3a7d44, armor: 0.62, steer: 4.5, speed: 0.93 },
+    small: { name: 'Liten', desc: 'Kvick men skör', lvl: 2, scale: 0.8, armor: 1.35, steer: 9.5, speed: 1.05 },
+    sport: { name: 'Sportbil', desc: 'Mitt emellan', lvl: 1, scale: 1, armor: 1, steer: 7, speed: 1 },
+    big: { name: 'Stor', desc: 'Tålig men trög', lvl: 4, scale: 1.35, armor: 0.62, steer: 4.5, speed: 0.93 },
   };
-  let vehicle = 'sport', VEH = VEHICLES.sport, SC = 1;
+  const SKINS = [
+    { id: 'red', name: 'Röd', lvl: 1, color: 0xe8452c, stripe: 0xffc21a, css: '#e8452c' },
+    { id: 'blue', name: 'Blå', lvl: 1, color: 0x2f6fdb, stripe: 0xf4f1ea, css: '#2f6fdb' },
+    { id: 'green', name: 'Skog', lvl: 2, color: 0x3a7d44, stripe: 0xffc21a, css: '#3a7d44' },
+    { id: 'racing', name: 'Racing', lvl: 3, color: 0xf4f1ea, stripe: 0x2f6fdb, css: 'linear-gradient(90deg,#f4f1ea 35%,#2f6fdb 35% 65%,#f4f1ea 65%)' },
+    { id: 'flames', name: 'Flammor', lvl: 5, color: 0xffffff, map: 'flames', css: 'linear-gradient(0deg,#ff7a1a,#e8452c 35%,#1b1d21 70%)' },
+    { id: 'camo', name: 'Kamouflage', lvl: 6, color: 0xffffff, map: 'camo', css: 'radial-gradient(circle at 30% 30%,#3b4529 30%,#6b7448 31% 55%,#8a8458 56%)' },
+    { id: 'neon', name: 'Neon', lvl: 8, color: 0x7b3fb8, emissive: 0x3a1060, stripe: 0x39ff88, css: 'linear-gradient(90deg,#7b3fb8 60%,#39ff88 60%)' },
+    { id: 'chrome', name: 'Krom', lvl: 10, color: 0xdfe4ea, metal: 0.85, rough: 0.18, css: 'linear-gradient(135deg,#f4f6f8,#8d96a3)' },
+    { id: 'gold', name: 'Guld', lvl: 12, color: 0xffc83a, metal: 0.85, rough: 0.22, stripe: 0x1b1d21, css: 'linear-gradient(135deg,#ffe28a,#c8901a)' },
+  ];
+  const ACCS = [
+    { id: 'bull', name: 'Frontskydd', lvl: 2, desc: 'Smällar framifrån gör 35 % mindre skada. Kan slitas loss.' },
+    { id: 'tires', name: 'Grova däck', lvl: 3, desc: 'Halkar hälften så länge, mjukare landningar.' },
+    { id: 'cage', name: 'Rollbur', lvl: 4, desc: 'Smällar uppifrån gör 40 % mindre skada. Kan slitas loss.' },
+    { id: 'side', name: 'Sidoskydd', lvl: 5, desc: 'Smällar från sidan gör 30 % mindre skada. Kan slitas loss.' },
+    { id: 'susp', name: 'Superfjädring', lvl: 6, desc: 'Hårda landningar gör halva skadan.' },
+    { id: 'turbo', name: 'Turbo', lvl: 7, desc: '8 % högre toppfart.' },
+    { id: 'armor', name: 'Pansarplåt', lvl: 9, desc: 'All skada minskar 15 %, men bilen styr lite trögare.' },
+  ];
+
+  const SAVE_KEY = 'dodsbacken.save.v1';
+  const save = { xp: 0, stars: {}, best: {}, vehicle: 'sport', skin: 'red', acc: {}, track: 'sommar' };
+  try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY)) || {}); } catch (e) {}
+  const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} };
+  const levelFor = xp => { let L = 1; while (xp >= 50 * L * (L + 1)) L++; return L; };
+  const level = () => levelFor(save.xp);
+  const xpRange = L => [50 * (L - 1) * L, 50 * L * (L + 1)];
+  const totalStars = () => Object.values(save.stars).reduce((a, b) => a + b, 0);
+  const trackOpen = T => totalStars() >= T.stars;
+  function unlocksAt(L) {
+    return [
+      ...Object.values(VEHICLES).filter(v => v.lvl === L).map(v => 'Bil: ' + v.name),
+      ...SKINS.filter(x => x.lvl === L).map(x => 'Lack: ' + x.name),
+      ...ACCS.filter(a => a.lvl === L).map(a => a.name),
+    ];
+  }
+  function nextUnlock() {
+    for (let L = level() + 1; L <= 12; L++) { const u = unlocksAt(L); if (u.length) return `Nivå ${L} låser upp: ${u.join(', ')}`; }
+    return 'Allt är upplåst!';
+  }
+
+  let TRACK = TRACKS.find(T => T.id === save.track && trackOpen(T)) || TRACKS[0];
+  let VEH = VEHICLES.sport, SC = 1, ACC = {};
   const topH = () => 1.4 * SC + player.y;
-  for (const b of document.querySelectorAll('.opt')) b.addEventListener('click', () => {
-    vehicle = b.dataset.v;
-    for (const o of document.querySelectorAll('.opt')) o.setAttribute('aria-checked', String(o === b));
-    if (state === 'menu') reset();
-  });
+
+  function applyTheme(T) {
+    const th = T.theme;
+    scene.background.set(th.sky); scene.fog.color.set(th.sky); scene.fog.near = th.fog[0]; scene.fog.far = th.fog[1];
+    hemi.color.set(th.hemi[0]); hemi.groundColor.set(th.hemi[1]); hemi.intensity = th.hemi[2];
+    sun.color.set(th.sun[0]); sun.intensity = th.sun[1];
+    const old = grass.material.map;
+    grass.material.map = groundTex(th.ground); grass.material.map.repeat.set(10, ROAD_LEN / 24); grass.material.needsUpdate = true;
+    if (old && old !== grassTex) old.dispose();
+    M.leaf.color.set(th.leaf); M.stone.color.set(th.stone); M.trunk.color.set(th.tree === 'dead' ? 0x241d1a : 0x5b3a1f);
+    for (const sc of scenery) {
+      const { leaf, trunk } = sc.userData; if (!leaf) continue;
+      leaf.visible = th.tree !== 'dead';
+      leaf.geometry = th.tree === 'cactus' ? treeGeo.cactus : treeGeo.leaf;
+      leaf.position.y = th.tree === 'cactus' ? 1.6 : 3.1;
+      trunk.visible = th.tree !== 'cactus';
+      trunk.scale.y = th.tree === 'dead' ? 3.4 : 1; trunk.position.y = th.tree === 'dead' ? 2 : 0.6;
+    }
+    for (const m of mountains.children) { m.material.color.set(th.mount); m.children[0].material.color.set(th.cap); }
+  }
 
   // ---------- Spelstatus ----------
   let seen = new Set();
   let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, obstacles, nextSpawn, nextSign, lastKind, inv;
-  let best = 0;
-  const FINISH = 1000;
+  let FINISH = TRACK.len;
   let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false;
-  try { best = Number(localStorage.getItem('dodsbacken3d.skick')) || 0; } catch (e) {}
-  if (best) $('bestMenu').textContent = `Bästa skick i mål: ${best} %. Dra med fingret för att styra.`;
 
   function clearWorld() {
     for (const o of obstacles || []) o.remove();
@@ -482,9 +689,17 @@
   }
   function reset() {
     clearWorld();
-    VEH = VEHICLES[vehicle]; SC = VEH.scale; CR = 0.95 * SC;
-    car = buildCar(VEH.color, true);
+    const L = level();
+    if (!VEHICLES[save.vehicle] || VEHICLES[save.vehicle].lvl > L) save.vehicle = 'sport';
+    const skin = SKINS.find(x => x.id === save.skin && x.lvl <= L) || SKINS[0];
+    ACC = {}; for (const a of ACCS) ACC[a.id] = !!save.acc[a.id] && a.lvl <= L;
+    VEH = VEHICLES[save.vehicle]; SC = VEH.scale; CR = 0.95 * SC; FINISH = TRACK.len;
+    car = buildCar(skin.color, true, { skin, acc: ACC });
     car.g.scale.setScalar(SC);
+    if (TRACK.theme.night) {
+      const sp = new THREE.SpotLight(0xfff0c8, 2.6, 70, 0.5, 0.6, 1.2), tg = new THREE.Object3D();
+      sp.position.set(0, 0.8, -2.1); tg.position.set(0, 0, -22); car.g.add(sp, tg); sp.target = tg;
+    }
     track.add(car.g);
     player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0 };
     dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; inv = 0;
@@ -496,7 +711,7 @@
   const meters = () => Math.floor(dist);
   const missingWheels = () => ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR'].filter(w => !hasPart(car, w)).length;
   const perf = () => Math.max(0.42, 1 - damage * 0.0042 - missingWheels() * 0.08);
-  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed * perf();
+  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed * TRACK.speed * (ACC.turbo ? 1.08 : 1) * perf();
 
   // ---------- Kollision (i vägplanet x/z) ----------
   function carCircles() { return [{ x: player.x, z: player.z - 1.1 * SC }, { x: player.x, z: player.z + 1.1 * SC }]; }
@@ -626,12 +841,17 @@
       unlock: 100, weight: 1.5,
       make(z) {
         return [obstacle('oil', z, (o, g) => {
-          const m = mk(G.oil, M.oil, g, 0, 0.03, 0, false); m.rotation.x = -Math.PI / 2; m.receiveShadow = true;
-          const rx = rand(1.4, 2), rz = rand(2, 2.8); m.scale.set(rx, rz, 1);
-          o.x = pick(LANES); g.position.x = o.x;
-          o.update = () => {};
+          const P = TRACK.puddle;
+          const m = mk(G.oil, M[P], g, 0, 0.03, 0, false); m.rotation.x = -Math.PI / 2; m.receiveShadow = true;
+          const rx = rand(1.4, 2), rz = rand(2, 2.8) * (P === 'ice' ? 1.4 : 1); m.scale.set(rx, rz, 1);
+          o.x = pick(LANES); g.position.x = o.x; o.hitH = 0.05;
+          o.update = () => {
+            if (P === 'lava' && Math.abs(o.z - player.z) < 90 && Math.random() < 0.3) fire(new V3(o.x + rand(-rx, rx) * 0.7, 0.1, o.z + rand(-rz, rz) * 0.7));
+          };
           o.hit = () => {
-            if (!o.done && !player.air && Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5) { o.done = true; slip = 1.5; beep(220, 0.35, 'sawtooth', 0.05, -150); }
+            const inside = Math.abs(player.x - o.x) < rx && Math.abs(player.z - o.z) < rz + 1.5;
+            if (P === 'lava') return inside ? { x: player.x, z: player.z, y: 0.3, power: 9, burn: true } : null;
+            if (!o.done && inside) { o.done = true; slip = (P === 'ice' ? 2.4 : 1.5) * (ACC.tires ? 0.5 : 1); beep(220, 0.35, 'sawtooth', 0.05, -150); }
             return null;
           };
         })];
@@ -807,17 +1027,18 @@
 
   function spawn() {
     const m = -nextSpawn;
-    const avail = Object.entries(KINDS).filter(([k, d]) => m >= d.unlock && k !== lastKind);
-    const fresh = avail.find(([k, d]) => d.unlock > 0 && m < d.unlock + 40 && !seen.has(k));
+    const avail = Object.entries(KINDS).filter(([k, d]) => TRACK.kinds.includes(k) && m >= d.unlock * TRACK.intro && k !== lastKind);
+    const fresh = avail.find(([k, d]) => d.unlock > 0 && m < d.unlock * TRACK.intro + 40 && !seen.has(k));
     let chosen;
     if (fresh) chosen = fresh;
     else {
-      let r = Math.random() * avail.reduce((s, [, d]) => s + d.weight, 0);
-      chosen = avail.find(([, d]) => (r -= d.weight) < 0) || avail[0];
+      const wt = ([k, d]) => d.weight * ((TRACK.weights || {})[k] || 1);
+      let r = Math.random() * avail.reduce((s, e) => s + wt(e), 0);
+      chosen = avail.find(e => (r -= wt(e)) < 0) || avail[0];
     }
     lastKind = chosen[0]; seen.add(lastKind);
     obstacles.push(...chosen[1].make(nextSpawn));
-    const gap = Math.max(36, 66 - m * 0.035) + (chosen[0] === 'traffic' ? 14 : 0);
+    const gap = Math.max(30, (Math.max(36, 66 - m * 0.035) + (chosen[0] === 'traffic' ? 14 : 0)) * TRACK.gap);
     if (Math.random() < 0.55) obstacles.push(...makeCoins(nextSpawn - gap * 0.45));
     nextSpawn -= gap;
   }
@@ -849,17 +1070,24 @@
   function onHit(o, h) {
     if (o.cool > 0 || inv > 0) return;
     o.cool = 1.2; inv = 0.3;
-    const sev = h.power * (0.45 + speed / 50) * VEH.armor;
-    damage = Math.min(100, damage + sev);
     const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - player.y) / SC, 0.3, 1.4);
-    const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : new V3(-lx, -0.15, -lz * 0.7).normalize();
-    dent(car, local(lx, ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
-
     const side = lx > 0.4 ? 'R' : lx < -0.4 ? 'L' : (Math.random() < 0.5 ? 'L' : 'R');
+    const front = !h.top && !h.burn && lz < -1, isSide = !h.top && !h.burn && Math.abs(lx) > 0.4 && Math.abs(lz) <= 1.3;
+    let mult = VEH.armor * (ACC.armor ? 0.85 : 1);
+    if (front && hasPart(car, 'accBull')) mult *= 0.65;
+    if (h.top && hasPart(car, 'accCage')) mult *= 0.6;
+    if (isSide && hasPart(car, 'accSide' + side)) mult *= 0.7;
+    const sev = h.power * (0.45 + speed / 50) * mult;
+    damage = Math.min(100, damage + sev);
+    const dir = h.top ? new V3(rand(-0.2, 0.2), -1, 0.15).normalize() : h.burn ? new V3(0, 1, 0) : new V3(-lx, -0.15, -lz * 0.7).normalize();
+    dent(car, local(lx, h.burn ? 0.3 : ly, lz), dir, 0.2 + sev * 0.013, 0.9 + sev * 0.025);
+    if (h.burn) fire(new V3(player.x, 0.5, player.z), 12);
+
     const out = new V3(side === 'R' ? 1 : -1, 0, lz < -1 ? -1 : lz > 1 ? 1 : 0);
     const cand = [];
-    if (h.top) cand.push(['hood', 0.5], ['spoiler', 0.5], ['trunk', 0.35]);
-    if (lz < -1) cand.push(['bumperF', 0.9], ['hood', damage > 25 ? 0.7 : 0.2], ['wheelF' + side, damage > 55 ? 0.5 : 0]);
+    if (h.top) cand.push(['accCage', sev > 18 ? 0.35 : 0], ['hood', 0.5], ['spoiler', 0.5], ['trunk', 0.35]);
+    if (isSide) cand.push(['accSide' + side, 0.3]);
+    if (lz < -1) cand.push(['accBull', sev > 14 ? 0.35 : 0], ['bumperF', 0.9], ['hood', damage > 25 ? 0.7 : 0.2], ['wheelF' + side, damage > 55 ? 0.5 : 0]);
     else if (lz > 1) cand.push(['bumperR', 0.9], ['spoiler', 0.6], ['trunk', damage > 25 ? 0.6 : 0.2], ['wheelR' + side, damage > 55 ? 0.5 : 0]);
     cand.push(['mirror' + side, 0.9], ['door' + side, damage > 30 ? 0.6 : 0.15], [(lz < 0 ? 'wheelF' : 'wheelR') + side, damage > 50 ? 0.45 : 0]);
     let lost = 0;
@@ -875,7 +1103,7 @@
     sparks(contact, 22); smoke(contact, false, 4);
     player.kx += Math.sign(player.x - h.x || (Math.random() - 0.5)) * (4 + sev * 0.22);
     player.yawKick += rand(-1, 1) * 0.04 * sev;
-    speed *= h.top ? 0.55 : 0.65;
+    speed *= h.top ? 0.55 : h.burn ? 0.85 : 0.65;
     shake = 0.5;
     if (o.onHit) o.onHit(h);
     crunch(0.18 + sev * 0.006); beep(110, 0.3, 'sawtooth', 0.06, -60);
@@ -888,7 +1116,7 @@
     sparks(new V3(player.x, 0.1, player.z), 14, 6);
     crunch(0.12 + impact * 0.01);
     if (impact < 9) return;
-    const sev = (impact - 9) * 3.4 * VEH.armor;
+    const sev = (impact - 9) * 3.4 * VEH.armor * (ACC.susp ? 0.5 : 1) * (ACC.tires ? 0.8 : 1) * (ACC.armor ? 0.85 : 1);
     damage = Math.min(100, damage + sev);
     dent(car, local(rand(-0.5, 0.5), 0.35, -2.0), new V3(0, 0.55, 0.85).normalize(), 0.15 + sev * 0.02, 1.2 + sev * 0.03);
     dent(car, local(0, 1.4, 0.2), new V3(0, -1, 0), 0.05 + sev * 0.008, 1.4);
@@ -906,16 +1134,36 @@
   }
 
   const verdict = c => c >= 80 ? 'Nästan som ny' : c >= 50 ? 'Rejält tilltygad' : c >= 20 ? 'Knappt i mål' : 'En rullande skrothög';
+  const starHtml = n => '★'.repeat(n) + '<span class="off">' + '★'.repeat(3 - n) + '</span>';
   function finish() {
     state = 'finish';
-    const cond = Math.max(0, Math.round(100 - damage)), isNew = cond > best;
-    if (isNew) { best = cond; try { localStorage.setItem('dodsbacken3d.skick', String(best)); } catch (e) {} }
+    const cond = Math.max(0, Math.round(100 - damage));
+    const stars = cond >= 75 ? 3 : cond >= 40 ? 2 : 1;
+    const prevL = level(), prevStars = totalStars();
+    const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + stars * 20);
+    save.xp += gain;
+    save.stars[TRACK.id] = Math.max(save.stars[TRACK.id] || 0, stars);
+    const isNew = cond > (save.best[TRACK.id] ?? -1);
+    if (isNew) save.best[TRACK.id] = cond;
+    persist();
+    const L = level(), [a, b] = xpRange(L);
     $('ovTitle').textContent = verdict(cond);
+    $('ovSign').textContent = '🏁 I mål · ' + TRACK.name;
+    $('ovStars').innerHTML = starHtml(stars);
+    $('ovStars').setAttribute('aria-label', stars + ' av 3 stjärnor');
     $('ovCond').textContent = cond + ' %';
     $('ovTime').textContent = runTime.toFixed(1) + ' s';
     $('ovParts').textContent = lostParts;
     $('ovCoins').textContent = coins;
-    $('ovBest').textContent = `Bästa skick i mål hittills: ${best} %`;
+    $('ovLvl').textContent = 'Nivå ' + L;
+    $('ovXp').textContent = `+${gain} XP · ${save.xp - a} / ${b - a}`;
+    $('ovBar').style.width = ((save.xp - a) / (b - a) * 100) + '%';
+    const lines = [];
+    for (let l = prevL + 1; l <= L; l++) lines.push(...unlocksAt(l));
+    for (const T of TRACKS) if (T.stars > prevStars && T.stars <= totalStars()) lines.push('Bana: ' + T.name);
+    const box = $('ovUnlocks');
+    box.hidden = !lines.length;
+    box.innerHTML = (L > prevL ? `<b>Nivå ${L}!</b>` : '<b>Ny bana!</b>') + lines.map(x => `<span>Upplåst: ${x}</span>`).join('');
     $('ovNew').hidden = !isNew; $('pauseBtn').hidden = true;
     const p = new V3(player.x, 3, player.z - 4);
     for (let i = 0; i < 50; i++) emit(p, new V3(rand(-8, 8), rand(4, 12), rand(-6, 2)), rand(0.15, 0.3), rand(1, 1.8), pick([0xffc21a, 0xe8452c, 0xffffff, 0x2f9be0, 0x4fbf5a]), false, 0, -12);
@@ -955,12 +1203,70 @@
   cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
   window.addEventListener('keydown', e => {
     keys[e.key] = true;
-    if ((e.key === 'Enter' || e.key === ' ') && (state === 'menu' || (state === 'finish' && !$('over').hidden))) { e.preventDefault(); start(); }
+    if ((e.key === 'Enter' || e.key === ' ') && state === 'finish' && !$('over').hidden) { e.preventDefault(); startTrack(TRACK); }
     if (e.key === 'p' || e.key === 'Escape') state === 'play' ? pause() : state === 'paused' && resume();
   });
   window.addEventListener('keyup', e => { keys[e.key] = false; });
 
-  function show(id) { for (const s of ['menu', 'over', 'paused']) $(s).hidden = s !== id; }
+  const SCREENS = ['menu', 'tracks', 'garage', 'over', 'paused'];
+  function show(id) { for (const x of SCREENS) $(x).hidden = x !== id; }
+  const el = (tag, cls, html) => { const e = document.createElement(tag); e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  function toDemo() { if (state !== 'menu') { state = 'menu'; reset(); } $('hud').hidden = true; $('pauseBtn').hidden = true; }
+
+  function renderMenu() {
+    const L = level(), [a, b] = xpRange(L);
+    $('lvlNum').textContent = 'Nivå ' + L;
+    $('lvlXp').textContent = `${save.xp - a} / ${b - a} XP`;
+    $('lvlBar').style.width = ((save.xp - a) / (b - a) * 100) + '%';
+    $('lvlNext').textContent = nextUnlock();
+  }
+  function goMenu() { toDemo(); show('menu'); renderMenu(); }
+  function goTracks() {
+    toDemo(); show('tracks');
+    const list = $('trackList'); list.innerHTML = '';
+    for (const T of TRACKS) {
+      const open = trackOpen(T), st = save.stars[T.id] || 0, bst = save.best[T.id];
+      const b = el('button', 'track', `<b>${T.name}</b><span class="st" aria-label="${st} av 3 stjärnor">${starHtml(st)}</span><small>${open ? `${T.len} m · ${T.desc}${bst != null ? ` Bästa skick: ${bst} %.` : ''}` : `🔒 Kräver ${T.stars} ★ totalt`}</small>`);
+      b.style.setProperty('--tbg', T.css); b.disabled = !open;
+      b.addEventListener('click', () => startTrack(T));
+      list.append(b);
+    }
+    $('starsTot').textContent = `★ ${totalStars()} / ${TRACKS.length * 3}`;
+  }
+  function goGarage() {
+    if (state !== 'garage') { state = 'garage'; reset(); }
+    $('hud').hidden = true; $('pauseBtn').hidden = true; show('garage'); renderGarage();
+  }
+  for (const tb of document.querySelectorAll('.tab')) tb.addEventListener('click', () => {
+    for (const x of document.querySelectorAll('.tab')) x.setAttribute('aria-selected', String(x === tb));
+    for (const pnl of document.querySelectorAll('[data-panel]')) pnl.hidden = pnl.dataset.panel !== tb.dataset.tab;
+  });
+  function renderGarage() {
+    const L = level();
+    const gv = $('gVeh'); gv.innerHTML = '';
+    for (const [id, v] of Object.entries(VEHICLES)) {
+      const locked = v.lvl > L, b = el('button', 'opt', `${v.name}<small>${locked ? '🔒 Nivå ' + v.lvl : v.desc}</small>`);
+      b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(save.vehicle === id)); b.disabled = locked;
+      b.addEventListener('click', () => { save.vehicle = id; persist(); reset(); renderGarage(); });
+      gv.append(b);
+    }
+    const gs = $('gSkin'); gs.innerHTML = '';
+    for (const sk of SKINS) {
+      const locked = sk.lvl > L, b = el('button', 'sw', `<i></i><span>${sk.name}${locked ? `<small>🔒 Nivå ${sk.lvl}</small>` : ''}</span>`);
+      b.style.setProperty('--c', sk.css); b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(save.skin === sk.id)); b.disabled = locked;
+      b.addEventListener('click', () => { save.skin = sk.id; persist(); reset(); renderGarage(); });
+      gs.append(b);
+    }
+    const ga = $('gAcc'); ga.innerHTML = '';
+    for (const a of ACCS) {
+      const locked = a.lvl > L, on = !!save.acc[a.id] && !locked;
+      const b = el('button', 'acc', `${a.name}<small>${a.desc}</small><em>${locked ? '🔒 Nivå ' + a.lvl : on ? 'På' : 'Av'}</em>`);
+      b.setAttribute('aria-pressed', String(on)); b.disabled = locked;
+      b.addEventListener('click', () => { save.acc[a.id] = !save.acc[a.id]; persist(); reset(); renderGarage(); });
+      ga.append(b);
+    }
+  }
+  function startTrack(T) { TRACK = T; save.track = T.id; persist(); applyTheme(T); start(); }
   function start() {
     initAudio(); reset(); state = 'play'; show(null);
     $('hud').hidden = false; $('pauseBtn').hidden = false;
@@ -968,10 +1274,16 @@
   }
   function pause() { if (state !== 'play') return; state = 'paused'; drag = null; show('paused'); }
   function resume() { state = 'play'; show(null); last = performance.now(); }
-  $('startBtn').addEventListener('click', start);
-  $('againBtn').addEventListener('click', start);
+  $('playBtn').addEventListener('click', goTracks);
+  $('garageBtn').addEventListener('click', goGarage);
+  $('tracksBack').addEventListener('click', goMenu);
+  $('garageBack').addEventListener('click', goMenu);
+  $('againBtn').addEventListener('click', () => startTrack(TRACK));
+  $('ovTracks').addEventListener('click', goTracks);
+  $('ovGarage').addEventListener('click', goGarage);
   $('pauseBtn').addEventListener('click', pause);
   $('resumeBtn').addEventListener('click', resume);
+  $('quitBtn').addEventListener('click', goMenu);
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
 
   // ---------- Uppdatering ----------
@@ -999,12 +1311,14 @@
       speed = 18; player.tx = Math.sin(t * 0.7) * 4;
     } else if (state === 'finish') {
       speed *= Math.pow(0.35, dt);
+    } else if (state === 'garage') {
+      speed = 0; player.tx = 0;
     }
 
     {
       dist += speed * dt; player.z = -dist;
       const prev = player.x;
-      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer * Math.max(0.35, 1 - damage * 0.0062))) + player.kx * dt;
+      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer * (ACC.armor ? 0.9 : 1) * Math.max(0.35, 1 - damage * 0.0062))) + player.kx * dt;
       player.tx += player.kx * dt * 0.8;
       player.kx *= Math.pow(0.05, dt);
       if (slip > 0) { player.x += Math.sin(t * 13) * 2.2 * dt * 6; slip -= dt; }
@@ -1092,6 +1406,11 @@
     camera.position.lerp(camW, Math.min(1, rdt * 10));
     if (shake > 0) camera.position.add(rv(shake * 0.5));
     camera.lookAt(lookW);
+    if (state === 'garage') {
+      const a = t * 0.35, r = 8.2 * SC;
+      camera.position.copy(track.localToWorld(new V3(player.x + Math.sin(a) * r, 2.3 * SC, player.z + Math.cos(a) * r)));
+      camera.lookAt(track.localToWorld(new V3(player.x, 0.7 * SC - 2.3, player.z)));
+    }
     mountains.position.set(camera.position.x * 0.9, camera.position.y, camera.position.z);
     const cw = track.localToWorld(new V3(player.x, 0, player.z));
     sun.position.set(cw.x - 10, cw.y + 24, cw.z + 6); sun.target.position.copy(cw);
@@ -1108,7 +1427,9 @@
     bar.style.backgroundColor = d < 40 ? 'var(--ok)' : d < 75 ? 'var(--hazard)' : 'var(--signal)';
   }
 
+  applyTheme(TRACK);
   reset();
+  renderMenu();
   let last = performance.now();
   function frame(now) {
     const rdt = Math.min(0.05, (now - last) / 1000);
@@ -1119,7 +1440,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; } };
+  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; }, addXp(v) { save.xp += v; persist(); renderMenu(); }, get save() { return save; } };
 })();
 </script>
 <!-- GAME END -->
