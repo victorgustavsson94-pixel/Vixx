@@ -101,7 +101,7 @@
   .opt[aria-checked="true"] { background: var(--hazard); color: var(--ink); border-color: var(--hazard); }
   .opt[aria-checked="true"] small { color: var(--ink); }
   .opt:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stats div { background: rgba(255,247,230,0.06); border-top: 3px solid var(--hazard); padding: 8px 10px; }
   .stats span { display: block; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
   .stats strong { font-family: var(--display); font-weight: 400; font-size: 22px; font-variant-numeric: tabular-nums; }
@@ -119,8 +119,8 @@
 
   <div class="hud" id="hud" hidden>
     <div class="chip">
-      <span class="label">Sträcka</span>
-      <span class="big" id="hudDist">0 m</span>
+      <span class="label">Kvar till mål</span>
+      <span class="big" id="hudDist">1000 m</span>
     </div>
     <div class="right">
       <div class="chip dmg">
@@ -136,7 +136,7 @@
   <div class="screen" id="menu">
     <span class="sign">⚠ Brant lutning 11 %</span>
     <h1>Döds&shy;backen</h1>
-    <p>Bilen rullar nerför backen och går fortare ju längre du kommer. Dra med fingret för att styra. Varje smäll bucklar bilen och slår loss delar. Vid 100 % är den skrot.</p>
+    <p>Ta dig 1000 meter nerför backen till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto långsammare och vingligare går den. Hur mycket bil har du kvar när du rullar i mål?</p>
     <div class="pick" role="radiogroup" aria-label="Välj bil">
       <button class="opt" id="vSmall" data-v="small" role="radio" aria-checked="false">Liten<small>Kvick men skör</small></button>
       <button class="opt" id="vSport" data-v="sport" role="radio" aria-checked="true">Sportbil<small>Mitt emellan</small></button>
@@ -154,18 +154,20 @@
       <li><b>300 m</b> Krossväggar</li>
     </ul>
     <button class="btn" id="startBtn">Kör!</button>
-    <span class="hint" id="bestMenu">Dator: piltangenterna styr, P pausar.</span>
+    <span class="hint" id="bestMenu">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span>
   </div>
 
   <div class="screen" id="over" hidden>
-    <span class="sign">Totalkvaddad</span>
-    <h1>Skrot i backen</h1>
+    <span class="sign">🏁 I mål</span>
+    <h1 id="ovTitle">Knappt i mål</h1>
     <div class="stats">
-      <div><span>Sträcka</span><strong id="ovDist">0 m</strong></div>
+      <div><span>Bilens skick</span><strong id="ovCond">0 %</strong></div>
+      <div><span>Tid</span><strong id="ovTime">0 s</strong></div>
+      <div><span>Tappade delar</span><strong id="ovParts">0</strong></div>
       <div><span>Mynt</span><strong id="ovCoins">0</strong></div>
-      <div><span>Rekord</span><strong id="ovBest">0 m</strong></div>
     </div>
     <span class="newbest" id="ovNew" hidden>Nytt rekord!</span>
+    <span class="hint" id="ovBest"></span>
     <button class="btn" id="againBtn">Ny bil</button>
   </div>
 
@@ -442,6 +444,7 @@
     if (!m || m.parent !== c.g) return false;
     c.g.updateMatrixWorld(true);
     track.attach(m);
+    if (c === car) lostParts++;
     debris.push({ m, v: new V3(out.x * rand(3, 7), rand(3, 7), carVel + out.z * 3), w: rv(9), life: 10, r: name.startsWith('wheel') ? 0.4 : 0.15 });
     return true;
   }
@@ -463,10 +466,12 @@
 
   // ---------- Spelstatus ----------
   let seen = new Set();
-  let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, timeScale, obstacles, nextSpawn, nextSign, lastKind, inv, wreckT;
+  let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, obstacles, nextSpawn, nextSign, lastKind, inv;
   let best = 0;
-  try { best = Number(localStorage.getItem('dodsbacken3d.best')) || 0; } catch (e) {}
-  if (best) $('bestMenu').textContent = `Rekord: ${best} m. Dator: piltangenterna styr, P pausar.`;
+  const FINISH = 1000;
+  let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false;
+  try { best = Number(localStorage.getItem('dodsbacken3d.skick')) || 0; } catch (e) {}
+  if (best) $('bestMenu').textContent = `Bästa skick i mål: ${best} %. Dra med fingret för att styra.`;
 
   function clearWorld() {
     for (const o of obstacles || []) o.remove();
@@ -481,14 +486,17 @@
     car = buildCar(VEH.color, true);
     car.g.scale.setScalar(SC);
     track.add(car.g);
-    player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0, wreck: null };
-    dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; timeScale = 1; inv = 0; wreckT = 0;
+    player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0 };
+    dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; inv = 0;
     obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set();
+    runTime = 0; lostParts = 0; finishMade = false; scrapShown = false;
     for (const s of scenery) s.position.z = s.position.z % 252;
   }
 
   const meters = () => Math.floor(dist);
-  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed;
+  const missingWheels = () => ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR'].filter(w => !hasPart(car, w)).length;
+  const perf = () => Math.max(0.42, 1 - damage * 0.0042 - missingWheels() * 0.08);
+  const targetSpeed = () => (22 + Math.min(26, dist * 0.03)) * VEH.speed * perf();
 
   // ---------- Kollision (i vägplanet x/z) ----------
   function carCircles() { return [{ x: player.x, z: player.z - 1.1 * SC }, { x: player.x, z: player.z + 1.1 * SC }]; }
@@ -839,7 +847,7 @@
   const local = (x, y, z) => new V3(x, y, z);
 
   function onHit(o, h) {
-    if (o.cool > 0 || inv > 0 || player.wreck) return;
+    if (o.cool > 0 || inv > 0) return;
     o.cool = 1.2; inv = 0.3;
     const sev = h.power * (0.45 + speed / 50) * VEH.armor;
     damage = Math.min(100, damage + sev);
@@ -872,15 +880,14 @@
     if (o.onHit) o.onHit(h);
     crunch(0.18 + sev * 0.006); beep(110, 0.3, 'sawtooth', 0.06, -60);
     try { navigator.vibrate && navigator.vibrate(60 + sev * 4); } catch (e) {}
-    popup(damage >= 100 ? 'TOTALKVADD!' : `KRASCH +${Math.round(sev)} %`);
-    if (damage >= 100) wreck(h);
+    scrapPopup(`KRASCH +${Math.round(sev)} %`);
   }
 
   function landing(impact) {
     shake = Math.max(shake, 0.25);
     sparks(new V3(player.x, 0.1, player.z), 14, 6);
     crunch(0.12 + impact * 0.01);
-    if (impact < 9 || player.wreck) return;
+    if (impact < 9) return;
     const sev = (impact - 9) * 3.4 * VEH.armor;
     damage = Math.min(100, damage + sev);
     dent(car, local(rand(-0.5, 0.5), 0.35, -2.0), new V3(0, 0.55, 0.85).normalize(), 0.15 + sev * 0.02, 1.2 + sev * 0.03);
@@ -890,26 +897,48 @@
     if (impact > 14 && Math.random() < 0.5) detach(car, 'wheelF' + side, new V3(side === 'R' ? 1 : -1, 0, 0), -speed * 0.75);
     speed *= 0.8;
     try { navigator.vibrate && navigator.vibrate(50 + sev * 4); } catch (e) {}
-    popup(damage >= 100 ? 'TOTALKVADD!' : `HÅRD LANDNING +${Math.round(sev)} %`);
-    if (damage >= 100) wreck({ x: player.x + rand(-1, 1) });
+    scrapPopup(`HÅRD LANDNING +${Math.round(sev)} %`);
   }
 
-  function wreck(h) {
-    const dirX = Math.sign(player.x - h.x || 1);
-    player.wreck = { v: new V3(dirX * rand(3, 6), rand(8, 11), -speed * 0.8), w: new V3(rand(-4, 4), rand(-3, 3), dirX * rand(-6, -3)) };
-    timeScale = 0.3; wreckT = 0;
-    const p = new V3(player.x, 1, player.z);
-    for (const n of Object.keys(car.parts)) if (n !== 'body' && n !== 'cabin' && Math.random() < 0.7) detach(car, n, new V3(rand(-1, 1), 0, rand(-1, 1)), -speed * 0.6);
-    fire(p, 30); smoke(p, true, 20); sparks(p, 40, 14);
-    flash.position.copy(p); flash.intensity = 6;
-    car.paint.color.set(0x2a2522);
-    crunch(0.5); beep(60, 1.2, 'sawtooth', 0.12, -30);
-    state = 'over';
-    const m = meters(), isNew = m > best;
-    if (isNew) { best = m; try { localStorage.setItem('dodsbacken3d.best', String(best)); } catch (e) {} }
-    $('ovDist').textContent = m + ' m'; $('ovCoins').textContent = coins; $('ovBest').textContent = best + ' m';
+  function scrapPopup(text) {
+    if (damage >= 100 && !scrapShown) { scrapShown = true; popup('SKROTHÖG – MEN DEN RULLAR!'); }
+    else popup(text);
+  }
+
+  const verdict = c => c >= 80 ? 'Nästan som ny' : c >= 50 ? 'Rejält tilltygad' : c >= 20 ? 'Knappt i mål' : 'En rullande skrothög';
+  function finish() {
+    state = 'finish';
+    const cond = Math.max(0, Math.round(100 - damage)), isNew = cond > best;
+    if (isNew) { best = cond; try { localStorage.setItem('dodsbacken3d.skick', String(best)); } catch (e) {} }
+    $('ovTitle').textContent = verdict(cond);
+    $('ovCond').textContent = cond + ' %';
+    $('ovTime').textContent = runTime.toFixed(1) + ' s';
+    $('ovParts').textContent = lostParts;
+    $('ovCoins').textContent = coins;
+    $('ovBest').textContent = `Bästa skick i mål hittills: ${best} %`;
     $('ovNew').hidden = !isNew; $('pauseBtn').hidden = true;
-    setTimeout(() => { if (state === 'over') { $('over').hidden = false; $('hud').hidden = true; } }, 3200);
+    const p = new V3(player.x, 3, player.z - 4);
+    for (let i = 0; i < 50; i++) emit(p, new V3(rand(-8, 8), rand(4, 12), rand(-6, 2)), rand(0.15, 0.3), rand(1, 1.8), pick([0xffc21a, 0xe8452c, 0xffffff, 0x2f9be0, 0x4fbf5a]), false, 0, -12);
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'square', 0.05), i * 130));
+    setTimeout(() => { if (state === 'finish') { $('over').hidden = false; $('hud').hidden = true; } }, 2400);
+  }
+
+  function makeFinish(z) {
+    return obstacle('finish', z, (o, g) => {
+      for (const s of [-1, 1]) mk(G.gantryPost, M.steel, g, s * (ROAD_HALF + 1.2), 3, 0).scale.y = 0.55;
+      const tex = canvasTex(512, 128, (c, w, h) => {
+        const q = 32;
+        for (let y = 0; y < h; y += q) for (let x = 0; x < w; x += q) { c.fillStyle = ((x + y) / q) % 2 ? '#111' : '#fff'; c.fillRect(x, y, q, q); }
+        c.fillStyle = '#ffc21a'; c.fillRect(w / 2 - 110, 18, 220, h - 36);
+        c.fillStyle = '#1b1d21'; c.font = '68px Bungee, Impact, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText('MÅL', w / 2, h / 2 + 4);
+      });
+      const banner = mk(new THREE.PlaneGeometry(ROAD_HALF * 2 + 2.4, 2.4), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }), g, 0, 5.4, 0, false);
+      const line = mk(new THREE.PlaneGeometry(ROAD_HALF * 2, 1.2), new THREE.MeshBasicMaterial({ map: tex }), g, 0, 0.04, 0, false);
+      line.rotation.x = -Math.PI / 2;
+      o.dispose = () => { tex.dispose(); banner.geometry.dispose(); line.geometry.dispose(); };
+      o.update = () => {}; o.hit = () => null;
+    });
   }
 
   // ---------- Styrning ----------
@@ -926,7 +955,7 @@
   cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
   window.addEventListener('keydown', e => {
     keys[e.key] = true;
-    if ((e.key === 'Enter' || e.key === ' ') && (state === 'menu' || (state === 'over' && !$('over').hidden))) { e.preventDefault(); start(); }
+    if ((e.key === 'Enter' || e.key === ' ') && (state === 'menu' || (state === 'finish' && !$('over').hidden))) { e.preventDefault(); start(); }
     if (e.key === 'p' || e.key === 'Escape') state === 'play' ? pause() : state === 'paused' && resume();
   });
   window.addEventListener('keyup', e => { keys[e.key] = false; });
@@ -950,12 +979,17 @@
   function carPoint(x, y, z) { car.g.updateMatrixWorld(true); return track.worldToLocal(car.g.localToWorld(tmp.set(x, y, z)).clone()); }
 
   function update(rdt) {
-    const dt = rdt * timeScale;
+    const dt = rdt;
     t += dt;
-    if (state === 'over') { wreckT += rdt; if (wreckT > 1.4) timeScale = Math.min(1, timeScale + rdt * 0.8); }
 
     if (state === 'play') {
+      runTime += dt;
       speed += (targetSpeed() - speed) * Math.min(1, dt * 0.7);
+      // Trasig motor hackar
+      if (damage > 65 && Math.random() < dt * (damage - 60) * 0.025) { speed *= 0.82; smoke(carPoint(0, 0.6, 2.2), true, 3); beep(90, 0.12, 'sawtooth', 0.05); }
+      // Skev hjulinställning: bilen vinglar mer ju trasigare den är
+      if (damage > 30) player.tx = clamp(player.tx + Math.sin(t * 1.7 + Math.sin(t * 0.6) * 2) * (damage - 30) * 0.035 * dt, -6, 6);
+      if (dist >= FINISH) finish();
       if (keys.ArrowLeft || keys.a) player.tx = clamp(player.tx - 16 * dt, -6, 6);
       if (keys.ArrowRight || keys.d) player.tx = clamp(player.tx + 16 * dt, -6, 6);
       // Saknade hjul drar bilen åt sidan.
@@ -963,19 +997,21 @@
       player.tx = clamp(player.tx + pull * 1.6 * dt, -6, 6);
     } else if (state === 'menu') {
       speed = 18; player.tx = Math.sin(t * 0.7) * 4;
+    } else if (state === 'finish') {
+      speed *= Math.pow(0.35, dt);
     }
 
-    if (!player.wreck) {
-      if (state !== 'over') { dist += speed * dt; player.z = -dist; }
+    {
+      dist += speed * dt; player.z = -dist;
       const prev = player.x;
-      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer)) + player.kx * dt;
+      player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer * Math.max(0.35, 1 - damage * 0.0062))) + player.kx * dt;
       player.tx += player.kx * dt * 0.8;
       player.kx *= Math.pow(0.05, dt);
       if (slip > 0) { player.x += Math.sin(t * 13) * 2.2 * dt * 6; slip -= dt; }
       player.x = clamp(player.x, -6.05, 6.05); player.tx = clamp(player.tx, -6, 6);
       const vx = (player.x - prev) / Math.max(dt, 1e-4);
       player.yawKick *= Math.pow(0.08, dt);
-      player.yaw = clamp(-vx * 0.035, -0.4, 0.4) + player.yawKick + (slip > 0 ? Math.sin(t * 7) * 0.5 : 0);
+      player.yaw = clamp(-vx * 0.035, -0.4, 0.4) + player.yawKick + (slip > 0 ? Math.sin(t * 7) * 0.5 : 0) + Math.sin(t * 9) * damage * 0.0009;
       // Lutning när hjul saknas
       const fl = hasPart(car, 'wheelFL'), fr = hasPart(car, 'wheelFR'), rl = hasPart(car, 'wheelRL'), rr = hasPart(car, 'wheelRR');
       car.roll += ((((fl ? 0 : 1) + (rl ? 0 : 1)) - ((fr ? 0 : 1) + (rr ? 0 : 1))) * 0.09 - car.roll) * Math.min(1, dt * 5);
@@ -994,37 +1030,26 @@
       const airP = player.air ? clamp(player.vy * 0.025, -0.35, 0.3) : slopeP;
       car.airPitch = (car.airPitch || 0) + (airP - (car.airPitch || 0)) * Math.min(1, dt * 8);
       const bump = state === 'play' && !player.air ? Math.sin(t * 31) * 0.012 * (speed / 30) : 0;
-      car.g.position.set(player.x, player.y + bump - (Math.abs(car.roll) + Math.abs(car.pitch)) * 2 * SC, player.z);
+      car.g.position.set(player.x, player.y + bump - (Math.abs(car.roll) + Math.abs(car.pitch)) * 2 * SC - (missingWheels() === 4 ? 0.3 * SC : 0), player.z);
       car.g.rotation.set(car.pitch + car.airPitch, player.yaw, car.roll);
       for (const w of ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR']) if (hasPart(car, w)) { car.parts[w].rotation.x -= speed * dt / 0.4; if (w[5] === 'F') car.parts[w].rotation.y = clamp(-vx * 0.05, -0.5, 0.5); }
       // Gnistor där hjul saknas
       if (state === 'play' && !player.air) for (const [w, x, z] of [['wheelFL', -0.9, -1.35], ['wheelFR', 0.9, -1.35], ['wheelRL', -0.9, 1.35], ['wheelRR', 0.9, 1.35]])
         if (!hasPart(car, w) && Math.random() < 0.8) sparks(carPoint(x, 0.05, z), 2, 4);
-    } else {
-      const w = player.wreck;
-      w.v.addScaledVector(GRAV, dt);
-      car.g.position.addScaledVector(w.v, dt);
-      car.g.rotation.x += w.w.x * dt; car.g.rotation.y += w.w.y * dt; car.g.rotation.z += w.w.z * dt;
-      if (car.g.position.y < 0.6 && w.v.y < 0) {
-        car.g.position.y = 0.6; w.v.y *= -0.35; w.v.x *= 0.6; w.v.z *= 0.6; w.w.multiplyScalar(0.6);
-        if (Math.abs(w.v.y) > 1.5) { sparks(car.g.position.clone(), 18, 8); crunch(0.2); shake = 0.4; }
-      }
-      player.x = car.g.position.x; player.z = car.g.position.z;
-      speed = Math.max(0, -w.v.z);
     }
 
     // Rök och eld efter skadenivå
     if (damage > 30 && Math.random() < dt * (damage / 6)) smoke(carPoint(0, 1.05, -1.5), damage > 60);
     if (damage > 78 && Math.random() < dt * 25) fire(carPoint(rand(-0.4, 0.4), 1.0, -1.5));
-    if (player.wreck && Math.random() < dt * 30) { fire(carPoint(0, 1.1, 0)); if (Math.random() < 0.5) smoke(carPoint(0, 1.4, 0), true); }
-    car.paint.color.copy(car.base).lerp(new THREE.Color(0x2a2522), player.wreck ? 0.85 : clamp((damage - 50) / 50, 0, 1) * 0.55);
+    car.paint.color.copy(car.base).lerp(new THREE.Color(0x2a2522), clamp((damage - 50) / 50, 0, 1) * 0.55);
 
     inv = Math.max(0, inv - dt); shake = Math.max(0, shake - rdt);
     flash.intensity = Math.max(0, flash.intensity - rdt * 4);
 
     if (state === 'play') {
-      while (nextSpawn > player.z - 230) spawn();
-      while (nextSign > player.z - 230) { obstacles.push(makeSign(nextSign)); nextSign -= 100; }
+      while (nextSpawn > player.z - 230 && nextSpawn > -FINISH + 45) spawn();
+      while (nextSign > player.z - 230 && nextSign > -FINISH) { obstacles.push(makeSign(nextSign)); nextSign -= 100; }
+      if (!finishMade && player.z - 230 < -FINISH) { finishMade = true; obstacles.push(makeFinish(-FINISH)); }
     }
     for (const o of obstacles) {
       o.cool = Math.max(0, o.cool - dt);
@@ -1061,10 +1086,10 @@
     for (const s of scenery) if (s.position.z > player.z + 25) { s.position.z -= 252; s.position.x = (s.position.x > 0 ? 1 : -1) * (9.5 + Math.random() * 28); }
 
     // Kamera
-    const camLocal = new V3(player.x * 0.6, 3.7 * (0.75 + SC * 0.25) + player.y * 0.6 + (player.wreck ? 2 : 0), player.z + 8.6 * (0.8 + SC * 0.2));
+    const camLocal = new V3(player.x * 0.6, 3.7 * (0.75 + SC * 0.25) + player.y * 0.6, player.z + 8.6 * (0.8 + SC * 0.2));
     const look = new V3(player.x * 0.8, 0.8 + player.y * 0.7, player.z - 7);
     const camW = track.localToWorld(camLocal), lookW = track.localToWorld(look);
-    camera.position.lerp(camW, Math.min(1, rdt * (player.wreck ? 3 : 10)));
+    camera.position.lerp(camW, Math.min(1, rdt * 10));
     if (shake > 0) camera.position.add(rv(shake * 0.5));
     camera.lookAt(lookW);
     mountains.position.set(camera.position.x * 0.9, camera.position.y, camera.position.z);
@@ -1073,7 +1098,7 @@
   }
 
   function hud() {
-    $('hudDist').textContent = meters() + ' m';
+    $('hudDist').textContent = Math.max(0, FINISH - meters()) + ' m';
     $('hudSpeed').textContent = Math.round(speed * 3.6);
     $('hudCoins').textContent = coins;
     const d = Math.round(damage);
@@ -1094,7 +1119,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; } };
+  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; } };
 })();
 </script>
 <!-- GAME END -->

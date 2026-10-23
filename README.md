@@ -2,7 +2,7 @@
 
 Ett 3D-mobilspel där en bil rullar nerför en backe och ska ta sig förbi hinder. Bilen går fortare ju längre man kommer.
 
-Varje krock syns på bilen: plåten bucklas där den träffas, stötfångare, speglar, dörrar, huv och till och med hjul kan slitas loss och flyga iväg, vindrutan spricker och krossas, och motorn börjar ryka och brinna. Vid 100 % skada voltar bilen i slow motion och rundan är slut.
+Målet ligger 1000 meter ner. Det finns inga liv – i stället går bilen sönder mer och mer: plåten bucklas där den träffas, stötfångare, speglar, dörrar, huv och hjul slits loss, vindrutan spricker och krossas, och motorn ryker, brinner och hackar. Ju trasigare bilen är desto långsammare och vingligare går den, men den rullar alltid vidare. I mål visas bilens skick, tiden och hur många delar som tappats.
 
 Välj mellan liten bil (kvick men skör), sportbil och stor bil (tålig men trög).
 
