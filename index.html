@@ -191,7 +191,7 @@
         <span class="label">Skada <span id="hudDmg">0 %</span></span>
         <div class="bar"><i id="hudBar"></i></div>
       </div>
-      <div class="chip"><span id="hudSpeed">0</span> km/h · <span id="hudCoins">0</span> mynt · <span id="hudMon">0</span> 👾</div>
+      <div class="chip"><span id="hudSpeed">0</span> km/h · <span id="hudCoins">0</span> 🪙 · <span id="hudMon">0</span> 👾 · <span id="hudGiant">0</span> 💀</div>
     </div>
   </div>
   <div id="pop"></div>
@@ -207,7 +207,7 @@
       <div class="bar"><i id="lvlBar"></i></div>
       <span class="hint" id="lvlNext"></span>
     </div>
-    <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Ta dig till den stora portalen längst ner, så teleporteras du till nästa bana. Kameran byter vinkel under resan, så håll koll. Tjäna XP, gå upp i nivå och lås upp lacker och tillbehör.</p>
+    <p>Ta dig ner till mål. Varje smäll bucklar bilen och slår loss delar, och ju trasigare den blir desto sämre går den. Ta dig till den stora portalen längst ner, så teleporteras du till nästa bana. Når skadan 100 % är bilen skrot och rundan förlorad. Kör ner jätteskeletten för extrapoäng. Kameran byter vinkel under resan, så håll koll. Tjäna XP, gå upp i nivå och lås upp lacker och tillbehör.</p>
     <div class="row2"><button class="btn" id="playBtn">Kör</button><button class="btn alt" id="garageBtn">Garage</button></div>
     <div class="head"><span class="hint">Dra med fingret för att styra. Dator: piltangenterna, P pausar.</span><button class="back" id="gfxBtn">Grafik: Auto</button></div>
   </div>
@@ -240,9 +240,9 @@
     <h1 id="ovTitle">Knappt i mål</h1>
     <div class="starsBig" id="ovStars" aria-label="Stjärnor"></div>
     <div class="stats">
-      <div><span>Bilens skick</span><strong id="ovCond">0 %</strong></div>
+      <div><span id="ovCondL">Bilens skick</span><strong id="ovCond">0 %</strong></div>
       <div><span>Tid</span><strong id="ovTime">0 s</strong></div>
-      <div><span>Monster</span><strong id="ovMon">0</strong></div>
+      <div><span>Monster · skelett</span><strong id="ovMon">0</strong></div>
       <div><span>Tappade delar</span><strong id="ovParts">0</strong></div>
       <div><span>Mynt</span><strong id="ovCoins">0</strong></div>
       <div><span>Bästa skick</span><strong id="ovBestC">0 %</strong></div>
@@ -672,11 +672,7 @@
     }
     const big = isPlayer && A.tires, wr = big ? 0.47 : 0.4;
     const WG = getWheel(wr, big ? 0.44 : 0.32);
-    for (const [n, x, z] of [['wheelFL', -0.93, -1.35], ['wheelFR', 0.93, -1.35], ['wheelRL', -0.93, 1.35], ['wheelRR', 0.93, 1.35]]) {
-      const pivot = new THREE.Group(); pivot.position.set(x * (big ? 1.05 : 1), wr, z); g.add(pivot); parts[n] = pivot;
-      const t = new THREE.Mesh(WG.tire, M.tire); t.rotation.z = Math.PI / 2; t.castShadow = true; pivot.add(t);
-      const h = new THREE.Mesh(WG.rim, M.hub); h.rotation.z = Math.PI / 2; pivot.add(h);
-    }
+    for (const n of Object.keys(WHEEL_POS)) addWheel(g, parts, n, big);
     return { g, parts, paint, base: paint.color.clone(), wind: 0, roll: 0, pitch: 0 };
   }
 
@@ -709,6 +705,14 @@
       add(null, new THREE.BoxGeometry(1.5, 0.03, 1.0), M.steel, 0, 0.05, 0, false, parts.hood);
       for (const s of [-1, 1]) add(null, new THREE.BoxGeometry(0.03, 0.34, 1.15), M.steel, s * 0.05, 0, 0, false, parts[s < 0 ? 'doorL' : 'doorR']);
     }
+  }
+
+  const WHEEL_POS = { wheelFL: [-0.93, -1.35], wheelFR: [0.93, -1.35], wheelRL: [-0.93, 1.35], wheelRR: [0.93, 1.35] };
+  function addWheel(g, parts, n, big) {
+    const wr = big ? 0.47 : 0.4, WG = getWheel(wr, big ? 0.44 : 0.32), [x, z] = WHEEL_POS[n];
+    const pivot = new THREE.Group(); pivot.position.set(x * (big ? 1.05 : 1), wr, z); g.add(pivot); parts[n] = pivot;
+    const t = new THREE.Mesh(WG.tire, M.tire); t.rotation.z = Math.PI / 2; t.castShadow = true; pivot.add(t);
+    const h = new THREE.Mesh(WG.rim, M.hub); h.rotation.z = Math.PI / 2; pivot.add(h);
   }
 
   // Bucklar: trycker in alla hörn nära träffpunkten (bilens lokala koordinater).
@@ -749,23 +753,23 @@
   const TRACKS = [
     { id: 'sommar', name: 'Sommarbacken', len: 800, hills: 1, desc: 'Sol, grönt gräs och de första fällorna.', css: 'linear-gradient(135deg,#3f7f34,#7fb6d9)',
       edge: null,
-      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil', monsterRate: 0.45,
+      kinds: ['giant', 'traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam'], intro: 0.7, gap: 1, speed: 1, puddle: 'oil', monsterRate: 0.45,
       theme: { sky: 0xa9d4f0, fog: [70, 283], ground: ['#4f8f3a', '#58993f'], leaf: 0x2d6a2b, tree: 'cone', stone: 0x8b8577, mount: 0x7d95ad, cap: 0xf2f6fa, hemi: [0xe6f2ff, 0x4f7f3a, 0.8], sun: [0xfff2dd, 1.0] } },
     { id: 'vinter', name: 'Vinterbacken', len: 1000, hills: 1.2, desc: 'Snö, isfläckar, smala passager och sågklingor.', css: 'linear-gradient(135deg,#dfe9f1,#6f8fb0)',
       edge: { v: 'small', why: 'den greppar bäst på isen och smiter igenom smala passager' },
-      kinds: ['traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'narrow', 'saw', 'gate', 'slam', 'pendulum'], weights: { narrow: 2.5, oil: 1.8 }, intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice', monsterRate: 0.4,
+      kinds: ['giant', 'traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'narrow', 'saw', 'gate', 'slam', 'pendulum'], weights: { narrow: 2.5, oil: 1.8 }, intro: 0.5, gap: 0.92, speed: 1.03, puddle: 'ice', monsterRate: 0.4,
       theme: { sky: 0xc7d6e4, fog: [50, 243], ground: ['#e8eef3', '#dbe5ed'], leaf: 0x3d6b4e, tree: 'cone', stone: 0x9aa3ab, mount: 0x8c9db0, cap: 0xffffff, hemi: [0xf0f6ff, 0xb8c8d8, 0.85], sun: [0xf4f8ff, 0.95] } },
     { id: 'oken', name: 'Ökenkanjonen', len: 1100, hills: 1.3, desc: 'Stenblock, tunnor, minor och monsterhorder.', css: 'linear-gradient(135deg,#d9a35b,#b8562a)',
       edge: { v: 'big', why: 'den plöjer genom stenblock, tunnor och monster utan att ta mycket skada' },
-      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'crusher', 'saw'], weights: { boulder: 2.5, barrels: 2, traffic: 1.6, monsters: 1.8 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil', monsterRate: 0.6,
+      kinds: ['giant', 'traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'crusher', 'saw'], weights: { boulder: 2.5, barrels: 2, traffic: 1.6, monsters: 1.8 }, intro: 0.4, gap: 0.86, speed: 1.04, puddle: 'oil', monsterRate: 0.6,
       theme: { sky: 0xf1c48a, fog: [60, 270], ground: ['#d9a35b', '#cf9750'], leaf: 0x4f8a3a, tree: 'cactus', stone: 0xb5653a, mount: 0xb86b3c, cap: 0xd99a5b, hemi: [0xfff0d8, 0xb07a40, 0.85], sun: [0xffe0b0, 1.15] } },
     { id: 'vulkan', name: 'Vulkanberget', len: 1200, hills: 1.45, desc: 'Lavapölar, eldkastare, fallluckor och låga balkar.', css: 'linear-gradient(135deg,#3a2622,#d8481a)',
       edge: { v: 'small', why: 'den slinker under de låga balkarna som den stora bilen slår i' },
-      kinds: ['traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'oil', 'beam', 'flame', 'pit', 'saw', 'pendulum', 'crusher', 'slam'], weights: { beam: 3, flame: 2, pit: 2 }, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava', monsterRate: 0.4,
+      kinds: ['giant', 'traffic', 'barrels', 'monsters', 'hammer', 'spikes', 'oil', 'beam', 'flame', 'pit', 'saw', 'pendulum', 'crusher', 'slam'], weights: { beam: 3, flame: 2, pit: 2 }, intro: 0.3, gap: 0.8, speed: 1.06, puddle: 'lava', monsterRate: 0.4,
       theme: { sky: 0x5a2c22, fog: [40, 229], ground: ['#2b2522', '#342b27'], leaf: 0x2a2522, tree: 'dead', stone: 0x4a3f3a, mount: 0x2e2220, cap: 0xff6a1a, hemi: [0xffb090, 0x301a10, 0.65], sun: [0xffa070, 0.9] } },
     { id: 'natt', name: 'Midnattsbacken', len: 1300, hills: 1.6, desc: 'Monsterhorder i mörkret och alla fällor på en gång.', css: 'linear-gradient(135deg,#0d1530,#2f4a8a)',
       edge: { v: 'big', why: 'den kör över monsterhorderna utan att ta skada' },
-      kinds: ['traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'pendulum', 'crusher', 'saw', 'flame', 'pit', 'narrow'], weights: { monsters: 3, barrels: 2, traffic: 1.5 }, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil', monsterRate: 0.8,
+      kinds: ['giant', 'traffic', 'boulder', 'barrels', 'monsters', 'hammer', 'spikes', 'bulge', 'oil', 'mines', 'gate', 'slam', 'pendulum', 'crusher', 'saw', 'flame', 'pit', 'narrow'], weights: { monsters: 3, barrels: 2, traffic: 1.5 }, intro: 0.25, gap: 0.75, speed: 1.1, puddle: 'oil', monsterRate: 0.8,
       theme: { sky: 0x0d1530, fog: [30, 202], ground: ['#1f3a22', '#22402a'], leaf: 0x173a1c, tree: 'cone', stone: 0x55524c, mount: 0x1a2440, cap: 0x8a9ab8, hemi: [0x7090d0, 0x101810, 0.35], sun: [0x9ab0ff, 0.3], night: true } },
   ];
   // Ingen bil är bäst överallt: liten greppar på is, ryms under balkar och genom smala passager men tål lite när den
@@ -798,7 +802,7 @@
   ];
 
   const SAVE_KEY = 'dodsbacken.save.v1';
-  const save = { xp: 0, stars: {}, best: {}, vehicle: 'sport', skin: 'red', acc: {}, track: 'sommar', gfx: 'auto' };
+  const save = { xp: 0, stars: {}, best: {}, fails: {}, vehicle: 'sport', skin: 'red', acc: {}, track: 'sommar', gfx: 'auto' };
   try { Object.assign(save, JSON.parse(localStorage.getItem(SAVE_KEY)) || {}); } catch (e) {}
   const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} };
   const levelFor = xp => { let L = 1; while (xp >= 50 * L * (L + 1)) L++; return L; };
@@ -850,7 +854,7 @@
   let seen = new Set(), recent = [];
   let state = 'menu', car, player, dist, speed, damage, coins, slip, shake, t, obstacles, nextSpawn, nextSign, lastKind, inv;
   let FINISH = TRACK.len;
-  let runTime = 0, lostParts = 0, finishMade = false, scrapShown = false, portalPull = false, teleT = 0;
+  let runTime = 0, lostParts = 0, finishMade = false, portalPull = false, teleT = 0;
   let camIdx = 0, camFrom = 0, camBlend = 1, nextCam = 70, camTagT = 0;
 
   function clearWorld() {
@@ -875,10 +879,10 @@
       sp.position.set(0, 0.8, -2.1); tg.position.set(0, 0, -22); car.g.add(sp, tg); sp.target = tg;
     }
     track.add(car.g);
-    player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0 };
+    player = { x: 0, z: 0, y: 0, vy: 0, air: false, tx: 0, kx: 0, yaw: 0, yawKick: 0, wreck: null }; timeScale = 1;
     dist = 0; speed = 0; damage = 0; coins = 0; slip = 0; shake = 0; t = 0; inv = 0;
-    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set(); recent = []; monstersHit = 0;
-    runTime = 0; lostParts = 0; finishMade = false; scrapShown = false; portalPull = false; teleT = 0;
+    obstacles = []; nextSpawn = -70; nextSign = -100; lastKind = ''; seen = new Set(); recent = []; monstersHit = 0; giantsHit = 0;
+    runTime = 0; lostParts = 0; finishMade = false; portalPull = false; teleT = 0;
     camIdx = 0; camFrom = 0; camBlend = 1; nextCam = 70; $('camTag').hidden = true; $('flash').classList.remove('on');
     for (const s of scenery) s.position.z = s.position.z % 378;
   }
@@ -1148,6 +1152,10 @@
         })];
       }
     },
+    giant: {
+      unlock: 20, weight: 2,
+      make(z) { return [makeGiant(z)]; }
+    },
     monsters: {
       unlock: 0, weight: 2,
       make(z) { return Array.from({ length: 4 + Math.floor(Math.random() * 4) }, () => makeMonster(z + rand(-7, 7))); }
@@ -1380,7 +1388,88 @@
       o.hit = () => (o.dead ? null : (hitCircle(o.x, o.z, 0.45) && { x: o.x, z: o.z, y: 1, monster: true }));
     });
   }
-  let monstersHit = 0;
+  let monstersHit = 0, giantsHit = 0;
+
+  // Jätteskelett: ca 6 meter höga, står mitt i vägen och sprängs i mängder av benbitar.
+  const BONE = new THREE.MeshStandardMaterial({ color: lin(0xeee6d2), roughness: 0.55 });
+  const HOLE = new THREE.MeshStandardMaterial({ color: lin(0x120d0a), roughness: 1 });
+  const SG = {
+    skull: new THREE.SphereGeometry(0.32, 18, 14), jaw: null, eye: new THREE.SphereGeometry(0.075, 10, 8), nose: new THREE.ConeGeometry(0.04, 0.08, 6),
+    vert: new THREE.CylinderGeometry(0.065, 0.065, 0.09, 10), rib: new THREE.TorusGeometry(0.3, 0.026, 6, 18, Math.PI * 1.55),
+    bone: new THREE.CylinderGeometry(0.045, 0.04, 1, 8), knob: new THREE.SphereGeometry(0.07, 10, 8), finger: new THREE.BoxGeometry(0.03, 0.14, 0.03),
+    foot: null, pelvis: null, shard: new THREE.BoxGeometry(0.07, 0.14, 0.05),
+  };
+  function buildGiant() {
+    if (!SG.jaw) { SG.jaw = roundBox(0.34, 0.12, 0.3, 2, 2, 2, 0.04); SG.foot = roundBox(0.14, 0.07, 0.3, 2, 2, 2, 0.03); SG.pelvis = roundBox(0.46, 0.16, 0.22, 2, 2, 2, 0.06); }
+    const g = new THREE.Group(), parts = [];
+    const add = (geo, mat, x, y, z, parent = g, rot) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(...rot); m.castShadow = true; parent.add(m); parts.push(m); return m; };
+    const bone = (parent, x, y, z, len, rot) => { const b = add(SG.bone, BONE, x, y, z, parent, rot); b.scale.y = len; return b; };
+    // huvud
+    const head = new THREE.Group(); head.position.y = 2.05; g.add(head);
+    add(SG.skull, BONE, 0, 0, 0, head).scale.set(1, 1.08, 1.05);
+    add(SG.jaw, BONE, 0, -0.27, 0.06, head);
+    add(SG.eye, HOLE, -0.11, 0.03, 0.26, head); add(SG.eye, HOLE, 0.11, 0.03, 0.26, head);
+    add(SG.nose, HOLE, 0, -0.08, 0.3, head, [Math.PI, 0, 0]);
+    // ryggrad, revben, bäcken
+    for (let i = 0; i < 7; i++) add(SG.vert, BONE, 0, 1.0 + i * 0.11, -0.12);
+    for (let i = 0; i < 4; i++) { const r = add(SG.rib, BONE, 0, 1.58 - i * 0.12, 0.0, g, [Math.PI / 2, 0, Math.PI * 1.22]); r.scale.setScalar(1 - i * 0.07); }
+    add(SG.bone, BONE, 0, 1.4, 0.27).scale.y = 0.4;
+    add(SG.pelvis, BONE, 0, 0.95, -0.02);
+    bone(g, 0, 1.68, -0.05, 0.84, [0, 0, Math.PI / 2]);
+    // armar uppsträckta
+    const arms = [-1, 1].map(sx => {
+      const sh = new THREE.Group(); sh.position.set(sx * 0.42, 1.68, 0); sh.rotation.z = sx * 2.5; g.add(sh);
+      add(SG.knob, BONE, 0, 0, 0, sh); bone(sh, 0, -0.25, 0, 0.5);
+      const el = new THREE.Group(); el.position.y = -0.52; el.rotation.z = sx * 0.4; sh.add(el);
+      add(SG.knob, BONE, 0, 0, 0, el); bone(el, -0.03, -0.22, 0, 0.45); bone(el, 0.03, -0.22, 0, 0.45);
+      for (let f = 0; f < 4; f++) add(SG.finger, BONE, -0.06 + f * 0.04, -0.52, 0, el, [0, 0, (f - 1.5) * 0.15]);
+      return sh;
+    });
+    // ben
+    for (const sx of [-1, 1]) {
+      add(SG.knob, BONE, sx * 0.14, 0.88, 0); bone(g, sx * 0.14, 0.62, 0, 0.5); add(SG.knob, BONE, sx * 0.14, 0.36, 0);
+      bone(g, sx * 0.14 - 0.02, 0.18, 0, 0.36); bone(g, sx * 0.14 + 0.02, 0.18, 0, 0.36); add(SG.foot, BONE, sx * 0.14, 0.03, 0.08);
+    }
+    return { g, parts, arms, head };
+  }
+  function makeGiant(z) {
+    return obstacle('giant', z, (o, g) => {
+      const sk = buildGiant(), S = 2.9;
+      sk.g.scale.setScalar(S); g.add(sk.g);
+      Object.assign(o, { sk, S, hitH: 5.5, x: pick([-3.5, -1.75, 0, 1.75, 3.5]), ph: rand(0, 6.28) });
+      g.position.x = o.x;
+      o.update = () => {
+        if (o.dead) return;
+        sk.g.rotation.z = Math.sin(t * 1.6 + o.ph) * 0.06;
+        sk.arms[0].rotation.z = -2.5 + Math.sin(t * 3 + o.ph) * 0.3; sk.arms[1].rotation.z = 2.5 - Math.sin(t * 3 + o.ph + 1) * 0.3;
+        sk.head.rotation.y = Math.sin(t * 0.9 + o.ph) * 0.4;
+      };
+      o.hit = () => (o.dead ? null : (hitCircle(o.x, o.z, 0.5 * o.S) && { x: o.x, z: o.z, y: 1.5, giant: true }));
+    });
+  }
+  function smashGiant(o) {
+    o.dead = true; giantsHit++;
+    o.g.updateMatrixWorld(true);
+    const c = new V3(o.x, hillY(o.z) + 3, o.z);
+    for (const m of o.sk.parts) {
+      track.attach(m);
+      debris.push({ m, v: new V3(rand(-9, 9) + player.kx, rand(5, 16), -speed * rand(0.7, 1.5) + rand(-4, 4)), w: rv(14), life: 4.5, r: 0.15 });
+    }
+    // extra benflisor
+    for (let i = 0; i < 60; i++) {
+      const m = new THREE.Mesh(SG.shard, BONE); m.position.copy(c).add(rv(1.6)); m.scale.setScalar(rand(0.6, 2)); m.rotation.set(rand(0, 6), rand(0, 6), rand(0, 6)); track.add(m);
+      debris.push({ m, v: new V3(rand(-11, 11), rand(3, 15), -speed * rand(0.6, 1.4) + rand(-6, 6)), w: rv(16), life: 3.5, r: 0.06 });
+    }
+    for (let i = 0; i < 40; i++) emit(c.clone().add(rv(1.5)), new V3(rand(-6, 6), rand(1, 8), rand(-6, 6)), rand(0.4, 1.1), rand(0.6, 1.4), 0xeee6d2, false, 1.2, -6, 0.7);
+    const sev = 3 * VEH.ram * (hasPart(car, 'accBull') ? 0.5 : 1);
+    damage = Math.min(100, damage + sev);
+    dent(car, local(rand(-0.4, 0.4), 0.8, -2.1), new V3(0, -0.2, 1).normalize(), 0.08 + sev * 0.015, 0.9);
+    speed *= 0.9; shake = 0.45;
+    crunch(0.35); [880, 660, 990, 520, 740].forEach((f, i) => setTimeout(() => beep(f, 0.05, 'triangle', 0.05), i * 45));
+    try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
+    popup(`💀 JÄTTESKELETT! +50 XP`);
+    checkWreck({ x: o.x });
+  }
   function smashMonster(o) {
     o.dead = true; monstersHit++;
     o.g.updateMatrixWorld(true);
@@ -1395,6 +1484,54 @@
     sparks(new V3(o.x, hillY(o.z) + 1, o.z), 6, 5);
     beep(520 + rand(0, 300), 0.08, 'square', 0.05, -200); crunch(0.08);
     popup(`SPLAT! MONSTER ×${monstersHit}`);
+    checkWreck({ x: o.x });
+  }
+
+  // Reparationskit: dyker bara upp när man har totalkvaddat bilen några gånger på samma bana.
+  let kitsLeft = 0, kitRate = 0;
+  const KIT = {
+    box: null, lid: new THREE.TorusGeometry(0.16, 0.04, 8, 16, Math.PI), bar: new THREE.BoxGeometry(0.08, 0.3, 0.02),
+    red: new THREE.MeshStandardMaterial({ color: lin(0xd9322a), roughness: 0.35, metalness: 0.2 }),
+    white: new THREE.MeshStandardMaterial({ color: lin(0xffffff), roughness: 0.4, emissive: lin(0xffffff), emissiveIntensity: 0.3 }),
+  };
+  function makeKit(z) {
+    return obstacle('kit', z, (o, g) => {
+      if (!KIT.box) KIT.box = roundBox(0.9, 0.5, 0.5, 3, 2, 2, 0.08);
+      const k = new THREE.Group(); k.position.y = 1.3; g.add(k);
+      mk(KIT.box, KIT.red, k);
+      const h = mk(KIT.lid, M.steel, k, 0, 0.25, 0); h.rotation.y = Math.PI / 2;
+      for (const zz of [0.26, -0.26]) { mk(KIT.bar, KIT.white, k, 0, 0, zz, false); const b = mk(KIT.bar, KIT.white, k, 0, 0, zz, false); b.rotation.z = Math.PI / 2; }
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0x5cff8a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 }));
+      glow.scale.setScalar(3.2); glow.position.y = 1.3; g.add(glow);
+      o.x = pick(LANES); g.position.x = o.x; o.hitH = 3;
+      o.update = dt => { if (o.taken) return; k.rotation.y += 2 * dt; k.position.y = 1.3 + Math.sin(t * 3) * 0.2; glow.material.opacity = 0.6 + Math.sin(t * 5) * 0.2; };
+      o.hit = () => {
+        if (!o.taken && Math.abs(player.x - o.x) < 1.4 && Math.abs(player.z - o.z) < 2.4) { o.taken = true; g.visible = false; repairCar(o); }
+        return null;
+      };
+      o.dispose = () => glow.material.dispose();
+    });
+  }
+  function repairCar(o) {
+    const fix = Math.min(damage, 30);
+    damage -= fix;
+    for (const m of Object.values(car.parts)) {
+      if (!m.userData.deform || m.parent !== car.g || !m.geometry.userData.mask) continue;
+      const a = m.geometry.attributes.position.array, orig = m.geometry.userData.orig;
+      for (let i = 0; i < a.length; i++) a[i] += (orig[i] - a[i]) * 0.6;
+      m.geometry.attributes.position.needsUpdate = true; m.geometry.computeVertexNormals();
+      const N = m.geometry.userData.normals, mask = m.geometry.userData.mask, na = m.geometry.attributes.normal.array;
+      for (let j = 0; j < mask.length; j++) if (!mask[j]) { na[j * 3] = N[j * 3]; na[j * 3 + 1] = N[j * 3 + 1]; na[j * 3 + 2] = N[j * 3 + 2]; }
+    }
+    if (car.wind && car.parts.wind.parent === car.g) {
+      const w = car.parts.wind; w.visible = true; w.material.map = null; w.material.color.copy(M.glass.color); w.material.needsUpdate = true; car.wind = 0;
+    }
+    const lost = Object.keys(WHEEL_POS).find(n => !hasPart(car, n));
+    if (lost) addWheel(car.g, car.parts, lost, ACC.tires);
+    const p = new V3(player.x, player.y + 1, player.z);
+    for (let i = 0; i < 40; i++) emit(p.clone().add(rv(1.2)), new V3(rand(-3, 3), rand(2, 6), rand(-3, 3)), rand(0.2, 0.4), rand(0.6, 1.1), pick([0x5cff8a, 0xffffff, 0xb6ffcf]), true, 0, -3);
+    [523, 784, 1047, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'triangle', 0.05), i * 70));
+    popup(`🔧 REPARERAD −${Math.round(fix)} %${lost ? ' + HJUL' : ''}`);
   }
 
   function makeCoins(z) {
@@ -1445,6 +1582,7 @@
     obstacles.push(...chosen[1].make(nextSpawn));
     const gap = Math.max(30, (Math.max(36, 66 - m * 0.035) + (chosen[0] === 'traffic' ? 14 : 0)) * TRACK.gap);
     if (Math.random() < 0.55) obstacles.push(...makeCoins(nextSpawn - gap * 0.45));
+    if (kitsLeft > 0 && m > 120 && Math.random() < kitRate) { kitsLeft--; obstacles.push(makeKit(nextSpawn - gap * 0.5)); }
     if (Math.random() < TRACK.monsterRate) for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) obstacles.push(makeMonster(nextSpawn - gap * rand(0.25, 0.75)));
     nextSpawn -= gap;
   }
@@ -1475,6 +1613,7 @@
 
   function onHit(o, h) {
     if (h.monster) { smashMonster(o); return; }
+    if (h.giant) { smashGiant(o); return; }
     if (o.cool > 0 || inv > 0) return;
     o.cool = 1.2; inv = 0.3;
     const lx = clamp((h.x - player.x) / SC, -0.95, 0.95), lz = clamp((h.z - player.z) / SC, -2.15, 2.15), ly = clamp((h.y - relY()) / SC, 0.3, 1.4);
@@ -1529,7 +1668,8 @@
     if (o.onHit) o.onHit(h);
     crunch(0.18 + sev * 0.006); beep(110, 0.3, 'sawtooth', 0.06, -60);
     try { navigator.vibrate && navigator.vibrate(60 + sev * 4); } catch (e) {}
-    scrapPopup(`${label ? label + ' ' : 'KRASCH '}+${Math.round(sev)} %`);
+    popup(`${label ? label + ' ' : 'KRASCH '}+${Math.round(sev)} %`);
+    checkWreck(h);
   }
 
   function landing(impact) {
@@ -1546,12 +1686,53 @@
     if (impact > 14 && Math.random() < 0.5) detach(car, 'wheelF' + side, new V3(side === 'R' ? 1 : -1, 0, 0), -speed * 0.75);
     speed *= 0.8;
     try { navigator.vibrate && navigator.vibrate(50 + sev * 4); } catch (e) {}
-    if (sev >= 1) scrapPopup(`HÅRD LANDNING +${Math.round(sev)} %`);
+    if (sev >= 1) popup(`HÅRD LANDNING +${Math.round(sev)} %`);
+    checkWreck({ x: player.x + rand(-1, 1) });
   }
 
-  function scrapPopup(text) {
-    if (damage >= 100 && !scrapShown) { scrapShown = true; popup('SKROTHÖG – MEN DEN RULLAR!'); }
-    else popup(text);
+  // 100 % skada: bilen exploderar, voltar i slow motion och rundan är förlorad.
+  let timeScale = 1, wreckT = 0;
+  function checkWreck(h) { if (damage >= 100 && state === 'play') wreck(h); }
+  function wreck(h) {
+    state = 'wreck'; wreckT = 0; timeScale = 0.3;
+    const dirX = Math.sign(player.x - h.x) || (Math.random() < 0.5 ? -1 : 1);
+    player.wreck = { v: new V3(dirX * rand(3, 6), rand(9, 12), -speed * 0.8), w: new V3(rand(-4, 4), rand(-3, 3), dirX * rand(-6, -3)) };
+    const p = car.g.position.clone().add(new V3(0, 1, 0));
+    for (const n of Object.keys(car.parts)) if (n !== 'body' && n !== 'cabin' && Math.random() < 0.7) detach(car, n, new V3(rand(-1, 1), 0, rand(-1, 1)), -speed * 0.6);
+    fire(p, 30); smoke(p, true, 20); sparks(p, 40, 14);
+    flash.color.set(0xff8a2a); flash.distance = 30; flash.position.copy(p); flash.intensity = 7;
+    damage = 100; shake = 0.8; drag = null;
+    crunch(0.5); beep(60, 1.2, 'sawtooth', 0.12, -30);
+    try { navigator.vibrate && navigator.vibrate([120, 60, 200]); } catch (e) {}
+    popup('💥 TOTALKVADDAD!'); hud();
+    $('pauseBtn').hidden = true;
+    setTimeout(() => { if (state === 'wreck') lose(); }, 2900);
+  }
+  function lose() {
+    const prevL = level();
+    const gain = Math.round(dist * 0.05 + coins * 3 + monstersHit * 4 + giantsHit * 50);
+    save.xp += gain;
+    save.fails = save.fails || {}; save.fails[TRACK.id] = (save.fails[TRACK.id] || 0) + 1;
+    persist();
+    const L = level(), [a, b] = xpRange(L);
+    $('ovSign').textContent = '💥 Totalkvaddad på ' + TRACK.name;
+    $('ovTitle').textContent = 'Skrot i backen';
+    $('ovStars').innerHTML = starHtml(0); $('ovStars').setAttribute('aria-label', 'Inga stjärnor');
+    $('ovCondL').textContent = 'Kom'; $('ovCond').textContent = `${Math.floor(dist)} / ${TRACK.len} m`;
+    $('ovTime').textContent = runTime.toFixed(1) + ' s';
+    $('ovParts').textContent = lostParts; $('ovCoins').textContent = coins;
+    $('ovMon').textContent = `${monstersHit} · ${giantsHit}`;
+    $('ovBestC').textContent = save.best[TRACK.id] != null ? save.best[TRACK.id] + ' %' : '–';
+    $('ovLvl').textContent = 'Nivå ' + L;
+    $('ovXp').textContent = `+${gain} XP · ${save.xp - a} / ${b - a}`;
+    $('ovBar').style.width = ((save.xp - a) / (b - a) * 100) + '%';
+    const lines = []; for (let l = prevL + 1; l <= L; l++) lines.push(...unlocksAt(l));
+    const box = $('ovUnlocks'); box.hidden = !lines.length;
+    box.innerHTML = `<b>Nivå ${L}!</b>` + lines.map(x => `<span>Upplåst: ${x}</span>`).join('');
+    const f = save.fails[TRACK.id];
+    $('ovNew').hidden = f < 2; $('ovNew').textContent = f === 2 ? '🔧 Nu dyker reparationskit upp på banan!' : '🔧 Reparationskit finns på banan';
+    $('nextBtn').hidden = false; $('nextBtn').textContent = 'Försök igen'; $('againBtn').hidden = true;
+    $('over').hidden = false; $('hud').hidden = true; $('camTag').hidden = true;
   }
 
   const verdict = c => c >= 80 ? 'Nästan som ny' : c >= 50 ? 'Rejält tilltygad' : c >= 20 ? 'Knappt i mål' : 'En rullande skrothög';
@@ -1561,14 +1742,16 @@
     const cond = Math.max(0, Math.round(100 - damage));
     const stars = cond >= 75 ? 3 : cond >= 40 ? 2 : 1;
     const prevL = level(), prevOpen = TRACKS.filter(trackOpen).length;
-    const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + monstersHit * 4 + stars * 20);
+    const gain = Math.round(TRACK.len * 0.1 * (1 + TRACKS.indexOf(TRACK) * 0.25) + cond + coins * 3 + monstersHit * 4 + giantsHit * 50 + stars * 20);
     save.xp += gain;
     save.stars[TRACK.id] = Math.max(save.stars[TRACK.id] || 0, stars);
+    save.fails[TRACK.id] = 0;
     const isNew = cond > (save.best[TRACK.id] ?? -1);
     if (isNew) save.best[TRACK.id] = cond;
     persist();
     const L = level(), [a, b] = xpRange(L);
     $('ovTitle').textContent = verdict(cond);
+    $('ovCondL').textContent = 'Bilens skick'; $('againBtn').textContent = 'Kör igen'; $('againBtn').hidden = false; $('ovNew').textContent = 'Nytt rekord på banan!';
     $('ovSign').textContent = '🌀 Teleporterad från ' + TRACK.name;
     const nextT = TRACKS[TRACKS.indexOf(TRACK) + 1];
     $('nextBtn').hidden = !nextT;
@@ -1579,7 +1762,7 @@
     $('ovTime').textContent = runTime.toFixed(1) + ' s';
     $('ovParts').textContent = lostParts;
     $('ovCoins').textContent = coins;
-    $('ovMon').textContent = monstersHit;
+    $('ovMon').textContent = `${monstersHit} · ${giantsHit}`;
     $('ovBestC').textContent = save.best[TRACK.id] + ' %';
     $('ovLvl').textContent = 'Nivå ' + L;
     $('ovXp').textContent = `+${gain} XP · ${save.xp - a} / ${b - a}`;
@@ -1649,7 +1832,7 @@
   cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
   window.addEventListener('keydown', e => {
     keys[e.key] = true;
-    if ((e.key === 'Enter' || e.key === ' ') && state === 'finish' && !$('over').hidden) { e.preventDefault(); startTrack(TRACKS[TRACKS.indexOf(TRACK) + 1] || TRACK); }
+    if ((e.key === 'Enter' || e.key === ' ') && (state === 'finish' || state === 'wreck') && !$('over').hidden) { e.preventDefault(); startTrack(state === 'finish' && TRACKS[TRACKS.indexOf(TRACK) + 1] || TRACK); }
     if (e.key === 'p' || e.key === 'Escape') state === 'play' ? pause() : state === 'paused' && resume();
   });
   window.addEventListener('keyup', e => { keys[e.key] = false; });
@@ -1717,6 +1900,9 @@
   function start() {
     initAudio(); reset(); state = 'play'; show(null);
     $('hud').hidden = false; $('pauseBtn').hidden = false;
+    const f = (save.fails || {})[TRACK.id] || 0;
+    kitsLeft = f >= 4 ? 3 : f >= 2 ? 2 : 0; kitRate = f >= 4 ? 0.22 : 0.13;
+    if (kitsLeft) setTimeout(() => popup('🔧 REPARATIONSKIT PÅ BANAN'), 600);
     beep(392, 0.1, 'square', 0.05); setTimeout(() => beep(587, 0.15, 'square', 0.05), 110);
   }
   function pause() { if (state !== 'play') return; state = 'paused'; drag = null; show('paused'); }
@@ -1726,7 +1912,7 @@
   $('tracksBack').addEventListener('click', goMenu);
   $('garageBack').addEventListener('click', goMenu);
   $('againBtn').addEventListener('click', () => startTrack(TRACK));
-  $('nextBtn').addEventListener('click', () => { const n = TRACKS[TRACKS.indexOf(TRACK) + 1]; if (n) startTrack(n); });
+  $('nextBtn').addEventListener('click', () => { const n = state === 'wreck' ? TRACK : TRACKS[TRACKS.indexOf(TRACK) + 1]; if (n) startTrack(n); });
   $('ovTracks').addEventListener('click', goTracks);
   $('ovGarage').addEventListener('click', goGarage);
   $('pauseBtn').addEventListener('click', pause);
@@ -1753,7 +1939,8 @@
   function carPoint(x, y, z) { car.g.updateMatrixWorld(true); return track.worldToLocal(car.g.localToWorld(tmp.set(x, y, z)).clone()); }
 
   function update(rdt) {
-    const dt = rdt;
+    if (state === 'wreck') { wreckT += rdt; if (wreckT > 1.3) timeScale = Math.min(1, timeScale + rdt * 0.8); }
+    const dt = rdt * timeScale;
     t += dt;
 
     if (state === 'play') {
@@ -1783,7 +1970,20 @@
       speed = 0; player.tx = 0;
     }
 
-    {
+    if (player.wreck) {
+      const w = player.wreck;
+      w.v.addScaledVector(GRAV, dt);
+      car.g.position.addScaledVector(w.v, dt);
+      car.g.rotation.x += w.w.x * dt; car.g.rotation.y += w.w.y * dt; car.g.rotation.z += w.w.z * dt;
+      const gy = hillY(car.g.position.z) + 0.6;
+      if (car.g.position.y < gy && w.v.y < 0) {
+        car.g.position.y = gy; w.v.y *= -0.35; w.v.x *= 0.6; w.v.z *= 0.6; w.w.multiplyScalar(0.6);
+        if (Math.abs(w.v.y) > 1.5) { sparks(car.g.position.clone(), 18, 8); crunch(0.2); shake = 0.4; }
+      }
+      player.x = car.g.position.x; player.z = car.g.position.z; player.y = car.g.position.y - 0.6; dist = -player.z;
+      speed = Math.max(0, -w.v.z);
+      if (Math.random() < dt * 30) { fire(carPoint(0, 1.1, 0)); if (Math.random() < 0.5) smoke(carPoint(0, 1.4, 0), true); }
+    } else {
       dist += speed * dt; player.z = -dist;
       const prev = player.x;
       player.x += (player.tx - player.x) * Math.min(1, dt * (slip > 0 ? 1.8 : player.air ? 1.5 : VEH.steer * (ACC.armor ? 0.9 : 1) * Math.max(0.35, 1 - damage * 0.0062))) + player.kx * dt;
@@ -1925,6 +2125,7 @@
     $('hudSpeed').textContent = Math.round(speed * 3.6);
     $('hudCoins').textContent = coins;
     $('hudMon').textContent = monstersHit;
+    $('hudGiant').textContent = giantsHit;
     const d = Math.round(damage);
     $('hudDmg').textContent = d + ' %';
     const bar = $('hudBar');
@@ -1974,7 +2175,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; }, spawnKind(k, d = 40) { obstacles.push(...(k === 'monster' ? [makeMonster(player.z - d, player.x)] : KINDS[k].make(player.z - d))); }, addXp(v) { save.xp += v; persist(); renderMenu(); }, get save() { return save; } };
+  window.__game = { get y() { return player.y; }, get air() { return player.air; }, get obs() { return obstacles.map(o => [o.kind, Math.round(o.z), o.x && +o.x.toFixed(1)]); }, get pz() { return player.z; }, get state() { return state; }, get damage() { return damage; }, get dist() { return dist; }, setDist(v) { dist = v; nextSpawn = -v - 60; nextSign = -Math.ceil(v / 100 + 1) * 100; }, setDamage(v) { damage = v; }, spawnKit(d = 40) { obstacles.push(makeKit(player.z - d)); obstacles[obstacles.length - 1].x = player.x; obstacles[obstacles.length - 1].g.position.x = player.x; }, spawnKind(k, d = 40) { obstacles.push(...(k === 'monster' ? [makeMonster(player.z - d, player.x)] : KINDS[k].make(player.z - d))); }, addXp(v) { save.xp += v; persist(); renderMenu(); }, get save() { return save; } };
 })();
 </script>
 <!-- GAME END -->

@@ -1,6 +1,6 @@
 # Dödsbacken
 
-Ett 3D-mobilspel där en bil ska ta sig nerför en kuperad backe full av hinder till en stor rund teleportportal som tar en vidare till nästa bana. Det finns inga liv: bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra, men den rullar alltid vidare – sista biten drar portalen in bilen, så även en helt kvaddad bil glider in.
+Ett 3D-mobilspel där en bil ska ta sig nerför en kuperad backe full av hinder till en stor rund teleportportal som tar en vidare till nästa bana. Bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra. Sista biten drar portalen in bilen, men når skadan 100 % är det slut.
 
 Backen går i krön och svackor (mer kuperat på svårare banor) och bilen kan lätta över skarpa krön. Kameran byter vinkel under resan – bakifrån, uppifrån, lågt, från sidorna, snett ovanifrån och långt bakom – vilket gör det svårare att styra.
 
@@ -51,6 +51,14 @@ Framsteg sparas i webbläsaren på enheten.
 ## Hinder och fällor
 
 Bilar i vägen, rullande stenblock, tunnor som rullar mot en, snurrande hammare, jättegupp, olja/is/lava, glidande mur, jättehammare, pendelklinga, krossväggar, spikmattor som skjuter upp (kan ge punka), minor som spränger upp bilen, sågklingor som glider i en skåra, eldkastare från vägkanten, fallluckor, låga balkar och smala passager. Samma hindertyp kommer inte två gånger inom tre hinder.
+
+## Förlora och reparera
+
+Når skadan 100 % exploderar bilen och voltar i slow motion – rundan är förlorad (ingen portal, inga stjärnor, men lite XP för sträcka, monster och skelett). Har man totalkvaddat bilen två gånger på samma bana börjar reparationskit dyka upp där (fler efter fyra försök). Ett kit tar bort 30 % skada, rätar delvis ut bucklorna, lagar vindrutan och sätter tillbaka ett tappat hjul. När banan väl är klarad försvinner kiten.
+
+## Jätteskelett
+
+Cirka sex meter höga skelett står mitt i vägen och viftar med armarna. Kör ner dem så sprängs de i mängder av benbitar och ger +50 XP styck.
 
 ## Monster
 
