@@ -17,7 +17,8 @@ ladda('data/val.js');
 ladda('js/sagomotor.js');
 ladda('js/illustrationer.js');
 const sagofiler = fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js')).sort();
-sagofiler.forEach((f) => ladda('sagor/' + f));
+sagofiler.filter((f) => f !== 'extra.js').forEach((f) => ladda('sagor/' + f));
+ladda('sagor/extra.js');
 
 const S = sandbox.Sagokompis;
 let fel = 0;
@@ -39,6 +40,20 @@ for (const saga of S.sagor) {
           const allt = ut.scener.map((s) => s.stycken.join(' ')).join(' ');
           if (/[{}\[\]]/.test(allt)) { console.error(saga.id + ' ' + plats + ' ' + figur.id + ': kvarglömd tagg'); fel++; }
           if (barnPron === 'hen') antal.push(ut.ord);
+          for (const spanning of ['mysig', 'aventyr']) {
+            for (const valt of ['a', 'b']) {
+              const v2 = S.motor.byggSaga(saga.id, Object.assign({}, val, { spanning }), { valt, forra: 'när vi hittade Pim' });
+              const t2 = v2.scener.map((s) => s.stycken.join(' ')).join(' ');
+              if (/[{}\[\]]/.test(t2)) { console.error(saga.id + ' ' + plats + ' ' + figur.id + ' ' + spanning + ' ' + valt + ': kvarglömd tagg'); fel++; }
+            }
+          }
+          const ex = S.sagoExtra[saga.id];
+          if (!ex || !ex.val || !ex.aventyr || !ex.hjalp) { console.error(saga.id + ': saknar extra (val, äventyr eller hjälp)'); fel++; }
+          else {
+            if (!ut.scener[ex.val.scen].val || ut.scener[ex.val.scen].val.efter < 0) { console.error(saga.id + ': valpunkten hamnar fel'); fel++; }
+            if (!ut.scener[ex.hjalp.scen].hjalp || ut.scener[ex.hjalp.scen].hjalp.efter < 0) { console.error(saga.id + ': hjälp-momentet hamnar fel'); fel++; }
+            if (!S.illustrationer.SAKER.includes(ex.hjalp.ikon)) { console.error(saga.id + ': okänd hjälp-ikon ' + ex.hjalp.ikon); fel++; }
+          }
           const ctx = S.motor.skapaSammanhang(val);
           ut.scener.forEach((sc) => {
             const spec = S.illustrationer.tolka(S.motor.fyllI(sc.bild, ctx));

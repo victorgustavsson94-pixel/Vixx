@@ -30,6 +30,17 @@ Appen är byggd som en webbapp (HTML, CSS och JavaScript utan byggsteg, samma up
 6. Kvällsläge dämpar färger och bilder. Timern kan avsluta uppläsningen när sagan är slut eller efter 5, 10 eller 15 minuter, och tonar då ner till en ”Sov gott”-skärm.
 7. ”Sagoval” tar dig tillbaka utan att sagan försvinner, och den sparas även om appen stängs.
 
+### Spänning, lek och effekter
+
+- **Du bestämmer!** Mitt i varje saga stannar uppläsningen och barnet väljer mellan två vägar, till exempel ”den slingriga vägen eller den branta genvägen”. Båda vägarna leder vidare till ett lugnt slut.
+- **Hjälp till!** I varje saga får barnet hjälpa till genom att trycka på något i berättelsen: tända lyktan, räkna ner med raketen eller vagga månen till sömns. Uppläsningen väntar tills det är gjort.
+- **Hur spännande ska det vara?** Före sagan väljer man *Mysig*, *Lite pirrig* eller *Stort äventyr*. Stort äventyr lägger till en extra spännande stund i varje saga (som alltid löses tryggt), och Mysig lägger till en lugnande mening i stället.
+- **Den gömda musen:** en liten mus tittar fram någonstans i varje scenbild. Hittar man alla fem händer något extra.
+- **Fortsättning följer:** kompisen minns förra kvällens äventyr (”Minns du äventyret med den ensamma stjärnan?”), och efter sagan föreslås nästa kvälls äventyr.
+- **Ljudvärld:** mjuka bakgrundsljud per plats, skapade direkt i appen: vågor, fjällvind, en uggla i skogen, en svävande rymdton, en sprakande brasa på slottet och en speldosa i barnets rum. Kan stängas av med notknappen.
+- **Kompisens röst:** kompisens repliker läses med en egen, ljusare röst.
+- **Effekter:** stjärnstoft vid varje tryck, valkort som studsar, stjärnhimmel med stjärnfall på startsidan, en sagobok som slås upp när sagan skapas, glittersvep vid scenbyten och stjärnregn när sagan är slut. På iPhone känns valen också i handen (haptik). I kvällsläget blir effekterna färre, och med ”Reducera rörelse” stängs de av.
+
 ### Scenbyten under uppläsningen
 
 Sagan läses mening för mening. När första meningen i en ny scen börjar läsas byts bilden och texten, och stycket som läses markeras. Det gör att bildbytet följer uppläsningen exakt, och att paus och tempoändring fortsätter från rätt mening.
@@ -63,18 +74,22 @@ Varje scen har en egen bild, alltså 100 scenbilder. Bild-id är `<saga>-scen<n>
 
 ### Riktiga bilder från Higgsfield
 
-1. `bildprompter/bildprompter.csv` (öppna i Google Sheets eller Excel) har 240 prompter: en per saga, plats och scen. Det finns också en läsbar version i `bildprompter/bildprompter.md`. Prompterna är skrivna för Seedream 5.0 Lite eller Flux.2 Pro i formatet 4:3.
+Stilen för hela appen är 3D-animerad långfilmskänsla med lugn kvällsbelysning.
+
+1. `bildprompter/bildprompter.csv` (öppna i Google Sheets eller Excel) har 240 scenprompter: en per saga, plats och scen. `bildprompter/app-bilder.csv` har appens övriga bilder: barnets referensbild, de 7 figurerna, 6 platskort, startbilden och appikonen. `bildprompter/bildprompter.md` är samma sak som läsbar lista, med ordningen att göra dem i. Prompterna är skrivna för Seedream 5.0 Lite eller Flux.2 Pro.
 2. Spara varje bild med filnamnet i kolumnen `filnamn` under `www/illustrationer/`, till exempel `www/illustrationer/riktiga/s01/rymden/scen-1.jpg`.
 3. Kör `node verktyg/registrera-bilder.js`. Appen visar då den riktiga bilden. Scener som saknar bild visar fortfarande prototypbilden.
 
-Bilderna genereras med barnet men utan kompis. Appen lägger den valda kompisen ovanpå bilden, så att samma bild fungerar för alla sju figurer.
+Scenbilderna genereras med barnet men utan kompis. Appen lägger in den valda 3D-figuren i bilden, så att samma bild fungerar för alla sju figurer. Figur-, plats- och startbilderna används också i valkorten och på startsidan när de finns.
+
+**Rörliga scener:** gör korta videoloopar av scenbilderna i Higgsfield (bild till video) och spara dem som `scen-<n>.mp4` bredvid bilden. Appen spelar då videon i stället för stillbilden. Rörelseprompten finns i `bildprompter.md`. Utan video får bilderna ändå en långsam kamerarörelse.
 
 ## Verktyg
 
 | Kommando | Vad det gör |
 |----------|-------------|
 | `npm run kontrollera` | Kontrollerar alla sagor för alla figurer och platser: att alla taggar fylls i, ordantal, fem scener, att bilderna finns och att alla kombinationer har en saga |
-| `npm run testa` | Kör hela användarflödet i Chromium med tre iPhone-storlekar (SE, 15 och 15 Pro Max), med en låtsasröst som mäter scenbytena |
+| `npm run testa` | Kör hela användarflödet i Chromium med tre iPhone-storlekar (SE, 15 och 15 Pro Max), med en låtsasröst som mäter scenbytena: val, spänningsnivå, gömd mus, uppläsning med val och hjälp till, kompisens röst, nästa kvälls äventyr, paus, tempo, kvällsläge och timer |
 | `npm run bilder` | Exporterar de 100 prototypbilderna som SVG |
 | `npm run prompter` | Skriver om promptlistan för Higgsfield |
 | `npm run registrera-bilder` | Kopplar in färdiga bilder |
@@ -100,7 +115,8 @@ Det som saknas och kräver dig:
 
 ## Vad som fortfarande är prototyp
 
-- **Illustrationerna** är genererade vektorbilder (prototypbilder) tills de riktiga bilderna från Higgsfield är på plats.
+- **Illustrationerna** är genererade vektorbilder (prototypbilder) tills de riktiga 3D-bilderna från Higgsfield är på plats. Detsamma gäller figurerna i valkorten och appikonen.
+- **Ljudvärlden** är enkla syntetiska ljud skapade i appen, inte inspelade ljud eller musik.
 - **Uppläsningen** är text-till-tal, inte inläst av en berättare. Rösten beror på vilka svenska röster som finns på telefonen.
 - **Kvällsläget** dämpar appens färger. Telefonens egen skärmljusstyrka ändras inte.
 - När appen körs i webbläsaren pausas uppläsningen om man byter app eller låser skärmen. I iPhone-appen fortsätter den, men det har inte kunnat testas på en riktig iPhone härifrån.

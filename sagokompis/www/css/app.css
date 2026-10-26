@@ -141,6 +141,7 @@ button { font: inherit; color: inherit; }
 .bildram { position: relative; border-radius: var(--rund); overflow: hidden; aspect-ratio: 4 / 3; background: var(--natt-2); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
 .scenbild { position: absolute; inset: 0; }
 .scenbild > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.1s ease; }
+.scenbild video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .scenbild > .tonar-ut { opacity: 0; }
 .scenbild .kompisfigur, .forhand-bild .kompisfigur { position: absolute; height: 34%; width: auto; transform: translateX(-50%); filter: drop-shadow(0 6px 8px rgba(10, 12, 40, 0.35)); pointer-events: none; }
 /* Levande bild: långsam zoom och panorering, som en filmkamera som rör sig sakta */
@@ -193,6 +194,74 @@ body.kvall { --text: #d9cfe9; --text-dampad: #9d95bd; --persika: #d9b48e; --vald
 body.kvall .bildram { filter: brightness(0.72) saturate(0.85); }
 body.kvall .primar, body.kvall .spela { background: #c9a47e; box-shadow: none; }
 body.kvall .spelarfot { background: rgba(9, 11, 34, 0.96); }
+
+/* ---------- Val i sagan, hjälp till och den gömda musen ---------- */
+.valruta, .hjalpruta { margin: 0.4rem 0 1.1rem; padding: 1rem; border-radius: 24px; text-align: center; background: radial-gradient(120% 140% at 50% 0%, rgba(246, 209, 168, 0.22), rgba(185, 163, 227, 0.12)); border: 2px solid rgba(246, 209, 168, 0.45); animation: ruta-in 0.6s cubic-bezier(.3, 1.4, .5, 1) both; }
+.valruta.vantar, .hjalpruta.vantar { box-shadow: 0 0 0 4px rgba(246, 209, 168, 0.18), 0 0 34px rgba(246, 209, 168, 0.3); animation: ruta-in 0.6s cubic-bezier(.3, 1.4, .5, 1) both, andas 3s ease-in-out infinite 0.6s; }
+.ruta-rubrik { margin: 0; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.85rem; color: var(--persika); }
+.ruta-fraga { margin: 0.3rem 0 0.8rem; font-size: 1.15rem; font-weight: 700; line-height: 1.4; }
+.ruta-knappar { display: grid; gap: 10px; }
+.valknapp { background: linear-gradient(180deg, #b9a3e3, #9b86d0); color: #1c1640; min-height: 58px; font-size: 1.1rem; box-shadow: 0 6px 16px rgba(155, 134, 208, 0.35); }
+.hjalpknapp { width: 132px; height: 132px; border-radius: 50%; border: 3px solid rgba(255, 241, 201, 0.6); background: radial-gradient(circle at 50% 40%, rgba(255, 241, 201, 0.35), rgba(44, 54, 112, 0.6)); cursor: pointer; display: grid; place-items: center; position: relative; margin: 0 auto; box-shadow: 0 0 30px rgba(255, 233, 183, 0.35); }
+.hjalpknapp svg { width: 92px; height: 78px; }
+.hjalpknapp.puls { animation: puls 0.45s cubic-bezier(.3, 1.8, .5, 1); }
+.hjalp-prickar { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.hjalp-prickar i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); transition: background-color 0.3s, transform 0.3s; }
+.hjalp-prickar i.tand { background: var(--persika); transform: scale(1.3); box-shadow: 0 0 10px var(--persika); }
+.hjalpruta { padding-bottom: 2.2rem; }
+.hjalpruta.klar .hjalpknapp { animation: firande 1s ease both; pointer-events: none; }
+@keyframes ruta-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes andas { 0%, 100% { box-shadow: 0 0 0 4px rgba(246, 209, 168, 0.14), 0 0 24px rgba(246, 209, 168, 0.22); } 50% { box-shadow: 0 0 0 6px rgba(246, 209, 168, 0.22), 0 0 44px rgba(246, 209, 168, 0.4); } }
+@keyframes puls { 0% { transform: scale(1); } 40% { transform: scale(0.88); } 100% { transform: scale(1); } }
+@keyframes firande { 0% { transform: scale(1) rotate(0); } 50% { transform: scale(1.15) rotate(8deg); } 100% { transform: scale(1) rotate(0); } }
+.bildram { isolation: isolate; }
+.gomd-mus { position: absolute; z-index: 3; width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 6px; border: 0; background: none; cursor: pointer; opacity: 0.8; animation: titta-fram 7s ease-in-out infinite; }
+.gomd-mus svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4)); }
+.gomd-mus.hittad { opacity: 1; animation: none; }
+.gomd-mus.hej svg { animation: hopp 0.7s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes titta-fram { 0%, 60%, 100% { transform: translateY(6px) scale(0.85); } 70%, 90% { transform: translateY(0) scale(1); } }
+.mus-rakning { margin: 0 0 0 auto; display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 0.9rem; color: var(--lavendel-ljus); }
+.mus-rakning svg { width: 22px; height: 20px; }
+.nasta-kvall { margin-top: 1rem; padding-top: 0.8rem; border-top: 1.5px dashed var(--kort-kant); }
+.nasta-titel { margin: 0.2rem 0 0.7rem; font-weight: 800; font-size: 1.15rem; }
+.chips.spanning .chip { flex: 1 1 auto; }
+
+/* ---------- Magiska effekter ---------- */
+.effektlager { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+.gnista { position: absolute; margin: -6px 0 0 -6px; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); animation: gnista-ut ease-out forwards; filter: drop-shadow(0 0 4px rgba(255, 241, 201, 0.8)); }
+.gnista.prick { clip-path: circle(50%); }
+.gnista.faller { animation-name: gnista-fall; animation-timing-function: ease-in-out; }
+@keyframes gnista-ut { 0% { transform: translate(0, 0) scale(0.3) rotate(0); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(var(--rot)); opacity: 0; } }
+@keyframes gnista-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 0.9; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+.studs { animation: studs 0.55s cubic-bezier(.3, 1.6, .5, 1); }
+.studs .ikon svg, .studs .ikon img { animation: hopp 0.7s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes studs { 0% { transform: scale(1); } 40% { transform: scale(0.94); } 100% { transform: scale(1); } }
+@keyframes hopp { 0% { transform: translateY(0); } 40% { transform: translateY(-14px) rotate(-4deg); } 100% { transform: translateY(0); } }
+.valkort[aria-checked="true"] { box-shadow: 0 0 0 1px var(--vald), 0 8px 28px rgba(246, 209, 168, 0.22); }
+.primar { position: relative; overflow: hidden; }
+.primar::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%); transform: translateX(-120%); animation: glans 5s ease-in-out infinite 1.5s; }
+@keyframes glans { 0%, 70% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.himmelsstjarna { position: absolute; border-radius: 50%; background: #fff6dc; box-shadow: 0 0 6px rgba(255, 246, 220, 0.8); animation: glimt ease-in-out infinite; }
+.stjarnfall { position: absolute; top: 12%; left: 75%; width: 110px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 241, 201, 0.95), transparent); transform: rotate(-24deg); opacity: 0; animation: stjarnfall 11s ease-in infinite 3s; }
+.stjarnfall.sent { top: 30%; left: 40%; animation-delay: 8.5s; animation-duration: 14s; }
+@keyframes stjarnfall { 0%, 88% { opacity: 0; transform: rotate(-24deg) translateX(0); } 91% { opacity: 1; } 100% { opacity: 0; transform: rotate(-24deg) translateX(-260px); } }
+.start-mane { animation: mane-glod 7s ease-in-out infinite; }
+@keyframes mane-glod { 0%, 100% { box-shadow: 0 0 60px 14px rgba(251, 233, 183, 0.22); } 50% { box-shadow: 0 0 80px 22px rgba(251, 233, 183, 0.34); } }
+#start-rubrik { background: linear-gradient(90deg, #fff4dc, #f6d1a8, #ddd2f5, #fff4dc); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: skimmer 12s ease-in-out infinite; }
+@keyframes skimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.glittersvep { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 35%, rgba(255, 241, 201, 0.35) 48%, rgba(221, 210, 245, 0.25) 52%, transparent 65%); transform: translateX(-110%); animation: svep 1.6s ease-in-out forwards; mix-blend-mode: screen; }
+@keyframes svep { to { transform: translateX(110%); } }
+.sagobok { position: relative; width: 190px; height: 130px; perspective: 600px; }
+.bok-sida { position: absolute; top: 0; width: 95px; height: 130px; background: linear-gradient(#fff4dc, #efdcb2); box-shadow: inset 0 0 18px rgba(184, 138, 100, 0.35); }
+.bok-sida.vanster { left: 0; border-radius: 14px 4px 4px 14px; transform-origin: right center; animation: sida-vanster 2s cubic-bezier(.4, 0, .2, 1) both; }
+.bok-sida.hoger { right: 0; border-radius: 4px 14px 14px 4px; transform-origin: left center; animation: sida-hoger 2s cubic-bezier(.4, 0, .2, 1) both; }
+@keyframes sida-vanster { from { transform: rotateY(90deg); } to { transform: rotateY(0); } }
+@keyframes sida-hoger { from { transform: rotateY(-90deg); } to { transform: rotateY(0); } }
+.bok-sken { position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 233, 183, 0.45), transparent 65%); animation: tona-in 2s ease both 0.6s; }
+.sagobok .laddar-stjarnor { position: absolute; left: 50%; top: -34px; transform: translateX(-50%); }
+#laddar-text { animation: tona-in 0.6s ease both; }
+body.kvall .primar::before, body.kvall #start-rubrik { animation: none; }
+body.kvall #start-rubrik { color: var(--text); background: none; }
 
 /* SVG-animationer i illustrationerna: långsamma och mjuka */
 .flyt { animation: svava 7s ease-in-out infinite; }

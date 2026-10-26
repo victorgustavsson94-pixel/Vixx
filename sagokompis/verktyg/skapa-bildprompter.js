@@ -19,7 +19,7 @@ const ladda = (fil) => vm.runInContext(fs.readFileSync(path.join(www, fil), 'utf
 ladda('data/val.js');
 ladda('js/sagomotor.js');
 ladda('js/illustrationer.js');
-fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js')).sort().forEach((f) => ladda('sagor/' + f));
+fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js') && f !== 'extra.js').sort().forEach((f) => ladda('sagor/' + f));
 const S = sandbox.Sagokompis;
 
 // En gemensam stil för hela appen: 3D-animerad långfilmskänsla, lugn kvällsbelysning.
@@ -106,6 +106,8 @@ const ut = path.join(rot, 'bildprompter');
 fs.mkdirSync(ut, { recursive: true });
 const csvCell = (v) => '"' + String(v).replace(/"/g, '""') + '"';
 fs.writeFileSync(path.join(ut, 'bildprompter.csv'), '﻿' + ['filnamn,saga,titel,plats,scen,rubrik,prompt'].concat(rader.map((r) => [r.fil, r.saga, r.titel, r.plats, r.scen, r.rubrik, r.prompt].map(csvCell).join(','))).join('\n') + '\n');
+const RORELSE = 'Gentle, slow, loopable motion for a bedtime story: the camera pushes in very slowly, the child breathes and blinks softly, small lights twinkle, leaves, water or clouds move calmly, tiny glowing particles float. No fast movement, no flashing, no scene cuts, no new characters. Seamless 5 second loop.';
+
 // Gemensamma bilder för resten av appen, i samma stil.
 const FIGUR_STIL = 'High-quality stylized 3D animated feature film character render, soft studio lighting, appealing rounded shapes, big friendly expressive eyes, full body, standing, three-quarter view, centered, on a plain transparent background (or flat solid light grey if transparency is not possible, for background removal), no text, no shadow on the ground.';
 const FIGURER = {
@@ -147,7 +149,7 @@ let md = '# Bildprompter för Sagokompis\n\n' +
   'Spara varje bild med filnamnet som står vid prompten, under `www/illustrationer/` (appikonen under `www/`), och kör sedan `node verktyg/registrera-bilder.js`.\n\n' +
   '## Appens bilder\n\n';
 for (const r of extra) md += '**' + r.grupp + ': ' + r.namn + '** (' + r.format + ') → `' + r.fil + '`\n\n```\n' + r.prompt + '\n```\n\n';
-md += '## Scenbilder\n';
+md += '## Rörliga scener (valfritt)\n\nGör korta videoloopar av de färdiga scenbilderna med bild-till-video (5 sekunder, 4:3). Spara dem bredvid bilden med samma namn men filändelsen `.mp4`, t.ex. `riktiga/s01/rymden/scen-1.mp4`. Appen visar videon och använder bilden som reserv.\n\n```\n' + RORELSE + '\n```\n\n## Scenbilder\n';
 let senaste = '';
 for (const r of rader) {
   const rubrik = r.saga + ' · ' + r.titel + ' · ' + r.plats;

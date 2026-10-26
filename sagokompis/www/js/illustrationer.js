@@ -446,5 +446,5 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="himmel-' + unik + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + h[0] + '"/><stop offset="0.6" stop-color="' + h[1] + '"/><stop offset="1" stop-color="' + h[2] + '"/></linearGradient><clipPath id="fonsterKlipp-' + unik + '"><rect x="263" y="41" width="94" height="84" rx="9"/></clipPath></defs>' + inner + '</svg>';
   }
 
-  S.illustrationer = { rita, ritaKompislager, figurIkon, platsIkon, tolka, SAKER: Object.keys(SAKER) };
+  S.illustrationer = { sak: (namn, ctx) => (SAKER[namn] ? SAKER[namn](ctx || {}) : ''), rita, ritaKompislager, figurIkon, platsIkon, tolka, SAKER: Object.keys(SAKER) };
 })();

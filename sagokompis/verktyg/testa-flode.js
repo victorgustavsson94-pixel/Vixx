@@ -21,7 +21,7 @@ const LATSASROST = `
     getVoices: () => [{ lang: 'sv-SE', name: 'Alva' }],
     addEventListener() {},
     speak(u) {
-      aktuell = u; window.__tal.yttranden.push({ text: u.text, rate: u.rate });
+      aktuell = u; window.__tal.yttranden.push({ text: u.text, rate: u.rate, pitch: u.pitch });
       timer = setTimeout(() => { aktuell = null; u.onend && u.onend(); }, window.__tal.forsening);
     },
     cancel() { clearTimeout(timer); if (aktuell) { const u = aktuell; aktuell = null; u.onerror && u.onerror({ error: 'interrupted' }); } }
@@ -81,6 +81,8 @@ function kontroll(villkor, text) {
       kontroll(titel.startsWith('Ella och'), 'förhandsvisningen visar sagans titel: ' + titel);
       kontroll((await page.textContent('#fh-figur')) === 'Kanin Lo', 'förhandsvisningen visar vald kompis');
       kontroll(await page.isVisible('#forhand-bild svg, #forhand-bild img'), 'förhandsvisningen har en bild');
+      await page.click('[data-grupp="spanning"] [data-varde="aventyr"]');
+      kontroll((await page.getAttribute('[data-grupp="spanning"] [data-varde="aventyr"]', 'aria-checked')) === 'true', 'spänningsnivån Stort äventyr går att välja');
       await skarm('5-forhand');
       kontroll((await page.textContent('#knapp-nasta')) === 'Skapa min saga', 'knappen heter ”Skapa min saga”');
       await page.click('#knapp-nasta');
@@ -99,6 +101,10 @@ function kontroll(villkor, text) {
       kontroll(bildId1.endsWith('scen1') && bildId2.endsWith('scen2') && bildId1 !== bildId2, 'Nästa scen byter bild (' + bildId1 + ' → ' + bildId2 + ')');
       await page.click('#knapp-forra');
 
+      // Den gömda musen
+      await page.click('.gomd-mus');
+      kontroll((await page.textContent('#mus-rakning')) === '1 av 5', 'den gömda musen går att hitta');
+
       // Uppläsning från början: scenbilden ska bytas när uppläsningen når nästa scen
       await page.evaluate(() => {
         window.__bilder = [];
@@ -109,7 +115,20 @@ function kontroll(villkor, text) {
         }).observe(document.getElementById('scenbild'), { childList: true });
       });
       await page.click('#knapp-spela');
-      await page.waitForSelector('#sov-gott:not([hidden])', { timeout: 20000 });
+      // Svara på valet och hjälp till när uppläsningen väntar
+      let valGjort = false, hjalpGjord = false;
+      for (let i = 0; i < 300 && !(await page.isVisible('#sov-gott')); i++) {
+        if (await page.isVisible('.valruta.vantar')) { await page.click('.valruta .valknapp >> nth=0', { force: true }); valGjort = true; }
+        if (await page.isVisible('.hjalpruta.vantar:not(.klar)')) {
+          for (let k = 0; k < 3; k++) await page.click('.hjalpruta:not(.klar) .hjalpknapp', { force: true });
+          hjalpGjord = true;
+        }
+        await page.waitForTimeout(100);
+      }
+      kontroll(valGjort, 'uppläsningen stannar och låter barnet välja väg');
+      kontroll(hjalpGjord, 'uppläsningen stannar för hjälp till-momentet');
+      await page.waitForSelector('#sov-gott:not([hidden])', { timeout: 5000 });
+      kontroll(await page.evaluate(() => window.__tal.yttranden.some((y) => y.pitch > 1.3)), 'kompisen läses med en egen röst');
       const bilder = await page.evaluate(() => window.__bilder);
       const antalYttranden = await page.evaluate(() => window.__tal.yttranden.length);
       kontroll(bilder.length === 4 && bilder[3].endsWith('scen5'), 'uppläsningen bytte bild vid varje ny scen: ' + bilder.join(', '));
@@ -118,6 +137,7 @@ function kontroll(villkor, text) {
       await skarm('7-sov-gott');
       await page.click('#knapp-vakna');
       kontroll(await page.isVisible('#slut-kort'), 'slutkortet erbjuder Läs igen och Ny saga');
+      kontroll(await page.isVisible('#nasta-kvall'), 'slutkortet föreslår nästa kvälls äventyr');
 
       // Paus och tempo
       await page.evaluate(() => { window.__tal.forsening = 400; });
@@ -128,6 +148,21 @@ function kontroll(villkor, text) {
       await page.waitForTimeout(500);
       const senaste = await page.evaluate(() => window.__tal.yttranden[window.__tal.yttranden.length - 1].rate);
       kontroll(senaste === 0.8, 'tempot ändras direkt under uppläsningen');
+      await page.evaluate(() => { window.__tal.forsening = 4; });
+      for (let i = 0; i < 300 && !(await page.isVisible('#sov-gott')); i++) {
+        if (await page.isVisible('.valruta.vantar')) await page.click('.valruta .valknapp >> nth=1', { force: true });
+        if (await page.isVisible('.hjalpruta.vantar:not(.klar)')) for (let k = 0; k < 3; k++) await page.click('.hjalpruta:not(.klar) .hjalpknapp', { force: true });
+        await page.waitForTimeout(100);
+      }
+      await page.click('#knapp-vakna');
+      await page.click('#knapp-nasta-aventyr');
+      kontroll((await page.textContent('#knapp-nasta')) === 'Skapa min saga', 'Nästa äventyr öppnar förhandsvisningen');
+      await page.click('#knapp-nasta');
+      await page.waitForSelector('#vy-las:not([hidden])', { timeout: 5000 });
+      kontroll((await page.textContent('#scen-text')).includes('Minns du äventyret med'), 'kompisen minns förra kvällens saga');
+      await page.evaluate(() => { window.__tal.forsening = 400; });
+      await page.click('#knapp-spela');
+      await page.waitForTimeout(500);
       await page.click('#knapp-spela');
       await page.waitForTimeout(300);
       kontroll(!(await page.$eval('#knapp-spela', (b) => b.classList.contains('spelar'))), 'paus stoppar uppläsningen');

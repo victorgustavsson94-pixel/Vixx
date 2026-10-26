@@ -109,6 +109,14 @@ High-quality stylized 3D animated feature film still, like a modern family anima
 App icon, 1024x1024, no transparency, no text. High-quality stylized 3D animated feature film still, like a modern family animated movie: soft subsurface lighting, rounded appealing shapes, expressive friendly characters, rich but gentle colors, cinematic depth of field, cozy bedtime mood with a dusty blue, lavender, rose and warm peach palette, warm glowing light sources. Safe and calm for children aged 4-7, nothing scary, no harsh contrast, no text, no letters, no logos, no watermark. Square composition. A sleepy brown teddy bear with a small golden star, resting against a big crescent moon on a dusty blue night sky. Simple bold shape that reads well at small sizes.
 ```
 
+## Rörliga scener (valfritt)
+
+Gör korta videoloopar av de färdiga scenbilderna med bild-till-video (5 sekunder, 4:3). Spara dem bredvid bilden med samma namn men filändelsen `.mp4`, t.ex. `riktiga/s01/rymden/scen-1.mp4`. Appen visar videon och använder bilden som reserv.
+
+```
+Gentle, slow, loopable motion for a bedtime story: the camera pushes in very slowly, the child breathes and blinks softly, small lights twinkle, leaves, water or clouds move calmly, tiny glowing particles float. No fast movement, no flashing, no scene cuts, no new characters. Seamless 5 second loop.
+```
+
 ## Scenbilder
 
 ## s01 · den ensamma stjärnan · rymden

@@ -120,16 +120,50 @@
     return (text.match(/[A-Za-zÅÄÖåäöÉé0-9]+/g) || []).length;
   }
 
-  /* Bygger den färdiga, personliga sagan. */
-  function byggSaga(sagaId, val) {
+  const MYSIG = 'Men {N} kände sig ändå trygg, för {F} var precis bredvid, och tillsammans klarar man nästan allt.';
+
+  function kortTitel(titel, namn) {
+    const prefix = namn + ' och ';
+    return titel.startsWith(prefix) ? titel.slice(prefix.length) : titel;
+  }
+
+  /* Bygger den färdiga, personliga sagan.
+     val.spanning: 'mysig' | 'pirrig' (standard) | 'aventyr'
+     opts.valt:    'a' | 'b' när barnet har valt väg i sagan, annars null
+     opts.hjalpKlar: true när barnet har gjort sitt hjälp till-moment
+     opts.forra:   titeln på förra kvällens saga med samma kompis (för en fortsättning) */
+  function byggSaga(sagaId, val, opts) {
+    opts = opts || {};
     const mall = S.sagor.find((s) => s.id === sagaId);
     if (!mall) throw new Error('Sagan ' + sagaId + ' finns inte');
+    const extra = (S.sagoExtra && S.sagoExtra[sagaId]) || {};
+    const spanning = val.spanning || 'pirrig';
     const ctx = skapaSammanhang(val);
     let ord = 0;
     const scener = mall.scener.map((sc, i) => {
-      const stycken = sc.text.map((t) => fyllI(t, ctx));
+      const delar = sc.text.map((t) => ({ text: t }));
+      const efter = (index, obj) => delar.splice(delar.indexOf(sc.__orig[index]) + 1, 0, obj);
+      sc.__orig = delar.slice();
+      let valInfo = null;
+      let hjalpInfo = null;
+      if (extra.aventyr && extra.aventyr.scen === i && spanning !== 'pirrig') {
+        efter(extra.aventyr.efter, { text: spanning === 'aventyr' ? extra.aventyr.text : MYSIG });
+      }
+      if (extra.val && extra.val.scen === i) {
+        const markor = sc.__orig[extra.val.efter];
+        valInfo = { markor, fraga: extra.val.fraga, alternativ: [{ id: 'a', knapp: extra.val.a.knapp }, { id: 'b', knapp: extra.val.b.knapp }], valt: opts.valt || null };
+        if (opts.valt) efter(extra.val.efter, { text: extra.val[opts.valt].text });
+      }
+      if (extra.hjalp && extra.hjalp.scen === i) {
+        hjalpInfo = Object.assign({ markor: sc.__orig[extra.hjalp.efter], klar: !!opts.hjalpKlar }, extra.hjalp);
+      }
+      if (i === 0 && opts.forra) {
+        efter(0, { text: '{F} tittade på {N} och log. – Minns du äventyret med ' + opts.forra + '? I kväll väntar ett nytt äventyr.' });
+      }
+      delete sc.__orig;
+      const stycken = delar.map((d) => fyllI(d.text, ctx));
       stycken.forEach((t) => (ord += rakna(t)));
-      return {
+      const scen = {
         nummer: i + 1,
         bildId: mall.id + '-scen' + (i + 1),
         rubrik: fyllI(sc.rubrik, ctx),
@@ -137,13 +171,23 @@
         bildtext: fyllI(sc.bildtext, ctx),
         stycken
       };
+      if (valInfo) {
+        scen.val = { efter: delar.indexOf(valInfo.markor), fraga: fyllI(valInfo.fraga, ctx), alternativ: valInfo.alternativ.map((a) => ({ id: a.id, knapp: fyllI(a.knapp, ctx) })), valt: valInfo.valt };
+      }
+      if (hjalpInfo) {
+        scen.hjalp = { efter: delar.indexOf(hjalpInfo.markor), uppmaning: fyllI(hjalpInfo.uppmaning, ctx), ikon: hjalpInfo.ikon, antal: hjalpInfo.antal, klart: fyllI(hjalpInfo.klart, ctx), klar: hjalpInfo.klar };
+      }
+      return scen;
     });
+    const titel = fyllI(mall.titel, ctx);
     return {
       id: mall.id,
-      titel: fyllI(mall.titel, ctx),
+      titel,
+      kortTitel: kortTitel(titel, ctx.enkla.N),
       tema: ctx.tema,
       plats: ctx.plats,
       figur: ctx.figur,
+      spanning,
       sammanfattning: fyllI(mall.sammanfattning, ctx),
       ord,
       minuter: Math.max(1, Math.round(ord / 130)),
@@ -151,5 +195,5 @@
     };
   }
 
-  S.motor = { skapaSammanhang, fyllI, passandeSagor, valjSaga, byggSaga, genitiv, versal, rakna };
+  S.motor = { kortTitel, skapaSammanhang, fyllI, passandeSagor, valjSaga, byggSaga, genitiv, versal, rakna };
 })();

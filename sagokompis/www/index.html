@@ -104,6 +104,12 @@
             <div><dt>Plats</dt><dd id="fh-plats"></dd></div>
             <div><dt>Tema</dt><dd id="fh-tema"></dd></div>
           </dl>
+          <p class="falt-etikett" id="spanning-etikett">Hur spännande ska det vara?</p>
+          <div class="chips spanning" role="radiogroup" aria-labelledby="spanning-etikett" data-grupp="spanning">
+            <button class="chip" role="radio" data-varde="mysig">Mysig</button>
+            <button class="chip" role="radio" data-varde="pirrig">Lite pirrig</button>
+            <button class="chip" role="radio" data-varde="aventyr">Stort äventyr</button>
+          </div>
           <p id="forhand-langd" class="liten"></p>
           <button id="knapp-byt-saga" class="knapp sekundar" hidden>Välj en annan saga</button>
         </div>
@@ -116,8 +122,12 @@
 
   <!-- Laddning -->
   <section id="vy-laddar" class="vy laddar" hidden aria-live="polite">
-    <div class="laddar-stjarnor" aria-hidden="true"><span></span><span></span><span></span></div>
-    <p>Sagan vävs ihop …</p>
+    <div class="sagobok" aria-hidden="true">
+      <div class="bok-sida vanster"></div><div class="bok-sida hoger"></div>
+      <div class="bok-sken"></div>
+      <div class="laddar-stjarnor"><span></span><span></span><span></span></div>
+    </div>
+    <p id="laddar-text">Sagan vävs ihop …</p>
   </section>
 
   <!-- Läsvy -->
@@ -127,6 +137,9 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg><span>Sagoval</span>
       </button>
       <div class="topp-hoger">
+        <button id="knapp-ljud" class="knapp ikon-knapp" aria-pressed="true" aria-label="Ljudvärld">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="16.5" cy="16" r="2.5" /></svg>
+        </button>
         <button id="knapp-kvall" class="knapp ikon-knapp" aria-pressed="false" aria-label="Kvällsläge">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
         </button>
@@ -144,6 +157,7 @@
       <div class="scenrad">
         <ol id="scen-prickar" class="scen-prickar" aria-hidden="true"></ol>
         <p id="scen-etikett" class="scen-etikett"></p>
+        <p class="mus-rakning" aria-label="Hittade möss"><svg viewBox="-20 -30 40 34" aria-hidden="true"><ellipse cx="0" cy="-10" rx="13" ry="10" fill="#d9cfe6"/><circle cx="-7" cy="-20" r="6" fill="#d9cfe6"/><circle cx="7" cy="-20" r="6" fill="#d9cfe6"/><circle cx="-4" cy="-12" r="1.6" fill="#3b2b33"/><circle cx="4" cy="-12" r="1.6" fill="#3b2b33"/></svg><span id="mus-rakning">0 av 5</span></p>
       </div>
       <h2 id="scen-rubrik" class="scen-rubrik"></h2>
       <div id="scen-text" class="scen-text"></div>
@@ -156,6 +170,11 @@
         <div class="slut-knappar">
           <button id="knapp-las-igen" class="knapp primar">Läs igen</button>
           <button id="knapp-ny-saga" class="knapp sekundar">Ny saga</button>
+        </div>
+        <div id="nasta-kvall" class="nasta-kvall" hidden>
+          <p class="liten">Fortsättning följer i morgon kväll …</p>
+          <p id="nasta-titel" class="nasta-titel"></p>
+          <button id="knapp-nasta-aventyr" class="knapp sekundar">Nästa äventyr</button>
         </div>
       </div>
       <p id="tal-info" class="liten tal-info" hidden></p>
@@ -235,6 +254,9 @@
 <script src="sagor/s18.js"></script>
 <script src="sagor/s19.js"></script>
 <script src="sagor/s20.js"></script>
+<script src="sagor/extra.js"></script>
+<script src="js/effekter.js"></script>
+<script src="js/ljud.js"></script>
 <script src="js/tal.js"></script>
 <script src="js/app.js"></script>
 </body>

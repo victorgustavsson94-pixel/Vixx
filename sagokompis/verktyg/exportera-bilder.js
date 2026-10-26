@@ -16,7 +16,7 @@ const ladda = (fil) => vm.runInContext(fs.readFileSync(path.join(www, fil), 'utf
 ladda('data/val.js');
 ladda('js/sagomotor.js');
 ladda('js/illustrationer.js');
-fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js')).sort().forEach((f) => ladda('sagor/' + f));
+fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js') && f !== 'extra.js').sort().forEach((f) => ladda('sagor/' + f));
 
 const S = sandbox.Sagokompis;
 const figur = process.argv[2] || 'nalle';

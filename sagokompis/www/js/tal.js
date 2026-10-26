@@ -33,13 +33,13 @@
       valj();
       return { svenskRost: !!this.rost };
     },
-    tala(text, tempo) {
+    tala(text, tempo, ton) {
       return new Promise((klar, fel) => {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'sv-SE';
         if (this.rost) u.voice = this.rost;
         u.rate = tempo;
-        u.pitch = 1.05;
+        u.pitch = ton || 1.05;
         u.onend = () => klar();
         u.onerror = (e) => (e.error === 'interrupted' || e.error === 'canceled' ? klar() : fel(new Error(e.error || 'talfel')));
         window.speechSynthesis.speak(u);
@@ -60,7 +60,7 @@
       }
     },
     // AVSpeechSynthesizer har en annan skala än webben: 1.0 är normalt.
-    tala(text, tempo) { return nativPlugin().speak({ text, lang: 'sv-SE', rate: tempo, pitch: 1.05, volume: 1, category: 'playback' }); },
+    tala(text, tempo, ton) { return nativPlugin().speak({ text, lang: 'sv-SE', rate: tempo, pitch: ton || 1.05, volume: 1, category: 'playback' }); },
     stoppa() { try { nativPlugin().stop(); } catch (e) { /* ignorera */ } }
   };
 
@@ -75,21 +75,42 @@
     return ut;
   }
 
-  /* Skapar en uppläsare för en saga.
-     handelser: { scen(i), stycke(scenIndex, styckeIndex), klar(), fel(meddelande), status(spelar) } */
-  function skapaUpplasare(saga, handelser) {
-    const motor = nativ.stod() ? nativ : webb.stod() ? webb : null;
+  /* Är stycket en replik från kompisen? Då får kompisen en egen, ljusare röst. */
+  function arKompisReplik(stycke, figurNamn) {
+    if (!/^–/.test(stycke) || !figurNamn) return false;
+    const namn = figurNamn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('(sa|frågade|viskade|ropade|svarade|hoade|pep|log)\\s+' + namn + '(\\s|[.,!?]|$)').test(stycke.split(/[.!?]\s+–/)[0]);
+  }
+
+  /* Delar upp sagan i meningar, med pauser för val och hjälp till-moment. */
+  function byggDelar(saga) {
     const delar = [];
     saga.scener.forEach((scen, si) => {
       scen.stycken.forEach((stycke, pi) => {
-        delaIMeningar(stycke).forEach((text) => delar.push({ scen: si, stycke: pi, text }));
+        const ton = arKompisReplik(stycke, saga.figur.namn) ? 1.35 : 1.05;
+        delaIMeningar(stycke).forEach((text) => delar.push({ scen: si, stycke: pi, text, ton }));
+        if (scen.val && !scen.val.valt && scen.val.efter === pi) delar.push({ scen: si, stycke: pi, paus: 'val', text: scen.val.fraga });
+        if (scen.hjalp && !scen.hjalp.klar && scen.hjalp.efter === pi) delar.push({ scen: si, stycke: pi, paus: 'hjalp', text: scen.hjalp.uppmaning });
       });
     });
+    return delar;
+  }
 
+  /* Skapar en uppläsare för en saga.
+     handelser: { stycke(scenIndex, styckeIndex), klar(), fel(meddelande), status(spelar),
+                  paus(del) → Promise som löses med en ny saga när barnet har valt eller hjälpt till } */
+  function skapaUpplasare(saga, handelser) {
+    const motor = nativ.stod() ? nativ : webb.stod() ? webb : null;
+    let delar = byggDelar(saga);
     let pos = 0;
     let spelar = false;
     let tempo = 0.95;
     let varv = 0; // ökas vid varje stopp, så att gamla löften ignoreras
+
+    function hittaEfter(si, pi) {
+      const i = delar.findIndex((d) => d.scen > si || (d.scen === si && d.stycke > pi));
+      return i < 0 ? delar.length : i;
+    }
 
     async function korFran(start) {
       const mittVarv = ++varv;
@@ -99,7 +120,23 @@
         const d = delar[pos];
         handelser.stycke(d.scen, d.stycke);
         try {
-          await motor.tala(d.text, tempo);
+          if (d.paus) {
+            await motor.tala(d.text, tempo, 1.15);
+            if (mittVarv !== varv) return;
+            handelser.status('vantar');
+            const ny = await handelser.paus(d);
+            if (mittVarv !== varv) return;
+            handelser.status(true);
+            if (d.paus === 'hjalp') {
+              const scen = ny.scener[d.scen];
+              if (scen.hjalp) await motor.tala(scen.hjalp.klart, tempo, 1.15);
+              if (mittVarv !== varv) return;
+            }
+            delar = byggDelar(ny);
+            pos = hittaEfter(d.scen, d.stycke) - 1;
+            continue;
+          }
+          await motor.tala(d.text, tempo, d.ton);
         } catch (e) {
           if (mittVarv !== varv) return;
           spelar = false;
@@ -146,6 +183,12 @@
           setTimeout(() => korFran(pos), 150);
         }
       },
+      /* Byter till en ombyggd saga (efter ett val) utan att tappa platsen. */
+      bytSaga(ny) {
+        const nu = delar[pos] || delar[0];
+        delar = byggDelar(ny);
+        if (!spelar) pos = Math.max(0, delar.findIndex((d) => d.scen === nu.scen && d.stycke >= nu.stycke && !d.paus));
+      },
       /* Hoppa till början av en scen. Fortsätter läsa om uppläsningen var igång. */
       gaTillScen(si) {
         const forsta = delar.findIndex((d) => d.scen === si);
@@ -163,5 +206,5 @@
     };
   }
 
-  S.tal = { skapaUpplasare, delaIMeningar };
+  S.tal = { skapaUpplasare, delaIMeningar, arKompisReplik };
 })();
