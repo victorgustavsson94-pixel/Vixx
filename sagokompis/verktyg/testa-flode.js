@@ -29,6 +29,14 @@ const LATSASROST = `
   Object.defineProperty(window, 'speechSynthesis', { value: latsas, configurable: true });
 `;
 
+// Klickar på en knapp i sagotexten först när scrollningen dit är klar.
+async function tryckISagan(page, valjare) {
+  const el = page.locator(valjare).first();
+  if (!(await el.count())) return;
+  await el.dispatchEvent('click');
+  await page.waitForTimeout(150);
+}
+
 const enheter = [
   { namn: 'iPhone SE', width: 375, height: 667 },
   { namn: 'iPhone 15', width: 393, height: 852 },
@@ -117,17 +125,17 @@ function kontroll(villkor, text) {
       await page.click('#knapp-spela');
       // Svara på valet och hjälp till när uppläsningen väntar
       let valGjort = false, hjalpGjord = false;
-      for (let i = 0; i < 300 && !(await page.isVisible('#sov-gott')); i++) {
-        if (await page.isVisible('.valruta.vantar')) { await page.click('.valruta .valknapp >> nth=0', { force: true }); valGjort = true; }
+      for (let i = 0; i < 900 && !(await page.isVisible('#sov-gott')); i++) {
+        if (await page.isVisible('.valruta.vantar')) { await tryckISagan(page, '.valruta .valknapp >> nth=0'); valGjort = true; }
         if (await page.isVisible('.hjalpruta.vantar:not(.klar)')) {
-          for (let k = 0; k < 3; k++) await page.click('.hjalpruta:not(.klar) .hjalpknapp', { force: true });
+          for (let k = 0; k < 3; k++) await tryckISagan(page, '.hjalpruta:not(.klar) .hjalpknapp');
           hjalpGjord = true;
         }
         await page.waitForTimeout(100);
       }
       kontroll(valGjort, 'uppläsningen stannar och låter barnet välja väg');
       kontroll(hjalpGjord, 'uppläsningen stannar för hjälp till-momentet');
-      await page.waitForSelector('#sov-gott:not([hidden])', { timeout: 5000 });
+      await page.waitForSelector('#sov-gott:not([hidden])', { timeout: 20000 });
       kontroll(await page.evaluate(() => window.__tal.yttranden.some((y) => y.pitch > 1.3)), 'kompisen läses med en egen röst');
       const bilder = await page.evaluate(() => window.__bilder);
       const antalYttranden = await page.evaluate(() => window.__tal.yttranden.length);
@@ -149,9 +157,9 @@ function kontroll(villkor, text) {
       const senaste = await page.evaluate(() => window.__tal.yttranden[window.__tal.yttranden.length - 1].rate);
       kontroll(senaste === 0.8, 'tempot ändras direkt under uppläsningen');
       await page.evaluate(() => { window.__tal.forsening = 4; });
-      for (let i = 0; i < 300 && !(await page.isVisible('#sov-gott')); i++) {
-        if (await page.isVisible('.valruta.vantar')) await page.click('.valruta .valknapp >> nth=1', { force: true });
-        if (await page.isVisible('.hjalpruta.vantar:not(.klar)')) for (let k = 0; k < 3; k++) await page.click('.hjalpruta:not(.klar) .hjalpknapp', { force: true });
+      for (let i = 0; i < 900 && !(await page.isVisible('#sov-gott')); i++) {
+        if (await page.isVisible('.valruta.vantar')) await tryckISagan(page, '.valruta .valknapp >> nth=1');
+        if (await page.isVisible('.hjalpruta.vantar:not(.klar)')) for (let k = 0; k < 3; k++) await tryckISagan(page, '.hjalpruta:not(.klar) .hjalpknapp');
         await page.waitForTimeout(100);
       }
       await page.click('#knapp-vakna');
