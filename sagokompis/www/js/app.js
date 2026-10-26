@@ -74,7 +74,7 @@
     const video = S.fardigaVideor && S.fardigaVideor[nyckel];
     const ctx = S.motor.skapaSammanhang(val);
     const spec = S.motor.fyllI(scen.bild, ctx);
-    const svg = S.illustrationer.rita(spec, { plats: val.plats, figur: val.figur, figurFarg: val.egenFigurFarg, fro: scen.bildId, alt: scen.bildtext });
+    const svg = S.illustrationer.rita(spec, { plats: val.plats, figur: val.figur, figurFarg: val.egenFigurFarg, fro: scen.bildId, alt: scen.bildtext, utanKompis: true });
     const wrap = document.createElement('div');
     wrap.className = klass || '';
     wrap.dataset.bildId = scen.bildId;
@@ -94,6 +94,7 @@
       wrap.insertAdjacentHTML('beforeend', S.illustrationer.ritaKompislager(spec, { plats: val.plats, figur: val.figur, figurFarg: val.egenFigurFarg }));
     } else {
       wrap.innerHTML = svg;
+      wrap.insertAdjacentHTML('beforeend', S.illustrationer.ritaKompislager(spec, { plats: val.plats, figur: val.figur, figurFarg: val.egenFigurFarg }));
     }
     return wrap;
   }

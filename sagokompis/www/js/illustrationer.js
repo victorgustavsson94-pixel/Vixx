@@ -400,7 +400,8 @@
       svg += sovscen(ctx.figur, ctx.figurFarg);
     } else if (!fl.ingen) {
       svg += barnet(b.barn[0], b.barn[1], b.stamning, ctx.hy).replace('<g transform', '<g class="' + (svavar ? 'flyt' : 'gunga') + '"><g transform') + '</g>';
-      svg += figuren(ctx.figur, b.figur[0], b.figur[1], 0.95, { farg: ctx.figurFarg, svavar });
+      // Finns en färdig 3D-figur läggs den ovanpå bilden av appen i stället.
+      if (!(ctx.utanKompis && S.figurBilder && S.figurBilder[ctx.figur])) svg += figuren(ctx.figur, b.figur[0], b.figur[1], 0.95, { farg: ctx.figurFarg, svavar });
     }
     if (fl.ibubbla && !fl.ingen) {
       const cx = (b.barn[0] + b.figur[0]) / 2;
