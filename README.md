@@ -1,3 +1,10 @@
+# Vixx
+
+Här finns två projekt:
+
+- **Dödsbacken** – 3D-mobilspel (nedan).
+- **[Sagokompis](sagokompis/README.md)** – iPhone-app med personliga godnattsagor och uppläsning. Ligger i mappen `sagokompis/`.
+
 # Dödsbacken
 
 Ett 3D-mobilspel där en bil ska ta sig nerför en kuperad backe full av hinder till en stor rund teleportportal som tar en vidare till nästa bana. Bilen går sönder mer och mer på vägen och blir långsammare, vingligare och svårare att styra. Sista biten drar portalen in bilen, men når skadan 100 % är det slut.

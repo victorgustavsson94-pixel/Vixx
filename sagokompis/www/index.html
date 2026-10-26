@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sagokompis">
+<meta name="theme-color" content="#1a2150">
+<meta name="description" content="Skapa personliga godnattsagor och lyssna på dem med uppläsning.">
+<title>Sagokompis</title>
+<link rel="icon" href="ikon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="ikon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Startsida -->
+  <section id="vy-start" class="vy" aria-labelledby="start-rubrik">
+    <div class="start-himmel" aria-hidden="true">
+      <div class="start-mane"></div>
+      <div class="start-moln moln-1"></div>
+      <div class="start-moln moln-2"></div>
+    </div>
+    <div class="start-innehall">
+      <p class="appnamn">Sagokompis</p>
+      <h1 id="start-rubrik">Vad ska vi drömma om ikväll?</h1>
+      <div id="start-figurer" class="start-figurer" aria-hidden="true"></div>
+      <div id="fortsatt-kort" class="kort fortsatt" hidden>
+        <p class="liten">Pågående saga</p>
+        <p id="fortsatt-titel" class="fortsatt-titel"></p>
+        <button id="knapp-fortsatt" class="knapp primar">Fortsätt sagan</button>
+      </div>
+      <button id="knapp-borja" class="knapp primar stor">Börja välja</button>
+    </div>
+  </section>
+
+  <!-- Val -->
+  <section id="vy-val" class="vy" hidden aria-labelledby="val-rubrik">
+    <header class="topprad">
+      <button id="val-tillbaka" class="knapp ikon-knapp" aria-label="Tillbaka">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <ol class="steg-prickar" id="steg-prickar" aria-hidden="true"></ol>
+      <span class="ikon-plats"></span>
+    </header>
+    <div class="val-innehall">
+      <p id="steg-text" class="liten steg-text"></p>
+      <h2 id="val-rubrik" tabindex="-1"></h2>
+
+      <div class="steg" data-steg="namn">
+        <label class="falt-etikett" for="falt-namn">Barnets namn</label>
+        <input id="falt-namn" class="falt" type="text" autocomplete="off" autocapitalize="words" maxlength="20" placeholder="Till exempel Ella">
+        <p id="namn-fel" class="fel" role="alert" hidden>Skriv ett namn, så kan sagan handla om just dig.</p>
+        <p class="falt-etikett" id="pron-etikett">Vad ska sagan säga?</p>
+        <div class="chips" role="radiogroup" aria-labelledby="pron-etikett" data-grupp="barnPron">
+          <button class="chip" role="radio" data-varde="han">han</button>
+          <button class="chip" role="radio" data-varde="hon">hon</button>
+          <button class="chip" role="radio" data-varde="hen">hen</button>
+        </div>
+      </div>
+
+      <div class="steg" data-steg="figur" hidden>
+        <div class="kortgrupp" role="radiogroup" aria-labelledby="val-rubrik" id="lista-figurer"></div>
+        <div id="egen-figur" class="kort egen-figur" hidden>
+          <label class="falt-etikett" for="falt-egen-namn">Vad heter din kompis?</label>
+          <input id="falt-egen-namn" class="falt" type="text" autocomplete="off" autocapitalize="words" maxlength="16" placeholder="Till exempel Pippa">
+          <p id="egen-fel" class="fel" role="alert" hidden>Ge din kompis ett namn.</p>
+          <p class="falt-etikett" id="egen-pron-etikett">Kompisen är en</p>
+          <div class="chips" role="radiogroup" aria-labelledby="egen-pron-etikett" data-grupp="egenFigurPron">
+            <button class="chip" role="radio" data-varde="han">han</button>
+            <button class="chip" role="radio" data-varde="hon">hon</button>
+            <button class="chip" role="radio" data-varde="hen">hen</button>
+          </div>
+          <p class="falt-etikett" id="egen-farg-etikett">Vilken färg?</p>
+          <div class="chips farger" role="radiogroup" aria-labelledby="egen-farg-etikett" data-grupp="egenFigurFarg">
+            <button class="chip farg" role="radio" data-varde="#b9a3e3" aria-label="Lila" style="--f:#b9a3e3"></button>
+            <button class="chip farg" role="radio" data-varde="#8fc9b4" aria-label="Mintgrön" style="--f:#8fc9b4"></button>
+            <button class="chip farg" role="radio" data-varde="#f0a9b9" aria-label="Rosa" style="--f:#f0a9b9"></button>
+            <button class="chip farg" role="radio" data-varde="#f2cf8d" aria-label="Gul" style="--f:#f2cf8d"></button>
+            <button class="chip farg" role="radio" data-varde="#9fb7e8" aria-label="Blå" style="--f:#9fb7e8"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="steg" data-steg="plats" hidden>
+        <div class="kortgrupp" role="radiogroup" aria-labelledby="val-rubrik" id="lista-platser"></div>
+      </div>
+
+      <div class="steg" data-steg="tema" hidden>
+        <div class="kortgrupp" role="radiogroup" aria-labelledby="val-rubrik" id="lista-teman"></div>
+      </div>
+
+      <div class="steg" data-steg="forhand" hidden>
+        <div class="kort forhand">
+          <div id="forhand-bild" class="forhand-bild"></div>
+          <p id="forhand-titel" class="forhand-titel"></p>
+          <p id="forhand-text" class="forhand-text"></p>
+          <dl class="forhand-lista">
+            <div><dt>Barn</dt><dd id="fh-namn"></dd></div>
+            <div><dt>Kompis</dt><dd id="fh-figur"></dd></div>
+            <div><dt>Plats</dt><dd id="fh-plats"></dd></div>
+            <div><dt>Tema</dt><dd id="fh-tema"></dd></div>
+          </dl>
+          <p id="forhand-langd" class="liten"></p>
+          <button id="knapp-byt-saga" class="knapp sekundar" hidden>Välj en annan saga</button>
+        </div>
+      </div>
+    </div>
+    <footer class="valfot">
+      <button id="knapp-nasta" class="knapp primar stor">Nästa</button>
+    </footer>
+  </section>
+
+  <!-- Laddning -->
+  <section id="vy-laddar" class="vy laddar" hidden aria-live="polite">
+    <div class="laddar-stjarnor" aria-hidden="true"><span></span><span></span><span></span></div>
+    <p>Sagan vävs ihop …</p>
+  </section>
+
+  <!-- Läsvy -->
+  <section id="vy-las" class="vy" hidden aria-labelledby="saga-titel">
+    <header class="topprad las-topp">
+      <button id="knapp-sagoval" class="knapp liten-knapp" aria-label="Till sagoval. Sagan sparas.">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg><span>Sagoval</span>
+      </button>
+      <div class="topp-hoger">
+        <button id="knapp-kvall" class="knapp ikon-knapp" aria-pressed="false" aria-label="Kvällsläge">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
+        </button>
+        <button id="knapp-installningar" class="knapp ikon-knapp" aria-haspopup="dialog" aria-label="Timer och inställningar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7" /><path d="M12 9v4l2.5 2M9 3h6" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="las-innehall">
+      <h1 id="saga-titel" class="saga-titel"></h1>
+      <div class="bildram">
+        <div id="scenbild" class="scenbild"></div>
+      </div>
+      <div class="scenrad">
+        <ol id="scen-prickar" class="scen-prickar" aria-hidden="true"></ol>
+        <p id="scen-etikett" class="scen-etikett"></p>
+      </div>
+      <h2 id="scen-rubrik" class="scen-rubrik"></h2>
+      <div id="scen-text" class="scen-text"></div>
+      <div class="scen-nav">
+        <button id="knapp-forra" class="knapp sekundar">← Förra scenen</button>
+        <button id="knapp-nasta-scen" class="knapp sekundar">Nästa scen →</button>
+      </div>
+      <div id="slut-kort" class="kort slut" hidden>
+        <p class="slut-rubrik">Slut. Sov gott, <span id="slut-namn"></span>!</p>
+        <div class="slut-knappar">
+          <button id="knapp-las-igen" class="knapp primar">Läs igen</button>
+          <button id="knapp-ny-saga" class="knapp sekundar">Ny saga</button>
+        </div>
+      </div>
+      <p id="tal-info" class="liten tal-info" hidden></p>
+    </div>
+
+    <div class="spelarfot">
+    <div class="spelare" role="group" aria-label="Uppläsning">
+      <button id="knapp-omstart" class="knapp ikon-knapp" aria-label="Börja om från början">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+      </button>
+      <button id="knapp-spela" class="knapp spela" aria-label="Läs upp sagan">
+        <svg class="ikon-spela" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" /></svg>
+        <svg class="ikon-paus" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+      </button>
+      <div class="tempo" role="radiogroup" aria-label="Uppläsningstempo">
+        <button class="chip liten-chip" role="radio" data-tempo="0.8">Lugnt</button>
+        <button class="chip liten-chip" role="radio" data-tempo="0.95">Normalt</button>
+        <button class="chip liten-chip" role="radio" data-tempo="1.1">Snabbt</button>
+      </div>
+    </div>
+    <p class="tal-not">Uppläsningen görs med telefonens inbyggda text-till-tal.</p>
+    </div>
+  </section>
+
+  <!-- Inställningar -->
+  <div id="dialog-installningar" class="dialog-bakgrund" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-rubrik">
+      <h2 id="dialog-rubrik">Timer och kvällsläge</h2>
+      <p class="falt-etikett" id="timer-etikett">Avsluta uppläsningen</p>
+      <div class="chips kolumn" role="radiogroup" aria-labelledby="timer-etikett" data-grupp="timer">
+        <button class="chip" role="radio" data-varde="slut">När sagan är slut</button>
+        <button class="chip" role="radio" data-varde="5">Om 5 minuter</button>
+        <button class="chip" role="radio" data-varde="10">Om 10 minuter</button>
+        <button class="chip" role="radio" data-varde="15">Om 15 minuter</button>
+      </div>
+      <p id="timer-status" class="liten"></p>
+      <label class="vaxel">
+        <input type="checkbox" id="vaxel-kvall">
+        <span>Kvällsläge med dämpad skärm</span>
+      </label>
+      <p class="liten">Kvällsläget dämpar färger och bilder i appen. Telefonens egen ljusstyrka ändras inte.</p>
+      <button id="dialog-stang" class="knapp primar">Klar</button>
+    </div>
+  </div>
+
+  <!-- Sov gott -->
+  <div id="sov-gott" class="sov-gott" hidden role="dialog" aria-modal="true" aria-labelledby="sov-text">
+    <div class="sov-mane" aria-hidden="true"></div>
+    <p id="sov-text">Sov gott</p>
+    <button id="knapp-vakna" class="knapp sekundar">Tillbaka till sagan</button>
+  </div>
+
+  <div id="meddelande" class="sr-endast" aria-live="polite"></div>
+</div>
+
+<script src="data/val.js"></script>
+<script src="js/sagomotor.js"></script>
+<script src="js/illustrationer.js"></script>
+<script src="illustrationer/fardiga.js"></script>
+<script src="sagor/s01.js"></script>
+<script src="sagor/s02.js"></script>
+<script src="sagor/s03.js"></script>
+<script src="sagor/s04.js"></script>
+<script src="sagor/s05.js"></script>
+<script src="sagor/s06.js"></script>
+<script src="sagor/s07.js"></script>
+<script src="sagor/s08.js"></script>
+<script src="sagor/s09.js"></script>
+<script src="sagor/s10.js"></script>
+<script src="sagor/s11.js"></script>
+<script src="sagor/s12.js"></script>
+<script src="sagor/s13.js"></script>
+<script src="sagor/s14.js"></script>
+<script src="sagor/s15.js"></script>
+<script src="sagor/s16.js"></script>
+<script src="sagor/s17.js"></script>
+<script src="sagor/s18.js"></script>
+<script src="sagor/s19.js"></script>
+<script src="sagor/s20.js"></script>
+<script src="js/tal.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

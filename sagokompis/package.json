@@ -1,0 +1,24 @@
+{
+  "name": "sagokompis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sagokompis – personliga godnattsagor med uppläsning för iPhone.",
+  "scripts": {
+    "start": "npx --yes http-server www -p 8080 -c-1",
+    "kontrollera": "node verktyg/kontrollera-sagor.js",
+    "testa": "node verktyg/testa-flode.js",
+    "bilder": "node verktyg/exportera-bilder.js",
+    "prompter": "node verktyg/skapa-bildprompter.js",
+    "registrera-bilder": "node verktyg/registrera-bilder.js",
+    "ios:synka": "npx cap sync ios",
+    "ios:oppna": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^8.0.2",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3"
+  }
+}

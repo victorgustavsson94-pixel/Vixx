@@ -1,0 +1,10 @@
+{
+  "appId": "se.bygginnovation.sagokompis",
+  "appName": "Sagokompis",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#141a40",
+    "preferredContentMode": "mobile"
+  }
+}

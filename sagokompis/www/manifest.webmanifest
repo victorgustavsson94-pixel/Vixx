@@ -1,0 +1,16 @@
+{
+  "name": "Sagokompis",
+  "short_name": "Sagokompis",
+  "description": "Personliga godnattsagor med uppläsning.",
+  "lang": "sv",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141a40",
+  "theme_color": "#1a2150",
+  "icons": [
+    { "src": "ikon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "ikon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "ikon-1024.png", "sizes": "1024x1024", "type": "image/png" }
+  ]
+}

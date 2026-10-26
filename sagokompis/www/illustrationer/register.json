@@ -1,0 +1,1002 @@
+[
+  {
+    "bildId": "s01-scen1",
+    "sagaId": "s01",
+    "scen": 1,
+    "fil": "s01/scen-1.svg",
+    "rubrik": "Ett ljus i kvällen",
+    "bildtext": "Ella och Brum i sovrummet tittar på en stjärna som faller förbi fönstret.",
+    "beskrivning": "kvall | hemma | fallstjarna 300 70 1 | barn 150 | figur 215",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s01-scen2",
+    "sagaId": "s01",
+    "scen": 2,
+    "fil": "s01/scen-2.svg",
+    "rubrik": "Stjärnan som hette Pim",
+    "bildtext": "En liten stjärna med ledsna ögon ligger på marken. Ella och Brum har hittat den.",
+    "beskrivning": "natt | stjarnfigur 235 222 1.1 | barn 120 | figur 320",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s01-scen3",
+    "sagaId": "s01",
+    "scen": 3,
+    "fil": "s01/scen-3.svg",
+    "rubrik": "Uppåt, steg för steg",
+    "bildtext": "Ella bär den lilla stjärnan uppför en brant backe, och Brum hjälper till.",
+    "beskrivning": "natt | backe 260 300 1 | stjarnfigur 205 150 0.6 | barn 190 230 | figur 265 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s01-scen4",
+    "sagaId": "s01",
+    "scen": 4,
+    "fil": "s01/scen-4.svg",
+    "rubrik": "Ett jättestort hej",
+    "bildtext": "Hela himlen glittrar tillbaka mot Pim, Ella och Brum.",
+    "beskrivning": "natt | stjarnregn 200 60 1 | stjarnfigur 200 140 0.9 | barn 140 | figur 260",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s01-scen5",
+    "sagaId": "s01",
+    "scen": 5,
+    "fil": "s01/scen-5.svg",
+    "rubrik": "Godnatt, Pim",
+    "bildtext": "Ella och Brum sover i sängen. Utanför fönstret lyser Pim lite extra starkt.",
+    "beskrivning": "somn | hemma | sov | stjarnfigur 300 70 0.45",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s02-scen1",
+    "sagaId": "s02",
+    "scen": 1,
+    "fil": "s02/scen-1.svg",
+    "rubrik": "Ett brev under dörren",
+    "bildtext": "Ett litet silverbrev ligger på golvet framför Ella och Brum.",
+    "beskrivning": "kvall | hemma | brev 205 228 1 | barn 140 | figur 270",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s02-scen2",
+    "sagaId": "s02",
+    "scen": 2,
+    "fil": "s02/scen-2.svg",
+    "rubrik": "Alla hjälps åt",
+    "bildtext": "Girlanger, lyktor och en stor tårta. Kalaset är nästan färdigt.",
+    "beskrivning": "kvall | inne | flaggor 200 62 1 | lykta 70 150 0.8 | lykta 330 150 0.8 | tarta 205 232 1 | barn 120 | figur 295",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s02-scen3",
+    "sagaId": "s02",
+    "scen": 3,
+    "fil": "s02/scen-3.svg",
+    "rubrik": "Den som satt utanför",
+    "bildtext": "Ella sätter sig på huk bredvid igelkotten, som sitter ensam i mörkret.",
+    "beskrivning": "natt | vasen 300 238 1.2 | barn 205 | figur 130",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s02-scen4",
+    "sagaId": "s02",
+    "scen": 4,
+    "fil": "s02/scen-4.svg",
+    "rubrik": "En överraskning till alla",
+    "bildtext": "igelkotten har med sig något fint till kalaset, och alla ser glada ut.",
+    "beskrivning": "varm | inne | flaggor 200 62 1 | [skog: bar 285 228 1 | slott: speldosa 285 228 1] | vasen 230 245 0.9 | barn 120 | figur 175",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s02-scen5",
+    "sagaId": "s02",
+    "scen": 5,
+    "fil": "s02/scen-5.svg",
+    "rubrik": "Den lugnaste dansen",
+    "bildtext": "Ella och Brum har kommit hem och sover gott efter kalaset.",
+    "beskrivning": "somn | hemma | sov | lykta 330 120 0.6",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s03-scen1",
+    "sagaId": "s03",
+    "scen": 1,
+    "fil": "s03/scen-1.svg",
+    "rubrik": "Två arga röster",
+    "bildtext": "Vid en bäck står två djur på var sin sida och ser sura ut. Ella och Brum står emellan.",
+    "beskrivning": "kvall | back 200 270 1 | [skog: hare 75 238 1 | fjall: ripa 75 238 1] | [skog: ekorre 330 238 1 | fjall: lammel 330 238 1] | barn 165 | figur 225",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s03-scen2",
+    "sagaId": "s03",
+    "scen": 2,
+    "fil": "s03/scen-2.svg",
+    "rubrik": "Hur grälet började",
+    "bildtext": "Ella och Brum lyssnar medan djuren berättar om grälet.",
+    "beskrivning": "kvall | back 200 270 1 | stenar 200 262 0.6 | barn 140 | figur 260",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s03-scen3",
+    "sagaId": "s03",
+    "scen": 3,
+    "fil": "s03/scen-3.svg",
+    "rubrik": "En sten i taget",
+    "bildtext": "Alla hjälps åt att lägga stenar i bäcken, en i taget.",
+    "beskrivning": "natt | back 200 270 1 | stenar 200 262 1 | sten 130 220 0.8 | barn 120 | figur 285",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s03-scen4",
+    "sagaId": "s03",
+    "scen": 4,
+    "fil": "s03/scen-4.svg",
+    "rubrik": "Den sista stenen",
+    "bildtext": "De två vännerna möts mitt på stenbron.",
+    "beskrivning": "natt | back 200 270 1 | stenar 200 262 1 | [skog: hare 175 236 0.9 | fjall: ripa 175 236 0.9] | [skog: ekorre 225 236 0.9 | fjall: lammel 225 236 0.9] | barn 95 | figur 310",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s03-scen5",
+    "sagaId": "s03",
+    "scen": 5,
+    "fil": "s03/scen-5.svg",
+    "rubrik": "Hem över bron",
+    "bildtext": "Ella sover. På fönsterbrädan ligger en slät liten sten från bäcken.",
+    "beskrivning": "somn | hemma | sov | sten 320 140 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s04-scen1",
+    "sagaId": "s04",
+    "scen": 1,
+    "fil": "s04/scen-1.svg",
+    "rubrik": "En liten viskning",
+    "bildtext": "Ella och Brum har hittat en snäcka som viskar.",
+    "beskrivning": "kvall | [hav: snacka 235 252 1 | rum: snacka 300 168 0.9] | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s04-scen2",
+    "sagaId": "s04",
+    "scen": 2,
+    "fil": "s04/scen-2.svg",
+    "rubrik": "Snäckan Sia",
+    "bildtext": "Snäckan Sia berättar varför hon är ledsen.",
+    "beskrivning": "natt | snacka 205 232 1.7 | barn 105 | figur 305",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s04-scen3",
+    "sagaId": "s04",
+    "scen": 3,
+    "fil": "s04/scen-3.svg",
+    "rubrik": "Schh, schh",
+    "bildtext": "Ella och Brum gör vågornas ljud för att hjälpa Sia att minnas.",
+    "beskrivning": "natt | [hav: vag 300 262 1 | rum: filt 205 262 1.3] | snacka 175 220 0.9 | barn 130 | figur 270",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s04-scen4",
+    "sagaId": "s04",
+    "scen": 4,
+    "fil": "s04/scen-4.svg",
+    "rubrik": "Sången kommer tillbaka",
+    "bildtext": "Sia sjunger igen, och små toner svävar upp i luften.",
+    "beskrivning": "varm | [hav: vag 270 255 1.2 | rum: filt 205 262 1.3] | snacka 205 230 1 | notpar 210 140 1 | barn 110 | figur 310",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s04-scen5",
+    "sagaId": "s04",
+    "scen": 5,
+    "fil": "s04/scen-5.svg",
+    "rubrik": "Sias vaggvisa",
+    "bildtext": "Ella sover. Utanför fönstret lyser månen, långt borta över havet.",
+    "beskrivning": "somn | hemma | sov | [hav: mane 320 70 0.5 | rum: snacka 330 152 0.55]",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s05-scen1",
+    "sagaId": "s05",
+    "scen": 1,
+    "fil": "s05/scen-1.svg",
+    "rubrik": "Lyktan som rullade iväg",
+    "bildtext": "igelkotten är ledsen och berättar för Ella och Brum vad som har hänt.",
+    "beskrivning": "kvall | vasen 282 242 1.2 | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s05-scen2",
+    "sagaId": "s05",
+    "scen": 2,
+    "fil": "s05/scen-2.svg",
+    "rubrik": "Vid grottans öppning",
+    "bildtext": "Ella och Brum står vid den mörka grottöppningen och håller varandra i handen.",
+    "beskrivning": "mork | grotta 235 222 1.6 | vasen 330 250 0.8 | barn 110 | figur 165",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s05-scen3",
+    "sagaId": "s05",
+    "scen": 3,
+    "fil": "s05/scen-3.svg",
+    "rubrik": "Ett steg i taget",
+    "bildtext": "Inne i grottan räknar Ella och Brum sina steg, och ett eko svarar.",
+    "beskrivning": "mork | grottinne | eko 285 120 1 | barn 165 | figur 230",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s05-scen4",
+    "sagaId": "s05",
+    "scen": 4,
+    "fil": "s05/scen-4.svg",
+    "rubrik": "Grottans hemlighet",
+    "bildtext": "Grottans väggar glittrar, och mitt på golvet lyser den borttappade lyktan.",
+    "beskrivning": "varm | grottinne | kristaller 200 120 1.2 | lykta 215 245 0.9 | barn 125 | figur 295",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s05-scen5",
+    "sagaId": "s05",
+    "scen": 5,
+    "fil": "s05/scen-5.svg",
+    "rubrik": "Hem med ljuset",
+    "bildtext": "Ella och Brum sover. Nattlampan lyser mjukt, som en liten lykta.",
+    "beskrivning": "somn | hemma | sov | lykta 330 150 0.6",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s06-scen1",
+    "sagaId": "s06",
+    "scen": 1,
+    "fil": "s06/scen-1.svg",
+    "rubrik": "Hoooo – klonk",
+    "bildtext": "Ella och Brum sitter upp i sängen och lyssnar på ett konstigt ljud.",
+    "beskrivning": "natt | inne | eko 300 95 1 | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s06-scen2",
+    "sagaId": "s06",
+    "scen": 2,
+    "fil": "s06/scen-2.svg",
+    "rubrik": "Ska vi gå och titta?",
+    "bildtext": "Ella och Brum smyger fram mot ljudet med en ficklampa.",
+    "beskrivning": "mork | inne | [slott: trappa 245 205 1.3 | rum: garderob 270 200 1.2] | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s06-scen3",
+    "sagaId": "s06",
+    "scen": 3,
+    "fil": "s06/scen-3.svg",
+    "rubrik": "Bakom dörren",
+    "bildtext": "Ella öppnar försiktigt dörren, fast det pirrar i magen.",
+    "beskrivning": "mork | inne | [slott: dorr 235 205 1.5 | rum: garderob 235 200 1.3] | barn 150 | figur 95",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s06-scen4",
+    "sagaId": "s06",
+    "scen": 4,
+    "fil": "s06/scen-4.svg",
+    "rubrik": "Den lilla vindpusten",
+    "bildtext": "En liten vindpust med blanka ögon snurrar i luften. Den är inte farlig, bara vilsen.",
+    "beskrivning": "varm | inne | vindpust 215 130 1.3 | barn 125 | figur 295",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s06-scen5",
+    "sagaId": "s06",
+    "scen": 5,
+    "fil": "s06/scen-5.svg",
+    "rubrik": "Nattens vänliga ljud",
+    "bildtext": "Ella och Brum sover. Utanför fönstret leker två vindpustar i natten.",
+    "beskrivning": "somn | hemma | sov | vindpust 318 92 0.6",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s07-scen1",
+    "sagaId": "s07",
+    "scen": 1,
+    "fil": "s07/scen-1.svg",
+    "rubrik": "Rakel på startplattan",
+    "bildtext": "En liten röd raket står på startplattan och darrar. Ella och Brum står bredvid.",
+    "beskrivning": "kvall | raket 265 205 1.2 | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s07-scen2",
+    "sagaId": "s07",
+    "scen": 2,
+    "fil": "s07/scen-2.svg",
+    "rubrik": "Ett viktigt uppdrag",
+    "bildtext": "Bredvid raketen står en säck full av glittrande drömmar.",
+    "beskrivning": "kvall | raket 265 205 1.2 | sack 190 248 0.9 | barn 115 | figur 330",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s07-scen3",
+    "sagaId": "s07",
+    "scen": 3,
+    "fil": "s07/scen-3.svg",
+    "rubrik": "Tio, nio, åtta",
+    "bildtext": "Ella och Brum sitter i raketen och räknar ner tillsammans med Rakel.",
+    "beskrivning": "natt | ingen | raket 205 195 1.5 | siffror 320 95 1",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s07-scen4",
+    "sagaId": "s07",
+    "scen": 4,
+    "fil": "s07/scen-4.svg",
+    "rubrik": "Uppe bland stjärnorna",
+    "bildtext": "Rakel flyger genom rymden mot den stora, vänliga månen.",
+    "beskrivning": "natt | rymd | ingen | mane 305 85 1.1 | raket 150 175 1.1 | stjarnregn 120 60 0.7",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s07-scen5",
+    "sagaId": "s07",
+    "scen": 5,
+    "fil": "s07/scen-5.svg",
+    "rubrik": "En dröm på kudden",
+    "bildtext": "Ella och Brum sover. Utanför fönstret syns en liten raket och glittrande drömmar.",
+    "beskrivning": "somn | hemma | sov | raket 322 92 0.42 | stjarnregn 300 60 0.4",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s08-scen1",
+    "sagaId": "s08",
+    "scen": 1,
+    "fil": "s08/scen-1.svg",
+    "rubrik": "Dimman kommer",
+    "bildtext": "En mjuk, vit dimma sveper in runt Ella och Brum.",
+    "beskrivning": "kvall | dimma 200 210 1 | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s08-scen2",
+    "sagaId": "s08",
+    "scen": 2,
+    "fil": "s08/scen-2.svg",
+    "rubrik": "Lammet Lilla Moln",
+    "bildtext": "Ett litet vitt lamm står alldeles ensamt i dimman.",
+    "beskrivning": "kvall | dimma 200 210 1 | lamm 245 242 1.1 | barn 150 | figur 315",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s08-scen3",
+    "sagaId": "s08",
+    "scen": 3,
+    "fil": "s08/scen-3.svg",
+    "rubrik": "Lyssna noga",
+    "bildtext": "Ella, Brum och lammet står stilla i dimman och lyssnar.",
+    "beskrivning": "natt | dimma 200 200 1.1 | eko 300 110 0.8 | lamm 180 245 0.8 | barn 120 | figur 255",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s08-scen4",
+    "sagaId": "s08",
+    "scen": 4,
+    "fil": "s08/scen-4.svg",
+    "rubrik": "Pling, pling – mamma!",
+    "bildtext": "Lammet springer fram till sin mamma, som har en liten bjällra runt halsen.",
+    "beskrivning": "natt | dimma 200 210 0.7 | faar 280 230 1.2 | lamm 220 248 0.9 | barn 110 | figur 165",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s08-scen5",
+    "sagaId": "s08",
+    "scen": 5,
+    "fil": "s08/scen-5.svg",
+    "rubrik": "När dimman lättar",
+    "bildtext": "Ella och Brum sover. På fönsterbrädan står ett litet gosedjurslamm.",
+    "beskrivning": "somn | hemma | sov | lamm 320 150 0.4",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s09-scen1",
+    "sagaId": "s09",
+    "scen": 1,
+    "fil": "s09/scen-1.svg",
+    "rubrik": "En stege till molnen",
+    "bildtext": "Ella och Brum är på väg upp mot molnen.",
+    "beskrivning": "kvall | [rymden: moln 235 140 1.3 | fjall: moln 235 95 1.3 | rum: manstrale 250 120 1] | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s09-scen2",
+    "sagaId": "s09",
+    "scen": 2,
+    "fil": "s09/scen-2.svg",
+    "rubrik": "Maskinen som tystnade",
+    "bildtext": "I molnfabriken står en stor maskin med rör och hjul.",
+    "beskrivning": "kvall | molnmaskin 255 192 1.2 | moln 110 85 0.7 | barn 120 | figur 335",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s09-scen3",
+    "sagaId": "s09",
+    "scen": 3,
+    "fil": "s09/scen-3.svg",
+    "rubrik": "Det som fattades",
+    "bildtext": "Ett grått, surt moln kommer ut ur maskinen. Ella tittar noga på maskinen.",
+    "beskrivning": "natt | molnmaskin 255 192 1.2 | gramoln 110 95 0.8 | barn 125 | figur 330",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s09-scen4",
+    "sagaId": "s09",
+    "scen": 4,
+    "fil": "s09/scen-4.svg",
+    "rubrik": "Moln av fantasi",
+    "bildtext": "Ett stort moln som ser ut som en val seglar över himlen.",
+    "beskrivning": "varm | molnval 205 92 1.1 | moln 335 125 0.6 | moln 75 140 0.5 | barn 130 | figur 270",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s09-scen5",
+    "sagaId": "s09",
+    "scen": 5,
+    "fil": "s09/scen-5.svg",
+    "rubrik": "Ett eget litet moln",
+    "bildtext": "Ella och Brum sover. Utanför fönstret svävar ett litet mjukt moln.",
+    "beskrivning": "somn | hemma | sov | moln 322 95 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s10-scen1",
+    "sagaId": "s10",
+    "scen": 1,
+    "fil": "s10/scen-1.svg",
+    "rubrik": "Ett gammalt papper",
+    "bildtext": "Ella och Brum hittar något spännande på marken.",
+    "beskrivning": "kvall | [skog,slott: karta 225 238 0.8 | hav: flaska 230 250 1] | barn 140 | figur 300",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s10-scen2",
+    "sagaId": "s10",
+    "scen": 2,
+    "fil": "s10/scen-2.svg",
+    "rubrik": "Kartan ritar",
+    "bildtext": "På kartan ritar sig streck och små bilder alldeles av sig själva.",
+    "beskrivning": "kvall | karta 205 150 1.7 | barn 85 | figur 330",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s10-scen3",
+    "sagaId": "s10",
+    "scen": 3,
+    "fil": "s10/scen-3.svg",
+    "rubrik": "Där kartan tog slut",
+    "bildtext": "Vid en vägskylt utan text står Ella och Brum och funderar.",
+    "beskrivning": "natt | skylt 205 205 1.3 | barn 120 | figur 290",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s10-scen4",
+    "sagaId": "s10",
+    "scen": 4,
+    "fil": "s10/scen-4.svg",
+    "rubrik": "En bro av regnbåge",
+    "bildtext": "En mjuk regnbågsbro sträcker sig framför Ella och Brum.",
+    "beskrivning": "varm | regnbagsbro 205 195 1.3 | barn 150 | figur 255",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s10-scen5",
+    "sagaId": "s10",
+    "scen": 5,
+    "fil": "s10/scen-5.svg",
+    "rubrik": "En karta till drömmarna",
+    "bildtext": "Ella och Brum sover. Vid sängen står den lilla kistan med kritorna.",
+    "beskrivning": "somn | hemma | sov | kista 320 160 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s11-scen1",
+    "sagaId": "s11",
+    "scen": 1,
+    "fil": "s11/scen-1.svg",
+    "rubrik": "När klockan slår tolv",
+    "bildtext": "Leksakerna på golvet har vaknat och tittar på Ella och Brum.",
+    "beskrivning": "natt | inne | leksaker 262 232 1.1 | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s11-scen2",
+    "sagaId": "s11",
+    "scen": 2,
+    "fil": "s11/scen-2.svg",
+    "rubrik": "Trumpinnen som försvann",
+    "bildtext": "Tennsoldaten med trumman ser bekymrad ut. Han har bara en trumpinne.",
+    "beskrivning": "natt | inne | soldat 232 232 1.2 | leksaker 320 235 0.8 | barn 115 | figur 175",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s11-scen3",
+    "sagaId": "s11",
+    "scen": 3,
+    "fil": "s11/scen-3.svg",
+    "rubrik": "Vad kan bli en trumpinne?",
+    "bildtext": "Ella håller upp en penna och funderar på om den kan bli en trumpinne.",
+    "beskrivning": "mork | inne | pennor 225 250 0.9 | soldat 310 235 0.8 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s11-scen4",
+    "sagaId": "s11",
+    "scen": 4,
+    "fil": "s11/scen-4.svg",
+    "rubrik": "Nattparaden",
+    "bildtext": "Leksakerna tågar i en lång, lugn parad över golvet.",
+    "beskrivning": "varm | inne | flaggor 200 62 0.8 | parad 205 238 1.2 | barn 75 | figur 335",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s11-scen5",
+    "sagaId": "s11",
+    "scen": 5,
+    "fil": "s11/scen-5.svg",
+    "rubrik": "Tillbaka på hyllan",
+    "bildtext": "Ella och Brum sover. På hyllan står tennsoldaten med sin penntrumma.",
+    "beskrivning": "somn | hemma | sov | soldat 322 150 0.45",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s12-scen1",
+    "sagaId": "s12",
+    "scen": 1,
+    "fil": "s12/scen-1.svg",
+    "rubrik": "En stråle på golvet",
+    "bildtext": "En silvrig månstråle lyser in genom fönstret och ner på golvet.",
+    "beskrivning": "kvall | hemma | manstrale 250 120 1 | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s12-scen2",
+    "sagaId": "s12",
+    "scen": 2,
+    "fil": "s12/scen-2.svg",
+    "rubrik": "Den första frågan",
+    "bildtext": "Ella och Brum frågar igelkotten om månskenet.",
+    "beskrivning": "natt | manstrale 210 110 1.2 | vasen 292 246 1.1 | barn 120 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s12-scen3",
+    "sagaId": "s12",
+    "scen": 3,
+    "fil": "s12/scen-3.svg",
+    "rubrik": "Fler svar",
+    "bildtext": "Ella och Brum möter en ny vän som också berättar om månskenet.",
+    "beskrivning": "natt | manstrale 210 110 1.2 | [skog: lysmaskar 290 230 1 | hav: krabba 300 250 1.1 | fjall: ren 300 250 1 | rum: spindel 320 80 1] | barn 115 | figur 185",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s12-scen4",
+    "sagaId": "s12",
+    "scen": 4,
+    "fil": "s12/scen-4.svg",
+    "rubrik": "Hos månen",
+    "bildtext": "Månstrålen går hela vägen upp till den stora, vänliga månen.",
+    "beskrivning": "varm | mane 292 80 1.4 | manstrale 230 170 1 | barn 120 | figur 180",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s12-scen5",
+    "sagaId": "s12",
+    "scen": 5,
+    "fil": "s12/scen-5.svg",
+    "rubrik": "Där strålen slutar",
+    "bildtext": "Ella och Brum sover, och månstrålen slutar precis på kudden.",
+    "beskrivning": "somn | hemma | sov | manstrale 300 120 0.8",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s13-scen1",
+    "sagaId": "s13",
+    "scen": 1,
+    "fil": "s13/scen-1.svg",
+    "rubrik": "En dörr som inte var där förut",
+    "bildtext": "Längst ner vid väggen finns en pytteliten dörr.",
+    "beskrivning": "kvall | inne | dorr 262 250 0.45 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s13-scen2",
+    "sagaId": "s13",
+    "scen": 2,
+    "fil": "s13/scen-2.svg",
+    "rubrik": "Nyckeln och knackningarna",
+    "bildtext": "En liten nyckel hänger i en tråd ovanför dörren.",
+    "beskrivning": "natt | inne | dorr 232 250 0.5 | nyckel 175 212 1 | barn 120 | figur 305",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s13-scen3",
+    "sagaId": "s13",
+    "scen": 3,
+    "fil": "s13/scen-3.svg",
+    "rubrik": "Småfolkets by",
+    "bildtext": "Bakom dörren finns en liten by med runda hus och små lyktor.",
+    "beskrivning": "varm | inne | by 205 248 1.3 | barn 105 | figur 305",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s13-scen4",
+    "sagaId": "s13",
+    "scen": 4,
+    "fil": "s13/scen-4.svg",
+    "rubrik": "Frågor åt båda hållen",
+    "bildtext": "I småfolkets bibliotek finns hyllor fulla av pyttesmå böcker.",
+    "beskrivning": "varm | inne | bocker 215 246 1 | smagubbe 262 252 1 | barn 115 | figur 320",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s13-scen5",
+    "sagaId": "s13",
+    "scen": 5,
+    "fil": "s13/scen-5.svg",
+    "rubrik": "En bok att ta med",
+    "bildtext": "Ella och Brum sover. På hyllan ligger en pytteliten bok.",
+    "beskrivning": "somn | hemma | sov | bok 322 160 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s14-scen1",
+    "sagaId": "s14",
+    "scen": 1,
+    "fil": "s14/scen-1.svg",
+    "rubrik": "Bubblor som lyser",
+    "bildtext": "Lysande bubblor svävar runt Ella och Brum.",
+    "beskrivning": "kvall | bubbla 245 150 1 | bubbla 295 105 0.6 | bubbla 200 85 0.45 | bubbla 330 175 0.35 | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s14-scen2",
+    "sagaId": "s14",
+    "scen": 2,
+    "fil": "s14/scen-2.svg",
+    "rubrik": "In i den stora bubblan",
+    "bildtext": "Ella och Brum färdas inne i en stor, genomskinlig bubbla.",
+    "beskrivning": "natt | under | bubbla 300 90 0.5 | bubbla 100 120 0.35 | barn 170 | figur 225 | ibubbla",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s14-scen3",
+    "sagaId": "s14",
+    "scen": 3,
+    "fil": "s14/scen-3.svg",
+    "rubrik": "Lumi",
+    "bildtext": "Lumi lyser i blått och lila och blåser små bubblor.",
+    "beskrivning": "varm | under | lumi 270 140 1.3 | bubbla 330 70 0.4 | barn 150 | figur 205 | ibubbla",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s14-scen4",
+    "sagaId": "s14",
+    "scen": 4,
+    "fil": "s14/scen-4.svg",
+    "rubrik": "Frågor som lyser",
+    "bildtext": "Bubblor fulla av frågor lyser upp omgivningen.",
+    "beskrivning": "varm | under | lumi 285 120 1 | bubbla 220 90 0.5 | bubbla 250 60 0.35 | bubbla 190 70 0.3 | [hav: koraller 70 252 1 | rymden: stjarnregn 120 60 0.6] | barn 150 | figur 205 | ibubbla",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s14-scen5",
+    "sagaId": "s14",
+    "scen": 5,
+    "fil": "s14/scen-5.svg",
+    "rubrik": "En bubbla på fönstret",
+    "bildtext": "Ella och Brum sover. En liten lysande bubbla vilar vid fönstret.",
+    "beskrivning": "somn | hemma | sov | bubbla 315 90 0.6",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s15-scen1",
+    "sagaId": "s15",
+    "scen": 1,
+    "fil": "s15/scen-1.svg",
+    "rubrik": "Ett litet pip",
+    "bildtext": "På marken sitter en liten fågelunge och fryser.",
+    "beskrivning": "kvall | fagel 262 248 1 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s15-scen2",
+    "sagaId": "s15",
+    "scen": 2,
+    "fil": "s15/scen-2.svg",
+    "rubrik": "Varsamma händer",
+    "bildtext": "Ella och Brum bygger ett mjukt bo åt fågelungen.",
+    "beskrivning": "natt | bo 212 244 1 | fagel 212 230 0.8 | barn 130 | figur 292",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s15-scen3",
+    "sagaId": "s15",
+    "scen": 3,
+    "fil": "s15/scen-3.svg",
+    "rubrik": "Lite värme",
+    "bildtext": "Fågelungen sitter varmt i boet, och Brum håller den sällskap.",
+    "beskrivning": "varm | bo 200 244 1 | fagel 200 230 0.8 | barn 140 | figur 262",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s15-scen4",
+    "sagaId": "s15",
+    "scen": 4,
+    "fil": "s15/scen-4.svg",
+    "rubrik": "Hem till boet",
+    "bildtext": "Uppe i trädet väntar fågelungens familj.",
+    "beskrivning": "natt | trad 300 252 1.2 | bo 300 140 0.7 | fagel 288 126 0.55 | fagel 315 128 0.55 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s15-scen5",
+    "sagaId": "s15",
+    "scen": 5,
+    "fil": "s15/scen-5.svg",
+    "rubrik": "En varm känsla",
+    "bildtext": "Ella och Brum sover. På fönsterbrädan sitter en liten fågel och tittar in.",
+    "beskrivning": "somn | hemma | sov | fagel 322 160 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s16-scen1",
+    "sagaId": "s16",
+    "scen": 1,
+    "fil": "s16/scen-1.svg",
+    "rubrik": "Månen gäspar",
+    "bildtext": "Den stora månen gäspar och ser trött ut.",
+    "beskrivning": "kvall | [rum: hemma | *: inne] | mane 300 80 1.2 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s16-scen2",
+    "sagaId": "s16",
+    "scen": 2,
+    "fil": "s16/scen-2.svg",
+    "rubrik": "Alla behöver vila",
+    "bildtext": "Ella och Brum pratar med den trötta månen.",
+    "beskrivning": "natt | [rum: hemma | *: inne] | mane 292 85 1.3 | moln 190 120 0.6 | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s16-scen3",
+    "sagaId": "s16",
+    "scen": 3,
+    "fil": "s16/scen-3.svg",
+    "rubrik": "Alla lyser lite",
+    "bildtext": "Stjärnor och lyktor lyser tillsammans så att månen kan vila.",
+    "beskrivning": "natt | [rum: hemma | *: inne] | stjarnregn 190 70 1 | lykta 110 190 0.6 | lykta 250 200 0.5 | mane 330 80 0.9 | barn 140 | figur 205",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s16-scen4",
+    "sagaId": "s16",
+    "scen": 4,
+    "fil": "s16/scen-4.svg",
+    "rubrik": "En vaggvisa för månen",
+    "bildtext": "Månen vilar under ett mjukt moln medan Ella och Brum sjunger.",
+    "beskrivning": "varm | [rum: hemma | *: inne] | mane 300 90 1.2 | moln 300 112 1.1 | notpar 175 150 1 | barn 130 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s16-scen5",
+    "sagaId": "s16",
+    "scen": 5,
+    "fil": "s16/scen-5.svg",
+    "rubrik": "Månen lyser igen",
+    "bildtext": "Ella och Brum sover. Utanför fönstret lyser månen klart och glatt.",
+    "beskrivning": "somn | hemma | sov | mane 312 80 0.5",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s17-scen1",
+    "sagaId": "s17",
+    "scen": 1,
+    "fil": "s17/scen-1.svg",
+    "rubrik": "Rosen som hängde med huvudet",
+    "bildtext": "En stor ros hänger trött med huvudet. Ella och Brum tittar på den.",
+    "beskrivning": "kvall | vissenros 252 250 1.2 | barn 140 | figur 200",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s17-scen2",
+    "sagaId": "s17",
+    "scen": 2,
+    "fil": "s17/scen-2.svg",
+    "rubrik": "Månbrunnen",
+    "bildtext": "Ella och Brum tittar ner i en gammal brunn där månen speglar sig.",
+    "beskrivning": "natt | brunn 275 250 1 | barn 150 | figur 212",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s17-scen3",
+    "sagaId": "s17",
+    "scen": 3,
+    "fil": "s17/scen-3.svg",
+    "rubrik": "Fram och tillbaka",
+    "bildtext": "Ella bär försiktigt en liten silverkopp med vatten.",
+    "beskrivning": "natt | kopp 210 225 1 | vissenros 300 250 1 | barn 175 | figur 115",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s17-scen4",
+    "sagaId": "s17",
+    "scen": 4,
+    "fil": "s17/scen-4.svg",
+    "rubrik": "Natten då rosen blommade",
+    "bildtext": "Nattrosen har slagit ut och lyser i rosa och silver.",
+    "beskrivning": "varm | ros 215 250 1.5 | stjarnregn 210 100 0.6 | barn 115 | figur 320",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s17-scen5",
+    "sagaId": "s17",
+    "scen": 5,
+    "fil": "s17/scen-5.svg",
+    "rubrik": "En doft av drömmar",
+    "bildtext": "Ella och Brum sover. På fönsterbrädan står ett litet rosenblad som lyser svagt.",
+    "beskrivning": "somn | hemma | sov | ros 322 160 0.45",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s18-scen1",
+    "sagaId": "s18",
+    "scen": 1,
+    "fil": "s18/scen-1.svg",
+    "rubrik": "Lampan slocknar",
+    "bildtext": "Det har blivit mörkt i rummet. Nattlampan har slocknat.",
+    "beskrivning": "mork | inne | nattlampa 230 240 1.1 | barn 140 | figur 300",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s18-scen2",
+    "sagaId": "s18",
+    "scen": 2,
+    "fil": "s18/scen-2.svg",
+    "rubrik": "Gnistan som var rädd",
+    "bildtext": "En pytteliten gnista sitter i lampan och darrar.",
+    "beskrivning": "mork | inne | nattlampa 230 240 1.1 | gnista 230 205 1 | barn 140 | figur 300",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s18-scen3",
+    "sagaId": "s18",
+    "scen": 3,
+    "fil": "s18/scen-3.svg",
+    "rubrik": "Vad skuggorna egentligen är",
+    "bildtext": "Ella, Brum och gnistan tittar på en skugga som bara är en stol med kläder på.",
+    "beskrivning": "natt | inne | skugga 300 200 1 | gnista 200 160 1 | barn 130 | figur 220",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s18-scen4",
+    "sagaId": "s18",
+    "scen": 4,
+    "fil": "s18/scen-4.svg",
+    "rubrik": "Mörkret är mjukt",
+    "bildtext": "Gnistan Glim lyser starkt och glatt mitt i rummet.",
+    "beskrivning": "varm | inne | gnista 210 140 1.4 | stjarnregn 200 70 0.5 | barn 130 | figur 280",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s18-scen5",
+    "sagaId": "s18",
+    "scen": 5,
+    "fil": "s18/scen-5.svg",
+    "rubrik": "Tillbaka i lampan",
+    "bildtext": "Ella och Brum sover tryggt. Nattlampan lyser mjukt och gult.",
+    "beskrivning": "somn | hemma | sov",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s19-scen1",
+    "sagaId": "s19",
+    "scen": 1,
+    "fil": "s19/scen-1.svg",
+    "rubrik": "Ett ljud från havet",
+    "bildtext": "Ute i vattnet syns en liten valunge. Ella och Brum står på stranden.",
+    "beskrivning": "kvall | valunge 270 205 0.9 | barn 130 | figur 190",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s19-scen2",
+    "sagaId": "s19",
+    "scen": 2,
+    "fil": "s19/scen-2.svg",
+    "rubrik": "Vilja i det stora havet",
+    "bildtext": "Valungen Vilja berättar för Ella och Brum att hon har kommit bort.",
+    "beskrivning": "natt | valunge 255 210 1 | barn 120 | figur 180",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s19-scen3",
+    "sagaId": "s19",
+    "scen": 3,
+    "fil": "s19/scen-3.svg",
+    "rubrik": "Mammas sång",
+    "bildtext": "Vilja sjunger, och små toner svävar ut över havet.",
+    "beskrivning": "natt | valunge 255 212 1 | notpar 255 150 0.9 | barn 120 | figur 180",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s19-scen4",
+    "sagaId": "s19",
+    "scen": 4,
+    "fil": "s19/scen-4.svg",
+    "rubrik": "Ett svar i natten",
+    "bildtext": "En stor val dyker upp bredvid Vilja. Mamma har hittat henne.",
+    "beskrivning": "varm | val 300 200 1.1 | valunge 210 215 0.8 | barn 100 | figur 155",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s19-scen5",
+    "sagaId": "s19",
+    "scen": 5,
+    "fil": "s19/scen-5.svg",
+    "rubrik": "Sången som alltid finns",
+    "bildtext": "Ella och Brum sover. Långt ute på havet simmar två valar sida vid sida.",
+    "beskrivning": "somn | hemma | sov | val 320 100 0.35",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s20-scen1",
+    "sagaId": "s20",
+    "scen": 1,
+    "fil": "s20/scen-1.svg",
+    "rubrik": "Hos Nattmormor",
+    "bildtext": "Nattmormor sitter i sin gungstol och stickar en filt av stjärnor.",
+    "beskrivning": "kvall | stol 270 250 1 | garn 230 248 0.8 | barn 130 | figur 185",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s20-scen2",
+    "sagaId": "s20",
+    "scen": 2,
+    "fil": "s20/scen-2.svg",
+    "rubrik": "Ett hål i filten",
+    "bildtext": "Mitt i stjärnfilten finns ett stort hål.",
+    "beskrivning": "natt | stjarnfilt 210 205 1.2 | stol 330 250 0.8 | barn 110 | figur 160",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s20-scen3",
+    "sagaId": "s20",
+    "scen": 3,
+    "fil": "s20/scen-3.svg",
+    "rubrik": "Att samla ljus",
+    "bildtext": "Ella och Brum samlar stjärnljus till ett glittrande nystan.",
+    "beskrivning": "natt | garn 200 230 1 | stjarnregn 200 80 0.8 | barn 120 | figur 285",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s20-scen4",
+    "sagaId": "s20",
+    "scen": 4,
+    "fil": "s20/scen-4.svg",
+    "rubrik": "Filten blir hel",
+    "bildtext": "Nattmormor stickar ihop hålet med det nya stjärnljuset.",
+    "beskrivning": "varm | stjarnfilt 205 200 1.3 | stol 335 250 0.8 | barn 105 | figur 155",
+    "status": "prototyp"
+  },
+  {
+    "bildId": "s20-scen5",
+    "sagaId": "s20",
+    "scen": 5,
+    "fil": "s20/scen-5.svg",
+    "rubrik": "Under stjärnfilten",
+    "bildtext": "Ella och Brum sover tryggt under natthimlen.",
+    "beskrivning": "somn | hemma | sov | stjarnregn 300 70 0.4",
+    "status": "prototyp"
+  }
+]
