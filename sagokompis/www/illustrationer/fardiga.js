@@ -1,6 +1,8 @@
 /* Färdiga illustrationer som ersätter prototypbilderna.
    Filen skapas av verktyg/registrera-bilder.js – redigera inte för hand.
-   Nyckel: <sagaId>/<plats>/scen-<n>   Värde: sökväg under illustrationer/ */
+   fardigaBilder: <sagaId>/<plats>/scen-<n> → bild. figurBilder/platsBilder: id → bild. Sökvägar under illustrationer/ */
 window.Sagokompis = window.Sagokompis || {};
-Sagokompis.fardigaBilder = {
-};
+Sagokompis.fardigaBilder = {};
+Sagokompis.figurBilder = {};
+Sagokompis.platsBilder = {};
+Sagokompis.startBild = null;

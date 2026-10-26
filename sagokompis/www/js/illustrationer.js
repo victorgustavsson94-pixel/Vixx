@@ -422,6 +422,11 @@
     const b = tolka(spec);
     if (b.flaggor.ingen || b.flaggor.sov) return '';
     const svavar = ctx.plats === 'rymden' || b.flaggor.rymd;
+    const bildfil = S.figurBilder && S.figurBilder[ctx.figur];
+    if (bildfil) {
+      // 3D-figuren placeras där scenbeskrivningen säger att kompisen står.
+      return '<img class="kompisfigur ' + (svavar ? 'flyt' : 'gunga') + '" src="illustrationer/' + bildfil + '" alt="" aria-hidden="true" style="left:' + (b.figur[0] / 4) + '%;bottom:' + ((300 - b.figur[1]) / 3) + '%">';
+    }
     return '<svg class="kompislager" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" aria-hidden="true">' +
       figuren(ctx.figur, b.figur[0], b.figur[1], 0.95, { farg: ctx.figurFarg, svavar }) + '</svg>';
   }

@@ -80,7 +80,7 @@ function kontroll(villkor, text) {
       const titel = await page.textContent('#forhand-titel');
       kontroll(titel.startsWith('Ella och'), 'förhandsvisningen visar sagans titel: ' + titel);
       kontroll((await page.textContent('#fh-figur')) === 'Kanin Lo', 'förhandsvisningen visar vald kompis');
-      kontroll(await page.isVisible('#forhand-bild svg'), 'förhandsvisningen har en bild');
+      kontroll(await page.isVisible('#forhand-bild svg, #forhand-bild img'), 'förhandsvisningen har en bild');
       await skarm('5-forhand');
       kontroll((await page.textContent('#knapp-nasta')) === 'Skapa min saga', 'knappen heter ”Skapa min saga”');
       await page.click('#knapp-nasta');

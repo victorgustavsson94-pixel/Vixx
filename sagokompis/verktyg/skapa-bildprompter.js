@@ -22,8 +22,9 @@ ladda('js/illustrationer.js');
 fs.readdirSync(path.join(www, 'sagor')).filter((f) => f.endsWith('.js')).sort().forEach((f) => ladda('sagor/' + f));
 const S = sandbox.Sagokompis;
 
-const STIL = 'Gentle bedtime picture-book illustration for children aged 4-7, soft gouache and watercolor texture, rounded friendly shapes, calm muted night palette of dusty blue, lavender, soft rose and warm peach, gentle glow, cozy and safe, not scary, no harsh contrast, no text, no letters, no watermark. 4:3 landscape composition with calm empty space.';
-const BARN = 'Main character: one small child (about 5 years old) in light blue pyjamas with little cream stars, seen from the side or three-quarter view, simple friendly face, soft brown hair.';
+// En gemensam stil för hela appen: 3D-animerad långfilmskänsla, lugn kvällsbelysning.
+const STIL = 'High-quality stylized 3D animated feature film still, like a modern family animated movie: soft subsurface lighting, rounded appealing shapes, expressive friendly characters, rich but gentle colors, cinematic depth of field, cozy bedtime mood with a dusty blue, lavender, rose and warm peach palette, warm glowing light sources. Safe and calm for children aged 4-7, nothing scary, no harsh contrast, no text, no letters, no logos, no watermark. 4:3 landscape composition.';
+const BARN = 'Main character: the same small child as in the reference image (about 5 years old, big kind eyes, soft brown hair, light blue pyjamas with little cream stars).';
 const KOMPIS = 'Do not draw any animal companion or second main character; the app adds the companion on top of the picture.';
 
 const PLATS = {
@@ -105,8 +106,48 @@ const ut = path.join(rot, 'bildprompter');
 fs.mkdirSync(ut, { recursive: true });
 const csvCell = (v) => '"' + String(v).replace(/"/g, '""') + '"';
 fs.writeFileSync(path.join(ut, 'bildprompter.csv'), '﻿' + ['filnamn,saga,titel,plats,scen,rubrik,prompt'].concat(rader.map((r) => [r.fil, r.saga, r.titel, r.plats, r.scen, r.rubrik, r.prompt].map(csvCell).join(','))).join('\n') + '\n');
-let md = '# Bildprompter för Sagokompis\n\n' + rader.length + ' bilder: en per saga, plats och scen. Bildformat 4:3 (t.ex. 1536 × 1152).\n' +
-  'Spara varje bild med filnamnet nedan under `www/illustrationer/` och kör sedan `node verktyg/registrera-bilder.js`.\n\n';
+// Gemensamma bilder för resten av appen, i samma stil.
+const FIGUR_STIL = 'High-quality stylized 3D animated feature film character render, soft studio lighting, appealing rounded shapes, big friendly expressive eyes, full body, standing, three-quarter view, centered, on a plain transparent background (or flat solid light grey if transparency is not possible, for background removal), no text, no shadow on the ground.';
+const FIGURER = {
+  barn: 'Character reference sheet of a small child about 5 years old, big kind eyes, soft brown hair, gentle smile, light blue pyjamas with little cream stars, barefoot. Front view and side view next to each other.',
+  nalle: 'A small cuddly brown teddy bear named Brum with round ears, light tummy patch and a warm gentle smile.',
+  rav: 'A small friendly orange fox named Ylva with a big fluffy tail with a white tip, clever kind eyes.',
+  drake: 'A small friendly mint-green baby dragon named Glöd with tiny soft wings, a cream belly, little orange horns and a soft warm glow in the chest.',
+  robot: 'A small friendly pastel blue robot named Bolt with a rounded head, an antenna with a warm yellow light, round glowing lamp eyes and little hands.',
+  kanin: 'A small soft light-grey bunny named Lo with very long ears with pink insides and a gentle curious look.',
+  uggla: 'A small fluffy brown owl named Ugo with very large round eyes, soft feathers and a calm wise look.',
+  egen: 'A small soft round lilac dream creature with tiny ears, a little cream star on its belly and a happy face (used for the child\'s own custom companion; should look neutral and cute).'
+};
+const PLATSKORT = {
+  skog: 'An enchanted forest at night with soft moss, rounded pine trees, glowing blue mushrooms and fireflies.',
+  rymden: 'A small soft lilac moon in outer space with a pink ringed planet and gentle stars.',
+  slott: 'A friendly fairytale castle on a hill at night with warm lit windows.',
+  hav: 'A calm beach at night with gentle waves, moonlight on the water and a small lighthouse.',
+  fjall: 'Snowy Scandinavian mountains at night with a gentle green aurora.',
+  rum: 'A cozy child\'s bedroom at night with a starry window, a small bed and a warm night light.'
+};
+const extra = [];
+extra.push({ fil: 'riktiga/figurer/barn-referens.png', grupp: 'Referens', namn: 'Barnet (referensbild)', prompt: FIGUR_STIL + ' ' + FIGURER.barn, format: '4:3' });
+for (const f of S.figurer) extra.push({ fil: 'riktiga/figurer/' + f.id + '.png', grupp: 'Figurer', namn: f.etikett, prompt: FIGUR_STIL + ' ' + FIGURER[f.id], format: '1:1' });
+for (const p of S.platser) extra.push({ fil: 'riktiga/platser/' + p.id + '.jpg', grupp: 'Platskort', namn: p.etikett, prompt: STIL.replace('4:3 landscape composition.', 'Square composition.') + ' No people. ' + PLATSKORT[p.id], format: '1:1' });
+extra.push({ fil: 'riktiga/start.jpg', grupp: 'Startsida', namn: 'Startbild', prompt: STIL.replace('4:3 landscape composition.', 'Tall portrait composition, 9:16, with calm empty night sky in the upper half for a title.') + ' A cozy hilltop at night under a huge friendly moon and stars; a teddy bear, a fox, a baby dragon, a little robot, a bunny and an owl sit together in a row looking up at the sky. No people.', format: '9:16' });
+extra.push({ fil: 'ikon-1024.png', grupp: 'Appikon', namn: 'Appikon', prompt: 'App icon, 1024x1024, no transparency, no text. ' + STIL.replace('4:3 landscape composition.', 'Square composition.') + ' A sleepy brown teddy bear with a small golden star, resting against a big crescent moon on a dusty blue night sky. Simple bold shape that reads well at small sizes.', format: '1:1' });
+
+const csvExtra = ['filnamn,grupp,namn,format,prompt'].concat(extra.map((r) => [r.fil, r.grupp, r.namn, r.format, r.prompt].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(',')));
+fs.mkdirSync(path.join(rot, 'bildprompter'), { recursive: true });
+fs.writeFileSync(path.join(rot, 'bildprompter', 'app-bilder.csv'), '\ufeff' + csvExtra.join('\n') + '\n');
+
+let md = '# Bildprompter för Sagokompis\n\n' +
+  'Stil för hela appen: 3D-animerad långfilmskänsla med lugn kvällsbelysning. Rekommenderade modeller: Seedream 5.0 Lite eller Flux.2 Pro.\n\n' +
+  '## Ordning\n\n' +
+  '1. **Barnets referensbild** först. Välj den bästa och använd den som referensbild i alla scenbilder, så att barnet ser likadant ut i alla sagor.\n' +
+  '2. **Figurerna** (7 st) med transparent bakgrund, eller ljusgrå bakgrund som tas bort med bakgrundsborttagning. Appen lägger in dem i scenerna, och de visas också när man väljer kompis.\n' +
+  '3. **Platskorten** (6 st), **startbilden** och **appikonen**.\n' +
+  '4. **Scenbilderna** (' + rader.length + ' st): en per saga, plats och scen, i formatet 4:3 (t.ex. 1536 × 1152). Kompisen ritas inte in i scenerna.\n\n' +
+  'Spara varje bild med filnamnet som står vid prompten, under `www/illustrationer/` (appikonen under `www/`), och kör sedan `node verktyg/registrera-bilder.js`.\n\n' +
+  '## Appens bilder\n\n';
+for (const r of extra) md += '**' + r.grupp + ': ' + r.namn + '** (' + r.format + ') → `' + r.fil + '`\n\n```\n' + r.prompt + '\n```\n\n';
+md += '## Scenbilder\n';
 let senaste = '';
 for (const r of rader) {
   const rubrik = r.saga + ' · ' + r.titel + ' · ' + r.plats;
@@ -114,4 +155,4 @@ for (const r of rader) {
   md += '**Scen ' + r.scen + ': ' + r.rubrik + '** → `' + r.fil + '`\n\n```\n' + r.prompt + '\n```\n\n';
 }
 fs.writeFileSync(path.join(ut, 'bildprompter.md'), md);
-console.log(rader.length + ' prompter skrivna till bildprompter/');
+console.log(rader.length + ' scenprompter och ' + extra.length + ' appbilder skrivna till bildprompter/');

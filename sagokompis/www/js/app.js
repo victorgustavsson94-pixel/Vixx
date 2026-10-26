@@ -74,6 +74,7 @@
     const wrap = document.createElement('div');
     wrap.className = klass || '';
     wrap.dataset.bildId = scen.bildId;
+    wrap.classList.add('levande');
     if (fil) {
       const img = new Image();
       img.alt = scen.bildtext;
@@ -91,7 +92,12 @@
   /* ---------- Startsida ---------- */
   function visaStart() {
     const fig = $('start-figurer');
-    if (!fig.childElementCount) fig.innerHTML = ['nalle', 'rav', 'drake', 'robot', 'kanin', 'uggla'].map((id) => S.illustrationer.figurIkon(id)).join('');
+    if (S.startBild) {
+      document.getElementById('vy-start').style.setProperty('--startbild', 'url("illustrationer/' + S.startBild + '")');
+      document.getElementById('vy-start').classList.add('har-startbild');
+    } else if (!fig.childElementCount) {
+      fig.innerHTML = ['nalle', 'rav', 'drake', 'robot', 'kanin', 'uggla'].map((id) => S.figurBilder && S.figurBilder[id] ? '<img src="illustrationer/' + S.figurBilder[id] + '" alt="">' : S.illustrationer.figurIkon(id)).join('');
+    }
     const p = tillstand.pagaende;
     $('fortsatt-kort').hidden = !p;
     if (p) {
@@ -111,11 +117,11 @@
   function byggValkort() {
     $('lista-figurer').innerHTML = S.figurer.map((f) =>
       '<button class="valkort figur" role="radio" aria-checked="false" data-grupp="figur" data-varde="' + f.id + '">' +
-      '<span class="ikon">' + S.illustrationer.figurIkon(f.id, tillstand.val.egenFigurFarg) + '</span>' +
+      '<span class="ikon">' + (S.figurBilder && S.figurBilder[f.id] ? '<img src="illustrationer/' + S.figurBilder[f.id] + '" alt="">' : S.illustrationer.figurIkon(f.id, tillstand.val.egenFigurFarg)) + '</span>' +
       '<span class="namn">' + (f.egen ? f.etikett : f.etikett + ' ' + f.namn) + '</span><span class="besk">' + f.beskrivning + '</span></button>').join('');
     $('lista-platser').innerHTML = S.platser.map((p) =>
       '<button class="valkort plats" role="radio" aria-checked="false" data-grupp="plats" data-varde="' + p.id + '">' +
-      '<span class="ikon">' + S.illustrationer.platsIkon(p.id) + '</span>' +
+      '<span class="ikon">' + (S.platsBilder && S.platsBilder[p.id] ? '<img src="illustrationer/' + S.platsBilder[p.id] + '" alt="">' : S.illustrationer.platsIkon(p.id)) + '</span>' +
       '<span class="namn">' + p.etikett + '</span><span class="besk">' + p.beskrivning + '</span></button>').join('');
     $('lista-teman').innerHTML = S.teman.map((t) =>
       '<button class="valkort tema" role="radio" aria-checked="false" data-grupp="tema" data-varde="' + t.id + '">' +
