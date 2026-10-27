@@ -17,7 +17,7 @@ En iPhone-app för personliga godnattsagor till barn i åldern 4–7 år, som sk
 
 - Ren HTML/CSS/JavaScript utan byggsteg i `sagokompis/www/`, paketerad som iOS-app med **Capacitor 8**. Xcode-projektet ligger i `sagokompis/ios/` och använder Swift Package Manager, inga CocoaPods.
 - Plugins: `@capacitor-community/text-to-speech` (iOS-röst) och `@capacitor/haptics`.
-- App-id: `se.bygginnovation.sagokompis`. Det är ett antagande som kan ändras i `capacitor.config.json` och Xcode.
+- App-id: `se.gustavsson.sagokompis`. Det är ett antagande som kan ändras i `capacitor.config.json` och Xcode.
 - Repot innehåller också spelet Dödsbacken (`index.html` och `klassisk.html` i roten). Rör inte det.
 
 ### Filer
@@ -98,7 +98,7 @@ Valfritt: korta videoloopar per scen (bild till video, 5 sekunder). De sparas so
 
 ### 3. Inför App Store (kräver Victor)
 
-- Apple Developer Program (99 USD per år), helst som organisationen Bygginnovation AB (kräver D-U-N-S-nummer).
+- Apple Developer Program (99 USD per år), privat konto räcker (det är ett privat projekt).
 - En Mac med Xcode för att bygga, signera och ladda upp.
 - App Store Connect: kategorin Barn, åldersgräns, beskrivning, skärmbilder (6,9 och 6,5 tum) och en integritetspolicy (krävs för barnappar). Appen samlar inte in någon data, så under ”App Privacy” är svaret ”Data Not Collected”.
 

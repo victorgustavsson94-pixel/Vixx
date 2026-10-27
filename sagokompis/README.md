@@ -102,11 +102,11 @@ Scenbilderna genereras med barnet men utan kompis. Appen lägger in den valda 3D
 
 ## Kvar innan App Store
 
-Förberett: Xcode-projekt, app-id `se.bygginnovation.sagokompis` (går att ändra i `capacitor.config.json` och Xcode), appnamn, ikon (1024 px), svenska som språk, bara stående läge, bara iPhone, och export-deklarationen (ingen kryptering).
+Förberett: Xcode-projekt, app-id `se.gustavsson.sagokompis` (går att ändra i `capacitor.config.json` och Xcode), appnamn, ikon (1024 px), svenska som språk, bara stående läge, bara iPhone, och export-deklarationen (ingen kryptering).
 
 Det som saknas och kräver dig:
 
-1. **Apple Developer Program** (99 USD per år), helst som organisation (Bygginnovation AB, kräver D-U-N-S-nummer).
+1. **Apple Developer Program** (99 USD per år), privat konto räcker (det är ett privat projekt).
 2. **En Mac med Xcode** för att bygga, signera och ladda upp. Signeringscertifikat och provisioneringsprofil skapas automatiskt i Xcode när kontot är inloggat.
 3. **App Store Connect:** skapa appen, välj kategorin *Barn* (åldersgrupp 6–8 år eller ”5 år och yngre”), åldersgräns och beskrivning, och skärmbilder för 6,9 och 6,5 tum.
 4. **Integritetspolicy (URL):** krävs för appar i kategorin Barn. Appen samlar inte in någon data och sparar bara valen lokalt på telefonen, så policyn blir kort. Under ”App Privacy” svarar man ”Data Not Collected”.
