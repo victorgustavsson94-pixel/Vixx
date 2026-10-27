@@ -13,6 +13,23 @@
     return (cap.Plugins && cap.Plugins.TextToSpeech) || null;
   }
 
+  /* Poäng för en svensk röst: bättre kvalitet (Premium/Förbättrad) och de kända barnvänliga
+     rösterna först. Andra språk får -1 och väljs aldrig. */
+  function rostPoang(namn, lang) {
+    if (!/^sv(-|_|$)/i.test(lang || '')) return -1;
+    let p = 0;
+    if (/premium/i.test(namn)) p += 20;
+    else if (/enhanced|f(ö|o)rb(ä|a)ttrad|f(ö|o)rst(ä|a)rkt/i.test(namn)) p += 10;
+    if (/alva|klara|oskar/i.test(namn)) p += 5;
+    return p;
+  }
+
+  function basta(roster) {
+    let b = null, bp = -1;
+    roster.forEach((r) => { const p = rostPoang(r.name, r.lang); if (p > bp) { b = r; bp = p; } });
+    return b;
+  }
+
   const webb = {
     namn: 'webb',
     rost: null,
@@ -20,8 +37,7 @@
     async forbered() {
       const valj = () => {
         const roster = window.speechSynthesis.getVoices();
-        this.rost = roster.find((r) => /^sv(-|_|$)/i.test(r.lang) && /alva|klara|oskar/i.test(r.name)) ||
-          roster.find((r) => /^sv(-|_|$)/i.test(r.lang)) || null;
+        this.rost = basta(roster);
         return roster.length > 0;
       };
       if (valj()) return { svenskRost: !!this.rost };
@@ -50,17 +66,28 @@
 
   const nativ = {
     namn: 'nativ',
+    rostIndex: null,
     stod() { return !!nativPlugin(); },
     async forbered() {
       try {
         const { languages } = await nativPlugin().getSupportedLanguages();
+        try {
+          // Välj den bästa installerade svenska rösten (Premium/Förbättrad före standard).
+          const { voices } = await nativPlugin().getSupportedVoices();
+          let bp = -1;
+          (voices || []).forEach((r, i) => { const p = rostPoang(r.name, r.lang); if (p > bp) { bp = p; this.rostIndex = i; } });
+        } catch (e) { this.rostIndex = null; }
         return { svenskRost: (languages || []).some((l) => /^sv/i.test(l)) };
       } catch (e) {
         return { svenskRost: true };
       }
     },
     // AVSpeechSynthesizer har en annan skala än webben: 1.0 är normalt.
-    tala(text, tempo, ton) { return nativPlugin().speak({ text, lang: 'sv-SE', rate: tempo, pitch: ton || 1.05, volume: 1, category: 'playback' }); },
+    tala(text, tempo, ton) {
+      const val = { text, lang: 'sv-SE', rate: tempo, pitch: ton || 1.05, volume: 1, category: 'playback' };
+      if (this.rostIndex !== null) val.voice = this.rostIndex;
+      return nativPlugin().speak(val);
+    },
     stoppa() { try { nativPlugin().stop(); } catch (e) { /* ignorera */ } }
   };
 
