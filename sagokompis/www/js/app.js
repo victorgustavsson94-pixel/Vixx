@@ -104,7 +104,7 @@
     if (S.effekter) S.effekter.stjarnhimmel(document.querySelector('.start-himmel'));
     const fig = $('start-figurer');
     if (S.startBild) {
-      document.getElementById('vy-start').style.setProperty('--startbild', 'url("illustrationer/' + S.startBild + '")');
+      document.getElementById('vy-start').style.setProperty('--startbild', 'url("' + new URL('illustrationer/' + S.startBild, document.baseURI).href + '")');
       document.getElementById('vy-start').classList.add('har-startbild');
     } else if (!fig.childElementCount) {
       fig.innerHTML = ['nalle', 'rav', 'drake', 'robot', 'kanin', 'uggla'].map((id) => S.figurBilder && S.figurBilder[id] ? '<img src="illustrationer/' + S.figurBilder[id] + '" alt="">' : S.illustrationer.figurIkon(id)).join('');
