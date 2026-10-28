@@ -91,6 +91,43 @@
     stoppa() { try { nativPlugin().stop(); } catch (e) { /* ignorera */ } }
   };
 
+  /* Inspelade meningar. verktyg/roster gör en ljudfil per mening, döpt efter meningens id.
+     Finns filen (listad i rost/fardiga.js) spelas den, annars läser telefonens röst som förut. */
+  function cyrb53(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+
+  function medInspelning(bas) {
+    let ljud = null;
+    let avbryt = null;
+    return {
+      namn: bas.namn,
+      forbered: () => bas.forbered(),
+      tala(text, tempo, ton) {
+        const fil = S.rostFiler && S.rostFiler[cyrb53(text)];
+        if (!fil) return bas.tala(text, tempo, ton);
+        return new Promise((klar, fel) => {
+          const a = new Audio('rost/' + fil);
+          ljud = a;
+          avbryt = klar;
+          a.playbackRate = Math.min(1.25, Math.max(0.8, tempo / 0.95));
+          a.preservesPitch = true;
+          a.onended = () => { ljud = null; avbryt = null; klar(); };
+          a.onerror = () => { ljud = null; avbryt = null; fel(new Error('ljudfel')); };
+          a.play().catch((e) => { ljud = null; avbryt = null; fel(e); });
+        });
+      },
+      stoppa() {
+        if (ljud) { ljud.pause(); ljud = null; if (avbryt) { const k = avbryt; avbryt = null; k(); } }
+        bas.stoppa();
+      }
+    };
+  }
+
   function delaIMeningar(stycke) {
     const delar = stycke.match(/[^.!?…]+[.!?…]+[”"]?\s*|[^.!?…]+$/g) || [stycke];
     // Slå ihop mycket korta delar (t.ex. "Plipp.") med nästa, så att rösten flyter.
@@ -127,7 +164,8 @@
      handelser: { stycke(scenIndex, styckeIndex), klar(), fel(meddelande), status(spelar),
                   paus(del) → Promise som löses med en ny saga när barnet har valt eller hjälpt till } */
   function skapaUpplasare(saga, handelser) {
-    const motor = nativ.stod() ? nativ : webb.stod() ? webb : null;
+    const bas = nativ.stod() ? nativ : webb.stod() ? webb : null;
+    const motor = bas ? medInspelning(bas) : null;
     let delar = byggDelar(saga);
     let pos = 0;
     let spelar = false;
