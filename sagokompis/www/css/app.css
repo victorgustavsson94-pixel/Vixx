@@ -142,6 +142,8 @@ button { font: inherit; color: inherit; }
 .scenbild { position: absolute; inset: 0; }
 .scenbild > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 1.1s ease; }
 .scenbild video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Själva scenbilden (inte kompisfiguren) fyller ramen. Utan den här regeln visas bilden i full storlek och bara mitten syns. */
+.scenbild > div > img:not(.kompisfigur), .scenbild > div > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .scenbild > .tonar-ut { opacity: 0; }
 .scenbild .kompisfigur, .forhand-bild .kompisfigur { position: absolute; height: 34%; width: auto; transform: translateX(-50%); filter: drop-shadow(0 6px 8px rgba(10, 12, 40, 0.35)); pointer-events: none; }
 /* Levande bild: långsam zoom och panorering, som en filmkamera som rör sig sakta */
